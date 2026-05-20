@@ -13,7 +13,7 @@ Read `.claude/CLAUDE.md` to understand the project's directory structure and con
 
 When asked to find something:
 
-1. Search for the concept across the source directory (`src_dir` from `project.yml`)
+1. Search for the concept across the source directory (`src_dir` from `.claude/project.yml`)
 2. Show the actual implementation with file:line
 3. Identify the pattern used
 4. List related files (types, tests, locale keys if applicable)

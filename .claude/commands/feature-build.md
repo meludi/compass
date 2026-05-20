@@ -18,7 +18,7 @@ Execute a plan from `.work/plans/` step by step with validation after each task.
 ### 1. Load plan
 
 - Read the plan file
-- Read `project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
+- Read `.claude/project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
 - Extract: goal, files to change, tasks, acceptance criteria
 - Confirm branch is correct (`git branch --show-current`)
 
@@ -37,7 +37,7 @@ For each task in the plan:
 5. After implementing, verify integration: imports resolve, callers/callees still work, data flows correctly across boundaries
 
 **Validate:**
-6. Run `type_check_cmd` from `project.yml` (skip if blank):
+6. Run `type_check_cmd` from `.claude/project.yml` (skip if blank):
 
 - **PASS** → mark task `[x]` in the plan file, proceed
 - **FAIL** → fix immediately, re-run, confirm PASS before proceeding
@@ -46,7 +46,7 @@ For each task in the plan:
 
 ### 3. Validate
 
-After all tasks complete, run in order (from `project.yml`):
+After all tasks complete, run in order (from `.claude/project.yml`):
 
 1. `lint_cmd && format_cmd`
 2. `type_check_cmd` (skip if blank)

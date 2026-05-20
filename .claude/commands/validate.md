@@ -12,7 +12,7 @@ Run all validation checks and report results.
 
 ## Checks to Run
 
-Read `project.yml` for the commands, then run in order:
+Read `.claude/project.yml` for the commands, then run in order:
 
 1. `lint_cmd && format_cmd`
 2. `type_check_cmd` — skip if blank

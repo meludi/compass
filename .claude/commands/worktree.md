@@ -11,7 +11,7 @@ Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code sessio
 
 ## Steps
 
-Read `worktree_prefix` from `project.yml`, then:
+Read `worktree_prefix` from `.claude/project.yml`, then:
 
 ```bash
 git worktree add {worktree_prefix}{name} -b feat/{name}
@@ -29,7 +29,7 @@ bash scripts/w.sh $ARGUMENTS open
 ## Result
 
 - Branch: `feat/<name>`
-- Directory: `{worktree_prefix}<name>` (from `project.yml`)
+- Directory: `{worktree_prefix}<name>` (from `.claude/project.yml`)
 - New Claude session opens inside the worktree
 
 ## After the session opens

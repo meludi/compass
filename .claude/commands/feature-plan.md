@@ -39,7 +39,7 @@ If the feature requires an unknown library or pattern: spawn a web-search agent 
 
 ### 4. Write the plan
 
-Read `project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`. Save to `.work/plans/{kebab-case-feature-name}.plan.md`:
+Read `.claude/project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`. Save to `.work/plans/{kebab-case-feature-name}.plan.md`:
 
 ```markdown
 # Plan: {Feature Name}
@@ -71,7 +71,7 @@ One sentence: what this plan achieves.
 - **Action**: CREATE / UPDATE
 - **Implement**: {what to do}
 - **Mirror**: `src/path/to/example.tsx:10-30` — follow this pattern
-- **Validate**: `type_check_cmd` from project.yml
+- **Validate**: `type_check_cmd` from `.claude/project.yml`
 
 ### Task 2: {Description}
 
@@ -79,7 +79,7 @@ One sentence: what this plan achieves.
 - **Action**: CREATE / UPDATE
 - **Implement**: {what to do}
 - **Mirror**: `src/path/to/example.ts:5-20`
-- **Validate**: `type_check_cmd` from project.yml
+- **Validate**: `type_check_cmd` from `.claude/project.yml`
 
 {...repeat for each task}
 

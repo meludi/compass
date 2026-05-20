@@ -6,12 +6,12 @@ allowed-tools: Bash(agent-browser:*)
 
 # Browser Automation with agent-browser
 
-Use after `/feature-build` to verify UI features before opening a PR. The dev server must be running (see `dev_cmd` and `dev_port` in `project.yml`).
+Use after `/feature-build` to verify UI features before opening a PR. The dev server must be running (see `dev_cmd` and `dev_port` in `.claude/project.yml`).
 
 ## Quick start
 
 ```bash
-agent-browser open http://localhost:{dev_port}   # Open app (dev_port from project.yml)
+agent-browser open http://localhost:{dev_port}   # Open app (dev_port from `.claude/project.yml`)
 agent-browser snapshot -i                  # Get interactive elements
 agent-browser screenshot                   # Take screenshot
 agent-browser close                        # Close browser

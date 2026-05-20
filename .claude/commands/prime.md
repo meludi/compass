@@ -30,9 +30,9 @@ If a **`.work/stories/*.md` path** is given:
 ### 2. Read project rules
 
 - `.claude/CLAUDE.md` — conventions, stack, patterns
-- `project.yml` — commands, repo, base branch
+- `.claude/project.yml` — commands, repo, base branch
 
-If additional reference docs exist (e.g. `reference/DOCUMENTATION.md`, `reference/DB.md`), read them too.
+If additional reference docs exist (e.g. `.claude/reference/DOCUMENTATION.md`, `.claude/reference/DB.md`), read them too.
 
 ### 3. Check git state + existing plan
 

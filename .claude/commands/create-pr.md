@@ -32,11 +32,11 @@ Run `/commit` — shows state, proposes message, waits for confirmation, commits
 git push -u origin <current-branch>
 ```
 
-Never push to `base_branch` (from `project.yml`) directly.
+Never push to `base_branch` (from `.claude/project.yml`) directly.
 
 ### 4. Open PR
 
-Read `base_branch` from `project.yml`, then:
+Read `base_branch` from `.claude/project.yml`, then:
 
 ```bash
 gh pr create --base {base_branch} \

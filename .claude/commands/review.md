@@ -15,7 +15,7 @@ Performs a thorough PR review by fanning out 3 specialized subagents in parallel
 
 ### 1. Fetch the PR
 
-Read `repo` and `src_dir` from `project.yml`, then:
+Read `repo` and `src_dir` from `.claude/project.yml`, then:
 
 ```bash
 gh pr view $ARGUMENTS --repo {repo}

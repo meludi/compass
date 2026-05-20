@@ -84,7 +84,7 @@ Each ticket gets its own branch, directory, and Claude session.
 
 ```
 /worktree <issue-name>
-# creates {worktree_prefix from project.yml}/<issue-name> on feat/<issue-name>
+# creates {worktree_prefix from `.claude/project.yml`}/<issue-name> on feat/<issue-name>
 # opens a fresh Claude Code session inside it
 ```
 
@@ -115,11 +115,11 @@ The plan uses the Linear issue, story file, or feature description as input. It 
 /feature-build .work/plans/dividend-display.plan.md
 ```
 
-For each task: reads target + adjacent files first (Verify Assumptions), implements following the Mirror pattern, then runs `type_check_cmd` (from project.yml) — PASS to proceed, FAIL to fix immediately. After all tasks pass:
+For each task: reads target + adjacent files first (Verify Assumptions), implements following the Mirror pattern, then runs `type_check_cmd` (from `.claude/project.yml`) — PASS to proceed, FAIL to fix immediately. After all tasks pass:
 
 **AI Validation (automated):**
 
-- `test_cmd` (from project.yml) — unit + integration tests
+- `test_cmd` (from `.claude/project.yml`) — unit + integration tests
 - `agent-browser` — automated E2E: navigate, interact, screenshot to `.work/screenshots/`
 
 Both must pass before writing the report.
@@ -140,7 +140,7 @@ Runs lint, TypeScript check, and tests. All must pass before proceeding.
 /create-pr
 ```
 
-Reads the implementation report, shows `git status` + `git diff --staged`, proposes a commit message, waits for confirmation, then commits, pushes, and opens a PR via `gh pr create --base base_branch (from project.yml)` with a structured body (Summary, Changes, Manual Test Plan). Outputs the PR URL.
+Reads the implementation report, shows `git status` + `git diff --staged`, proposes a commit message, waits for confirmation, then commits, pushes, and opens a PR via `gh pr create --base base_branch (from `.claude/project.yml`)` with a structured body (Summary, Changes, Manual Test Plan). Outputs the PR URL.
 
 ### Step 6 — REVIEW — `/review` + manual testing
 
@@ -163,11 +163,11 @@ Runs 3 subagents in parallel, then auto-triggers `/security-review` if the diff 
 - `pr-test-analyzer` — missing tests
 - `codebase-explorer` — pattern consistency
 
-Dev server must be running from the main project directory (`dev_cmd` (from project.yml)).
+Dev server must be running from the main project directory (`dev_cmd` (from `.claude/project.yml`)).
 
 ### Step 7 — Merge + cleanup
 
-After review passes: merge PR into `base_branch (from project.yml)`, then remove the worktree (shell command — no slash command for this):
+After review passes: merge PR into `base_branch (from `.claude/project.yml`)`, then remove the worktree (shell command — no slash command for this):
 
 ```bash
 bash scripts/w.sh <issue-name> rm
@@ -181,7 +181,7 @@ Same human, same hours — multiple tickets shipping simultaneously.
 
 ```
 # Main directory — dev server only
-{dev_cmd from project.yml}
+{dev_cmd from `.claude/project.yml`}
 
 # Terminal 1 — Ticket A
 /worktree feature-a
@@ -258,9 +258,9 @@ BUG → ? → + RULE
 
 | Problem                            | Fix                                                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| Dev server error in worktree       | You started `dev_cmd` (from project.yml) from the worktree. Run it from the main project dir instead. |
+| Dev server error in worktree       | You started `dev_cmd` (from `.claude/project.yml`) from the worktree. Run it from the main project dir instead. |
 | DB state missing in worktree       | `/worktree` copies DB at creation time. If main DB has new data, copy again manually.  |
-| Type errors after implement        | Run `type_check_cmd` (from project.yml) and fix before committing.                                    |
+| Type errors after implement        | Run `type_check_cmd` (from `.claude/project.yml`) and fix before committing.                                    |
 | Linear issue not created           | Check `LINEAR_API_KEY` in `.claude/settings.local.json` and `enabledMcpjsonServers`.  |
-| Fork won't push `base_branch (from project.yml)`  | Use `git push origin base_branch (from project.yml)` from the terminal instead.                       |
+| Fork won't push `base_branch (from `.claude/project.yml`)`  | Use `git push origin base_branch (from `.claude/project.yml`)` from the terminal instead.                       |
 | Claude session feels slow/confused | Start a fresh session and run `/prime` (Context Reset).                                |

@@ -4,7 +4,7 @@ description: Set up claude-workflow-starter for a new project
 
 # /init — Project Setup
 
-Configure this Claude workflow for your project by filling in `project.yml` and `.claude/CLAUDE.md`.
+Configure this Claude workflow for your project by filling in `.claude/project.yml` and `.claude/CLAUDE.md`.
 
 ## Steps
 
@@ -25,9 +25,9 @@ Collect the following values (show defaults in brackets):
 11. **Worktree prefix** — [../my-app-]
 12. **Source directory** — [src/]
 
-### 2. Write `project.yml`
+### 2. Write `.claude/project.yml`
 
-Fill in all values in `project.yml` at the project root.
+Fill in all values in `.claude/project.yml` at the project root.
 
 ### 3. Generate `.claude/CLAUDE.md` from template
 
