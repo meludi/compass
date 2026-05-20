@@ -1,0 +1,17 @@
+# Project configuration — fill in your values, or run /init
+name: ""                # e.g. my-project
+repo: ""                # GitHub slug, e.g. owner/my-project
+base_branch: main       # Branch PRs are opened against
+
+package_manager: npm    # npm | pnpm | yarn | bun
+
+dev_cmd: npm run dev    # Start dev server
+dev_port: 3000          # Dev server port
+
+test_cmd: npm test
+lint_cmd: npm run lint
+format_cmd: npm run format
+type_check_cmd: ""      # Optional, e.g. npm run typecheck — leave blank if not used
+
+src_dir: src/           # Source directory
+worktree_prefix: ""     # e.g. ../my-project- (prefix for parallel worktree dirs)
