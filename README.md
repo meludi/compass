@@ -11,7 +11,6 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 ```bash
 cp -r claude-workflow-starter/.claude your-project/
 cp claude-workflow-starter/project.yml your-project/
-cp -r claude-workflow-starter/reference your-project/
 ```
 
 Or use it as a Git submodule / template.
@@ -66,7 +65,7 @@ Per ticket (PIV Loop):
     /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
 ```
 
-Full guide: `reference/WORKFLOW.md`
+Full guide: `.claude/reference/WORKFLOW.md`
 
 ---
 
@@ -100,7 +99,7 @@ Commands read this file at runtime — change a value once, all commands pick it
 ├── CLAUDE-template.md     # Template for your project conventions
 ├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
 ├── commands/              # All slash commands
+├── reference/WORKFLOW.md  # Full workflow guide
 └── skills/agent-browser/  # Automated browser testing via Playwright
 project.yml                # Project config
-reference/WORKFLOW.md      # Full workflow guide
 ```
