@@ -211,6 +211,28 @@ bash .claude/scripts/worktree.sh <issue-name> rm
 
 ---
 
+## Quick Path — for trivial changes
+
+The full PIV Loop is built for features. For trivial changes, a PRD, a story, and a
+plan are pure ceremony. Skip them:
+
+```
+/worktree <name>  →  make the edit by hand  →  /validate  →  /create-pr
+```
+
+- Skips `/ideate`, `/create-prd`, `/setup-stack`, `/create-stories`, `/feature-plan`,
+  and `/feature-build` — no spec artifacts are produced.
+- `/prime` is optional — skip it for a pure typo; run it if you need git/branch context.
+- `/review` is optional for trivial diffs.
+- `/worktree` still applies: it keeps work off the base branch and isolated.
+
+**Use it for:** typos, single-line bugfixes, CSS/copy tweaks, config-value changes.
+
+**Do not use it for:** anything with logic, new files, or acceptance criteria — that
+goes through the full Level 2 PIV Loop above.
+
+---
+
 ## Parallel Development (10x pattern)
 
 > Bolting AI on = 2x. Building for parallelism = 10x.

@@ -1,13 +1,13 @@
 ---
-description: Break a PRD into stories — saves to .work/stories/, optionally creates Linear issues
+description: Break a PRD into stories — saves to .work/stories/, optionally creates tracker issues
 argument-hint: <path to .work/prds/*.prd.md>
 ---
 
-# /create-stories — Generate Linear Issues from PRD
+# /create-stories — Generate Tracker Issues from PRD
 
 > **Recommended:** `/model sonnet` — balanced model for this command.
 
-Generate user stories from a PRD and create them as issues in Linear via MCP.
+Generate user stories from a PRD and create them as issues in your tracker via MCP.
 
 ## Input
 
@@ -36,9 +36,9 @@ Aim for stories that take 1–2 days max. Split larger work into phases.
 
 ### 3. Save locally
 
-Save all stories to `.work/stories/{prd-name}-stories.md` before creating in Linear.
+Save all stories to `.work/stories/{prd-name}-stories.md` before creating them in the tracker.
 
-### 4. Create in Linear via MCP
+### 4. Create issues in the tracker via MCP
 
 For each story, use `mcp__linear-server__save_issue` to create the issue.
 
@@ -49,14 +49,14 @@ Required fields:
 - `teamId` (get from `mcp__linear-server__get_team` if not known)
 - `priority` (1=Urgent, 2=High, 3=Medium, 4=Low)
 
-After creating: report each issue with its Linear ID and URL.
+After creating: report each issue with its tracker ID and URL.
 
 ### 5. Output
 
 Summary table:
 
-| Story                | Linear ID | Priority |
-| -------------------- | --------- | -------- |
-| Add recently visited | PD-42     | Medium   |
+| Story                | Issue ID | Priority |
+| -------------------- | -------- | -------- |
+| Add recently visited | PD-42    | Medium   |
 
-Stories are now in Linear — pick one and run `/worktree <name>` to start.
+Stories are now created — pick one and run `/worktree <name>` to start.

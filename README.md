@@ -1,6 +1,6 @@
 # claude-workflow-starter
 
-A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Plan → Implement → Validate) with parallel subagent code review, automated E2E testing, and Linear integration — stack-agnostic, configured in one file.
+A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Plan → Implement → Validate) with parallel subagent code review, automated E2E testing, and optional issue-tracker sync — stack-agnostic, configured in one file.
 
 ---
 
@@ -158,6 +158,7 @@ LEVEL 2 (per story):            /worktree → /prime → /feature-plan → /feat
 - **IDEATE** — brain dump with the agent, no structure yet
 - **PIV** — Plan → Implement → Validate, the three phases of every story
 - **Linear is optional** — stories live in `.work/stories/`; Linear sync is available but not required
+- **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/worktree → edit → /validate → /create-pr` (see WORKFLOW.md)
 
 Full guide: `.claude/reference/WORKFLOW.md`
 Concepts (the why): `.claude/reference/CONCEPTS.md`
@@ -170,11 +171,12 @@ Commands write plans, PRDs, stories, and reports to `.work/` — created automat
 
 ```
 .work/
-├── prds/       # specs from /create-prd    → committed
-├── stories/    # stories from /create-stories → committed
-├── plans/      # plans from /feature-plan  → committed
-├── reports/    # build reports             → gitignored
-└── BACKLOG.md  # local backlog (no Linear) → committed
+├── prds/        # specs from /ideate (or /create-prd) → committed
+├── stories/     # stories from /create-stories       → committed
+├── plans/       # plans from /feature-plan           → committed
+├── reports/     # build reports                      → gitignored
+├── screenshots/ # browser screenshots                → gitignored
+└── BACKLOG.md   # local backlog (no tracker)         → committed
 ```
 
 ---
@@ -213,7 +215,8 @@ Commands read this file at runtime — change a value once, all commands pick it
 ├── project.yml            # Project config — commands, repo, branch
 ├── reference/
 │   ├── CONCEPTS.md        # The four frameworks behind this workflow
-│   └── WORKFLOW.md        # Full workflow guide
+│   ├── WORKFLOW.md        # Full workflow guide
+│   └── WORKTREES.md       # Git worktree mental model and lifecycle
 ├── scripts/
 │   └── worktree.sh        # Worktree lifecycle script (create, open, remove)
 └── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
