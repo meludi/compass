@@ -5,6 +5,8 @@ argument-hint: <feature name or description>
 
 # /create-prd — Generate Product Requirements Document
 
+> **Recommended:** `/model opus` + Plan Mode (`/plan`) — deep thinking for spec work, no accidental execution.
+
 Generate a PRD from the current conversation context. Use this before `/create-stories` or `/feature-plan`.
 
 ## Input
@@ -31,7 +33,21 @@ Only ask if critical information is missing:
 - What is the success criterion?
 - Are there constraints (performance, DB schema, existing UI)?
 
-### 3. Generate PRD
+### 3. Propose approaches (if a real choice exists)
+
+Before writing the spec, present 2–3 approaches for the core design decision.
+
+**Approach A — {name}:** {one sentence}. Trade-off: {the flaw}
+**Approach B — {name}:** {one sentence}. Trade-off: {the flaw}
+**Approach C (optional):** …
+
+**Recommendation:** Approach {X} — {why it's the least-bad option}
+
+Wait for user confirmation before proceeding. If they pick a different approach, note it and continue with their choice.
+
+Skip this step if there is only one sensible approach.
+
+### 4. Generate PRD
 
 Save to `.work/prds/{kebab-case-name}.prd.md`:
 
@@ -76,6 +92,20 @@ Save to `.work/prds/{kebab-case-name}.prd.md`:
 2. (optional) Follow-up: {enhancements}
 ```
 
-### 4. Output
+### 5. Spec self-review
 
-Report: PRD saved to `.work/prds/{name}.prd.md` — ready for `/create-stories` or `/feature-plan`.
+After writing the PRD, review it before handing off:
+
+1. **Placeholder scan** — any "TBD", "TODO", "…", or empty sections? Fill or remove.
+2. **Internal consistency** — do any sections contradict each other? Does the goal match the acceptance criteria?
+3. **Ambiguity check** — can any requirement be interpreted two ways? Pick one, make it explicit.
+4. **Scope check** — is this focused enough for one initiative, or does it need decomposition?
+
+Fix issues inline. No re-review loop — just fix and move on.
+
+### 6. Output
+
+```
+PRD saved to .work/prds/{name}.prd.md
+→ Next: /setup-stack (greenfield) or /create-stories
+```

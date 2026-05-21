@@ -4,6 +4,8 @@ description: Run linter, type checker, and tests — report any failures
 
 # /validate
 
+> **Recommended:** `/model haiku` — saves tokens, this command only runs shell checks.
+
 Run all validation checks and report results.
 
 **When to run**: Before `/create-pr`, or anytime you want a quick health check.

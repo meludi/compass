@@ -4,57 +4,118 @@ description: Set up claude-workflow-starter for a new project
 
 # /setup — Project Setup
 
-Configure this Claude workflow for your project. Run once after copying the starter into your project.
+> **Recommended:** `/model sonnet` — balanced model for this command.
+
+Configure this Claude workflow for your project. Run once after copying the starter into your project. Runs in two phases — same command both times.
 
 **What it does:**
-1. Fills in `.claude/project.yml` with your project values
-2. Generates `.claude/CLAUDE.md` from `.claude/CLAUDE-template.md`
+1. Phase 1 — writes `.claude/project.yml` with defaults, asks you to fill it in
+2. Phase 2 — validates `.claude/project.yml`, generates `.claude/CLAUDE.md`
 
 ---
 
-## Steps
+## Phase Detection
 
-### 1. Ask the user
+Read `.claude/project.yml`.
 
-Collect the following values (show defaults in brackets):
+- `name: ""` (empty) → **run Phase 1**
+- `name` has a value → **run Phase 2**
 
-1. **Project name** — short identifier, e.g. `my-app`
-2. **GitHub repo** — `owner/repo` format
-3. **Package manager** — npm / pnpm / yarn / bun [npm]
-4. **Dev command** — [npm run dev]
-5. **Dev port** — [3000]
-6. **Test command** — [npm test]
-7. **Lint command** — [npm run lint]
-8. **Format command** — [npm run format]
-9. **Type check command** — [npm run typecheck] (leave blank to skip)
-10. **Base branch** — [main]
-11. **Worktree prefix** — e.g. `../my-app-` (parent dir + project name + dash)
-12. **Source directory** — [src/]
-13. **DB file** — e.g. `myapp.db` (leave blank if no DB to copy per worktree)
-14. **Project description** — one paragraph, what this project does
+---
 
-### 2. Write `.claude/project.yml`
+## Phase 1 — Write Template
 
-Fill in all values.
+Write `.claude/project.yml` with the following content (preserve all inline comments):
 
-### 3. Generate `.claude/CLAUDE.md` from template
+```yaml
+# Project configuration — edit these values, then run /setup again to generate CLAUDE.md
+name: ""                # Required — short identifier, e.g. my-app
+repo: ""                # Required — GitHub slug, e.g. owner/my-app
+base_branch: main       # Branch PRs are opened against
+
+package_manager: npm    # npm | pnpm | yarn | bun
+
+dev_cmd: npm run dev    # Start dev server
+dev_port: 3000          # Dev server port (number)
+
+test_cmd: npm test
+lint_cmd: npm run lint
+format_cmd: npm run format
+type_check_cmd: ""      # Optional — e.g. npm run typecheck — leave blank if not used
+
+src_dir: src/           # Source directory
+worktree_prefix: ""     # e.g. ../my-app- — placed as sibling of main project dir
+db_file: ""             # Optional — e.g. myapp.db — copied per worktree by worktree.sh
+
+description: ""         # One paragraph — what does this project do?
+```
+
+Then output:
+
+```
+.claude/project.yml written with defaults.
+
+Open the file, fill in your values, then run /setup again.
+```
+
+Stop. Do not proceed to Phase 2.
+
+---
+
+## Phase 2 — Validate + Generate
+
+### Step 1 — Validate
+
+Check the following fields and collect all errors before reporting:
+
+| Field | Rule |
+|---|---|
+| `name` | Must not be empty |
+| `repo` | Must not be empty, must match `owner/repo` format |
+| `base_branch` | Must not be empty |
+| `package_manager` | Must be one of: `npm`, `pnpm`, `yarn`, `bun` |
+| `dev_port` | Must be a number |
+
+If any errors exist, output them all at once and stop:
+
+```
+Validation failed — fix the following in .claude/project.yml:
+
+  - package_manager: "npmp" is not valid. Must be one of: npm, pnpm, yarn, bun
+  - dev_port: "abc" is not a number
+```
+
+Do not generate CLAUDE.md until all errors are resolved.
+
+### Step 2 — Warn about unvalidatable fields
+
+After successful validation, always output this notice:
+
+```
+Note: dev_cmd, test_cmd, lint_cmd, format_cmd, type_check_cmd cannot be
+validated automatically. Please review these manually before continuing.
+```
+
+### Step 3 — Generate `.claude/CLAUDE.md`
 
 Read `.claude/CLAUDE-template.md`. Generate `CLAUDE.md` in two phases:
 
-**Phase 1 — fill immediately** (from answers + codebase scan):
-- Project description, tech stack, commands — from step 1
-- Directory structure, key files — scan existing files if this is a brownfield project; leave as placeholder for greenfield
+**Fill immediately** (from `project.yml` + codebase scan):
+- Project description — from `description` field
+- Tech stack — scan existing files (package.json, lock files, config files)
+- Commands — from `dev_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `type_check_cmd`
+- Directory structure, key files — scan existing files (brownfield); leave as placeholder (greenfield)
 
-**Phase 2 — mark as TODO** (not enough context yet):
+**Mark as TODO** (not enough context yet):
 - Code Patterns (Naming, Error Handling, File Organization)
 - Architecture details
 - Testing patterns
 
 Mark these sections explicitly as `TODO: update after first feature` — do not invent or leave blank.
 
-Do not modify `CLAUDE-template.md` — it stays as the reusable source. `CLAUDE.md` is the living document.
+Do not modify `CLAUDE-template.md` — it stays as the reusable source.
 
-### 4. Confirm
+### Step 4 — Confirm
 
 ```
 Project configured:
@@ -69,5 +130,5 @@ Generated: .claude/CLAUDE.md
   ~ TODO:    code patterns, architecture details, testing patterns
              → update after your first feature
 
-Next: run /prime to load context and start working.
+Next: run /ideate — brain dump with the agent, then /create-prd to write the spec.
 ```

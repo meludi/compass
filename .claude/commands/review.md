@@ -5,6 +5,8 @@ argument-hint: <PR number>
 
 # /review — Chief Code Review Officer
 
+> **Recommended:** `/model opus` — deep analysis for code review.
+
 Performs a thorough PR review by fanning out 3 specialized subagents in parallel, then aggregates their findings.
 
 ## Input

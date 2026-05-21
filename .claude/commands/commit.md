@@ -4,6 +4,8 @@ description: Stage and commit changes with a Conventional Commit message
 
 # /commit — Stage and Commit
 
+> **Recommended:** `/model haiku` — saves tokens, this command only runs git operations.
+
 Create a commit for current changes. No push.
 
 ## Steps

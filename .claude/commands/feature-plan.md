@@ -5,6 +5,8 @@ argument-hint: <feature description | path to .work/prds/*.prd.md>
 
 # /feature-plan — Create Implementation Plan
 
+> **Recommended:** `/model opus` + Plan Mode (`/plan`) — deep thinking for architecture decisions, no accidental execution.
+
 Transform a feature description into a concrete implementation plan. **Plan only — no code written.**
 
 Run `/prime` first if you haven't already.

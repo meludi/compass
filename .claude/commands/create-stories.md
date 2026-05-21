@@ -5,6 +5,8 @@ argument-hint: <path to .work/prds/*.prd.md>
 
 # /create-stories — Generate Linear Issues from PRD
 
+> **Recommended:** `/model sonnet` — balanced model for this command.
+
 Generate user stories from a PRD and create them as issues in Linear via MCP.
 
 ## Input

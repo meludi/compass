@@ -5,6 +5,8 @@ argument-hint: <path to .work/plans/*.plan.md>
 
 # /feature-build — Execute Implementation Plan
 
+> **Recommended:** `/model sonnet` — balanced model for this command.
+
 Execute a plan from `.work/plans/` step by step with validation after each task.
 
 **Golden rule:** If validation fails, fix it before moving on. Never accumulate broken state.

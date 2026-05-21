@@ -5,6 +5,8 @@ argument-hint: [issue-id | path to .work/stories/*.md]
 
 # /prime — Load Project Context
 
+> **Recommended:** `/model sonnet` — balanced model for this command.
+
 Bootstrap your mental model at the start of every session before doing any work.
 
 **Input**: $ARGUMENTS (optional — issue ID e.g. `PROJ-42`, or path to `.work/stories/*.md` if not using an issue tracker)

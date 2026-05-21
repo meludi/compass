@@ -10,7 +10,7 @@ The workflow has two clearly separated levels:
 
 ```
 LEVEL 1 — Initiative Setup (done once per initiative)
-  IDEATE → STORY → stories in .work/stories/ (+ Linear if configured)
+  /ideate → /create-prd → /setup-stack (greenfield) → /create-stories → stories in .work/stories/ (+ Linear if configured)
 
 LEVEL 2 — PIV Loop (run for every story)
   PLAN → IMPLEMENT → VALIDATE → MERGE
@@ -73,12 +73,22 @@ The PRD becomes the source of truth for every AI conversation in this initiative
 → saves to .work/prds/dividend-tracking.prd.md
 ```
 
-### Step 3 — Create stories — `/create-stories`
+### Step 3 — Scaffold the stack — `/setup-stack` _(greenfield only)_
+
+Run once for new projects directly after the PRD is written — the PRD already contains the tech stack hints in `## Technical notes`. Scaffolds the framework, fills the CLAUDE.md Code Patterns section, and creates canonical seed files that `/feature-plan` can reference as Mirror sources.
+
+```
+/setup-stack .work/prds/dividend-tracking.prd.md
+```
+
+Skip for brownfield — the existing codebase already provides Mirror sources.
+
+### Step 4 — Create stories — `/create-stories`
 
 Break the PRD into individual, actionable stories with acceptance criteria.
 
 ```
-# Directly after /create-prd — PRD still in context:
+# Directly after /create-prd (or /setup-stack) — PRD still in context:
 /create-stories
 
 # Or later, from file:
@@ -269,24 +279,42 @@ BUG → ? → + RULE
 
 ---
 
+## Models
+
+| | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
+|---|---|---|---|
+| **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
+| **In this workflow** | `/ideate`, `/create-prd`, `/feature-plan`, `/review`, `/security-review` | `/setup`, `/setup-stack`, `/prime`, `/feature-build`, `/create-stories`, `/reflect` | `/validate`, `/commit`, `/create-pr`, `/worktree` |
+| **Latency** | Moderate | Fast | Fastest |
+| **Context window** | 1M tokens | 1M tokens | 200k tokens |
+| **Max output** | 128k tokens | 64k tokens | 64k tokens |
+| **Input price** | $5 / MTok | $3 / MTok | $1 / MTok |
+| **Output price** | $25 / MTok | $15 / MTok | $5 / MTok |
+
+Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
+
+---
+
 ## Command Reference
 
-| Command            | Level      | When to use                                                     | Model   | Trigger |
-| ------------------ | ---------- | --------------------------------------------------------------- | ------- | ------- |
-| `/setup`           | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | User |
-| `/prime`           | PIV        | Start of every session — loads mental model                     | Sonnet  | User |
-| `/create-prd`      | Initiative | Turn an initiative idea into a structured spec (PRD)            | Opus    | User |
-| `/create-stories`  | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | User |
-| `/worktree`        | PIV        | Create worktree + branch + open new Claude session              | Haiku   | User |
-| `/feature-plan`    | PIV        | Before implementing — design the changes                        | Opus    | User |
-| `/feature-build`   | PIV        | Execute plan step by step                                       | Sonnet  | User |
-| `/validate`        | PIV        | Run all checks — lint, types, tests                             | Haiku   | User |
-| `/commit`          | PIV        | Stage and commit locally — no push, no PR                       | Haiku   | User |
-| `/create-pr`       | PIV        | Commit + push + open PR in one step                             | Haiku   | User |
-| `/review <PR>`     | PIV        | After PR is open — full parallel code review                    | Opus    | User |
-| `/security-review` | PIV        | Security review of changed files                                | Opus    | Auto (via `/review`) or User |
-| `/reflect`         | Anytime    | Capture learnings, evolve system — after merge, bug, or session | Sonnet  | User |
-| `agent-browser`    | PIV        | Automated E2E testing after implementation                      | —       | Auto (via `/feature-build`) or User |
+| Command            | Level      | When to use                                                     | Model   | Plan Mode | Trigger |
+| ------------------ | ---------- | --------------------------------------------------------------- | ------- | --------- | ------- |
+| `/setup`           | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | —         | User |
+| `/ideate`          | Initiative | Brain dump + Subagent-Recherche + Klärungsfragen — vor /create-prd | Opus | **Ja**    | User |
+| `/create-prd`      | Initiative | Turn an initiative idea into a structured spec (PRD)            | Opus    | **Ja**    | User |
+| `/setup-stack`     | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet | —         | User |
+| `/create-stories`  | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | —         | User |
+| `/prime`           | PIV        | Start of every session — loads mental model                     | Sonnet  | —         | User |
+| `/worktree`        | PIV        | Create worktree + branch + open new Claude session              | Haiku   | —         | User |
+| `/feature-plan`    | PIV        | Before implementing — design the changes                        | Opus    | **Ja**    | User |
+| `/feature-build`   | PIV        | Execute plan step by step                                       | Sonnet  | —         | User |
+| `/validate`        | PIV        | Run all checks — lint, types, tests                             | Haiku   | —         | User |
+| `/commit`          | PIV        | Stage and commit locally — no push, no PR                       | Haiku   | —         | User |
+| `/create-pr`       | PIV        | Commit + push + open PR in one step                             | Haiku   | —         | User |
+| `/review <PR>`     | PIV        | After PR is open — full parallel code review                    | Opus    | —         | User |
+| `/security-review` | PIV        | Security review of changed files                                | Opus    | —         | Auto (via `/review`) or User |
+| `/reflect`         | Anytime    | Capture learnings, evolve system — after merge, bug, or session | Sonnet  | —         | User |
+| `agent-browser`    | PIV        | Automated E2E testing after implementation                      | —       | —         | Auto (via `/feature-build`) or User |
 
 ---
 

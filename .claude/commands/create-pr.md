@@ -4,6 +4,8 @@ description: Commit, push, and open a PR — bridges feature-build and review
 
 # /create-pr — Commit, Push, and Open PR
 
+> **Recommended:** `/model haiku` — saves tokens, this command only runs git and GitHub operations.
+
 Closes the PIV Loop: bridges `/feature-build` (Build session) and `/review` (Review session).
 
 ## When to run

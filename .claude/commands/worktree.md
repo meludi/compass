@@ -5,6 +5,8 @@ argument-hint: <feature-name>
 
 # /worktree — Create Worktree and Open Session
 
+> **Empfohlen:** `/model haiku` — spart Tokens, dieser Command führt nur Shell-Operationen aus.
+
 Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code session inside it.
 
 **Input**: $ARGUMENTS (feature name, e.g. `add-search`)

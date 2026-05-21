@@ -4,6 +4,8 @@ description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .
 
 # /setup-tracker — Configure Issue Tracker
 
+> **Recommended:** `/model sonnet` — balanced model for this command.
+
 Switch between issue trackers. Updates the 3 files that reference Linear so the whole workflow points to the new tracker.
 
 ---
@@ -208,21 +210,47 @@ Update required fields section to match the tracker's schema.
 
 ---
 
-### `settings.local.json` — add env vars (API-token-based trackers only)
+### `settings.local.json` — add env vars and enable the MCP server
 
-For Linear, Jira community, and Azure DevOps local, add the secret to `.claude/settings.local.json` (gitignored):
+Add to `.claude/settings.local.json` (gitignored). `enabledMcpjsonServers` must match the key in `.mcp.json`.
 
+**Linear:**
 ```json
 {
-  "env": {
-    "LINEAR_API_KEY": "lin_api_...",
-    "JIRA_API_TOKEN": "...",
-    "ADO_PAT": "..."
-  }
+  "env": { "LINEAR_API_KEY": "lin_api_..." },
+  "enabledMcpjsonServers": ["linear-server"]
 }
 ```
 
-OAuth-based trackers (Jira official, Azure DevOps remote) do not need env vars.
+**Jira (official — OAuth, no token needed):**
+```json
+{
+  "enabledMcpjsonServers": ["atlassian"]
+}
+```
+
+**Jira (community):**
+```json
+{
+  "env": { "JIRA_API_TOKEN": "..." },
+  "enabledMcpjsonServers": ["jira"]
+}
+```
+
+**Azure DevOps (remote — OAuth, no token needed):**
+```json
+{
+  "enabledMcpjsonServers": ["azure-devops"]
+}
+```
+
+**Azure DevOps (local):**
+```json
+{
+  "env": { "ADO_PAT": "..." },
+  "enabledMcpjsonServers": ["azure-devops"]
+}
+```
 
 ---
 

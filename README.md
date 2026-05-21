@@ -19,7 +19,7 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 | Tool | Purpose | Setup |
 |------|---------|-------|
 | [Linear](https://linear.app) | Issue tracker — stories can be synced as Linear issues | See below |
-| [agent-browser](https://agent-browser.dev) | Automated E2E testing via `/feature-build` | `npx skills add vercel-labs/agent-browser` |
+| [agent-browser](https://agent-browser.dev) | Automated E2E testing via `/feature-build` | Included — `.claude/skills/agent-browser/` |
 | [pnpm](https://pnpm.io) | Recommended package manager (content store = efficient parallel worktrees) | `npm install -g pnpm` or `brew install pnpm` |
 
 ---
@@ -37,7 +37,8 @@ The Linear MCP server is already configured in `.mcp.json` (included in this rep
 {
   "env": {
     "LINEAR_API_KEY": "lin_api_..."
-  }
+  },
+  "enabledMcpjsonServers": ["linear-server"],
 }
 ```
 
@@ -119,6 +120,14 @@ This will ask you a few questions (package manager, commands, repo, branch, DB f
 
 `CLAUDE.md` is generated once by `/setup` and updated by you as the project evolves.
 
+**For greenfield projects** — directly after `/create-prd`, run:
+
+```
+/setup-stack .work/prds/your-prd.prd.md
+```
+
+This scaffolds the framework, asks 4 style questions, creates canonical seed files, and fills the Code Patterns section of `CLAUDE.md`. Skip for brownfield projects — existing code already provides the patterns.
+
 ---
 
 ## How it works
@@ -126,7 +135,7 @@ This will ask you a few questions (package manager, commands, repo, branch, DB f
 Two-level workflow:
 
 ```
-LEVEL 1 (once per initiative):  IDEATE → /create-prd → /create-stories → stories in .work/stories/
+LEVEL 1 (once per initiative):  IDEATE → /create-prd → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
 LEVEL 2 (per story):            /worktree → /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
 ```
 
