@@ -11,19 +11,19 @@ Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code sessio
 
 ## Steps
 
-Read `worktree_prefix` from `.claude/project.yml`, then:
+Use the worktree script (handles install, `.env.local` symlink, and DB copy):
+
+```bash
+bash .claude/scripts/worktree.sh $ARGUMENTS open
+```
+
+Or manually:
 
 ```bash
 git worktree add {worktree_prefix}{name} -b feat/{name}
 cd {worktree_prefix}{name}
-# Install dependencies if needed
-# Open new Claude Code session: claude .
-```
-
-Or if the project uses a worktree script:
-
-```bash
-bash scripts/w.sh $ARGUMENTS open
+# Install dependencies, symlink .env.local, copy DB if needed
+claude .
 ```
 
 ## Result
@@ -41,4 +41,4 @@ Run `/prime` to load context, then start working.
 - Run from the **main project directory** — never from an existing worktree
 - For parallel features: open a second terminal and run `/worktree <other-name>`
 - Dev server always runs from the main directory — never from a worktree
-- To remove a worktree when done: `git worktree remove {worktree_prefix}<name> && git branch -d feat/<name>`
+- To remove a worktree when done: `bash .claude/scripts/worktree.sh <name> rm`

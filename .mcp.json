@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "linear-server": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/mcp"],
+      "env": {
+        "MCP_REMOTE_HEADER_Authorization": "Bearer ${LINEAR_API_KEY}"
+      }
+    }
+  }
+}

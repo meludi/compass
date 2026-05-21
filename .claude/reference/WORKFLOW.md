@@ -10,21 +10,45 @@ The workflow has two clearly separated levels:
 
 ```
 LEVEL 1 — Initiative Setup (done once per initiative)
-  IDEATE → TICKET → Issues in Linear
+  IDEATE → STORY → stories in .work/stories/ (+ Linear if configured)
 
-LEVEL 2 — PIV Loop (run for every ticket)
+LEVEL 2 — PIV Loop (run for every story)
   PLAN → IMPLEMENT → VALIDATE → MERGE
 ```
 
-**The spec is either a Linear issue or a `.work/` artifact** — you don't write a new document per feature from scratch.
+**Glossary:**
+- **IDEATE** — structured brain dump with the agent before writing any spec. Raw ideas, no structure yet.
+- **STORY** — a scoped unit of work with acceptance criteria. Saved to `.work/stories/`; optionally synced to Linear.
+- **PIV** — Plan → Implement → Validate. The three phases of every development iteration.
+- **PRD** — Product Requirements Document. A structured feature spec that gets broken into stories.
 
-**Linear is optional.** When configured (`LINEAR_API_KEY`), Linear issues are the spec — pick a ticket and run the PIV loop. When not configured, use `.work/` instead: PRDs in `.work/prds/`, plans in `.work/plans/`, backlog in `.work/BACKLOG.md`. Run `/prime` without an issue ID and describe the feature directly in `/feature-plan`.
+**The spec is either a story file or a Linear issue** — you don't write a new document per feature from scratch.
+
+**Linear is optional.** When configured (`LINEAR_API_KEY`), Linear issues are the spec. Without Linear, stories live in `.work/stories/` — same workflow, no external tool required. Plans in `.work/plans/`, backlog in `.work/BACKLOG.md`. Run `/prime` without an issue ID and describe the feature directly in `/feature-plan`.
+
+---
+
+## The `.work/` Directory
+
+Your session-persistent workspace — local to your machine.
+
+```
+.work/
+├── prds/          # /create-prd         → versioniert
+├── stories/       # /create-stories     → versioniert
+├── plans/         # /feature-plan       → versioniert
+├── reports/       # /feature-build      → gitignored
+├── screenshots/   # agent-browser       → gitignored
+└── BACKLOG.md     # optional, ohne Linear → versioniert
+```
+
+Plans, PRDs, stories, and BACKLOG are committed — they are your project's spec artifacts. Reports and screenshots are generated output — gitignored.
 
 ---
 
 ## Level 1: Initiative Setup (once per initiative)
 
-This is the IDEATE → TICKET phase from the AI Coding Logical Flow. Done once when starting a new initiative or major feature set — not repeated for every small feature.
+This is the IDEATE → STORY phase from the AI Coding Logical Flow. Done once when starting a new initiative or major feature set — not repeated for every small feature.
 
 ### Step 1 — IDEATE
 
@@ -49,9 +73,9 @@ The PRD becomes the source of truth for every AI conversation in this initiative
 → saves to .work/prds/dividend-tracking.prd.md
 ```
 
-### Step 3 — Create Linear issues — `/create-stories`
+### Step 3 — Create stories — `/create-stories`
 
-Break the PRD into individual, actionable stories with acceptance criteria. Each story becomes a Linear issue.
+Break the PRD into individual, actionable stories with acceptance criteria.
 
 ```
 # Directly after /create-prd — PRD still in context:
@@ -60,31 +84,31 @@ Break the PRD into individual, actionable stories with acceptance criteria. Each
 # Or later, from file:
 /create-stories .work/prds/dividend-tracking.prd.md
 
-→ creates multiple issues in Linear (via MCP)
 → saves to .work/stories/
+→ optionally creates Linear issues if LINEAR_API_KEY is configured
 ```
 
-Each issue is now the spec for one PIV Loop iteration.
+Each story is now the spec for one PIV Loop iteration.
 
 ---
 
-## Level 2: PIV Loop (per ticket)
+## Level 2: PIV Loop (per story)
 
-Run this for every ticket. One worktree session per ticket — plan, build, and validate all happen inside it. This is the core of the 10x Playbook: **Plan / Build / Validate**.
+Run this for every story. One worktree session per story — plan, build, and validate all happen inside it. This is the core of the 10x Playbook: **Plan / Build / Validate** (PIV).
 
-### Step 1 — Pick a ticket
+### Step 1 — Pick a story
 
-Open Linear, pick an issue. The issue description is your spec — no additional document needed.
+Pick a story from `.work/stories/` — or from Linear if configured. The story description is your spec — no additional document needed.
 
-> **Linear is optional.** If Linear is not configured (no `LINEAR_API_KEY`), run `/prime` without an issue ID — it skips the Linear step and loads git state + project rules only. Describe the feature directly in `/feature-plan` instead.
+> **Without Linear:** browse `.work/stories/`, pick a file, pass its path to `/prime`. Same flow, no external tool.
 
 ### Step 2 — Create a worktree (new session)
 
-Each ticket gets its own branch, directory, and Claude session.
+Each story gets its own branch, directory, and Claude session.
 
 ```
-/worktree <issue-name>
-# creates {worktree_prefix from `.claude/project.yml`}/<issue-name> on feat/<issue-name>
+/worktree <story-name>
+# creates {worktree_prefix from `.claude/project.yml`}/<story-name> on feat/<story-name>
 # opens a fresh Claude Code session inside it
 ```
 
@@ -167,32 +191,42 @@ Dev server must be running from the main project directory (`dev_cmd` (from `.cl
 
 ### Step 7 — Merge + cleanup
 
-After review passes: merge PR into `base_branch (from `.claude/project.yml`)`, then remove the worktree (shell command — no slash command for this):
+After review passes: merge PR into `base_branch (from `.claude/project.yml`)`, then remove the worktree:
 
 ```bash
-bash scripts/w.sh <issue-name> rm
+bash .claude/scripts/worktree.sh <issue-name> rm
 ```
 
 ---
 
 ## Parallel Development (10x pattern)
 
-Same human, same hours — multiple tickets shipping simultaneously.
+> Bolting AI on = 2x. Building for parallelism = 10x.
+
+Same human, same hours — multiple stories shipping simultaneously.
 
 ```
 # Main directory — dev server only
 {dev_cmd from `.claude/project.yml`}
 
-# Terminal 1 — Ticket A
+# Terminal 1 — Story A
 /worktree feature-a
 # Session A: /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
 
-# Terminal 2 — Ticket B
+# Terminal 2 — Story B
 /worktree feature-b
 # Session B: /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
 ```
 
-Each worktree has its own branch, DB copy, and Claude session — no interference.
+### The 5 blockers — and how this starter handles them
+
+| Blocker | Fix |
+|---------|-----|
+| Port `:3000` conflict | Dev server runs from main dir only — worktrees never start their own |
+| `node_modules` × N | Each worktree installs its own (pnpm content store deduplicates on disk) |
+| DB races | `worktree.sh` copies `db_file` per worktree — isolated state, no races |
+| Token blowouts | Subagents for research; only summaries return to main context |
+| PR pile-up | `/review` fans out 3 parallel subagents per PR |
 
 ---
 
@@ -212,24 +246,47 @@ BUG → ? → + RULE
 
 > Don't just fix the bug. Fix the system that allowed the bug.
 
+### How to do it
+
+**Agent deviated from a pattern:**
+1. Identify exactly what it did vs. what was expected (file, line, action)
+2. Open the relevant command in `.claude/commands/`
+3. Add a concrete rule: "Always X. Never Y." with an example reference
+4. Commit: `docs: tighten feature-plan — require Mirror pattern reference per task`
+
+**Bug slipped through:**
+1. Fix the bug
+2. Ask: what system property allowed this? Missing type, no validation, wrong assumption?
+3. Add a rule to `CLAUDE.md` under the relevant section
+4. Add a test that would have caught it
+
+**Context was missing:**
+1. Write the missing context as a doc in `.claude/reference/`
+2. Add it to the On-Demand Context table in `CLAUDE.md`
+3. `/prime` loads the table — the agent picks it up next session
+
+**`CLAUDE.md` is a living document** — update it after significant features as the project evolves.
+
 ---
 
 ## Command Reference
 
-| Command            | Level      | When to use                                                     |
-| ------------------ | ---------- | --------------------------------------------------------------- |
-| `/worktree`        | PIV        | Create worktree + branch + open new Claude session              |
-| `/prime`           | PIV        | Start of every session — loads mental model                     |
-| `/create-prd`      | Initiative | Turning an initiative idea into a structured spec               |
-| `/create-stories`  | Initiative | Breaking PRD into Linear issues                                 |
-| `/feature-plan`    | PIV        | Before implementing — design the changes                        |
-| `/feature-build`   | PIV        | Executing a plan step by step                                   |
-| `/validate`        | PIV        | Run all checks — lint, types, tests                             |
-| `/commit`          | PIV        | Stage and commit locally — no push, no PR                       |
-| `/create-pr`       | PIV        | Commit + push + open PR in one step                             |
-| `/review <PR>`     | PIV        | After PR is open — full parallel code review                    |
-| `/security-review` | PIV        | Auto-triggered by `/review` — or run manually on specific files |
-| `agent-browser`    | PIV        | Testing UI after implementation                                 |
+| Command            | Level      | When to use                                                     | Model   | Trigger |
+| ------------------ | ---------- | --------------------------------------------------------------- | ------- | ------- |
+| `/setup`           | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | User |
+| `/prime`           | PIV        | Start of every session — loads mental model                     | Sonnet  | User |
+| `/create-prd`      | Initiative | Turn an initiative idea into a structured spec (PRD)            | Opus    | User |
+| `/create-stories`  | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | User |
+| `/worktree`        | PIV        | Create worktree + branch + open new Claude session              | Haiku   | User |
+| `/feature-plan`    | PIV        | Before implementing — design the changes                        | Opus    | User |
+| `/feature-build`   | PIV        | Execute plan step by step                                       | Sonnet  | User |
+| `/validate`        | PIV        | Run all checks — lint, types, tests                             | Haiku   | User |
+| `/commit`          | PIV        | Stage and commit locally — no push, no PR                       | Haiku   | User |
+| `/create-pr`       | PIV        | Commit + push + open PR in one step                             | Haiku   | User |
+| `/review <PR>`     | PIV        | After PR is open — full parallel code review                    | Opus    | User |
+| `/security-review` | PIV        | Security review of changed files                                | Opus    | Auto (via `/review`) or User |
+| `/reflect`         | Anytime    | Capture learnings, evolve system — after merge, bug, or session | Sonnet  | User |
+| `agent-browser`    | PIV        | Automated E2E testing after implementation                      | —       | Auto (via `/feature-build`) or User |
 
 ---
 

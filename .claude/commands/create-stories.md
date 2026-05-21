@@ -1,5 +1,5 @@
 ---
-description: Generate Linear issues from a PRD file
+description: Break a PRD into stories — saves to .work/stories/, optionally creates Linear issues
 argument-hint: <path to .work/prds/*.prd.md>
 ---
 

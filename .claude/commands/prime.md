@@ -1,13 +1,13 @@
 ---
 description: Prime agent with project context
-argument-hint: [linear-issue-id | path to .work/stories/*.md]
+argument-hint: [issue-id | path to .work/stories/*.md]
 ---
 
 # /prime — Load Project Context
 
 Bootstrap your mental model at the start of every session before doing any work.
 
-**Input**: $ARGUMENTS (optional — Linear issue ID e.g. `PROJ-42`, or path to `.work/stories/*.md`)
+**Input**: $ARGUMENTS (optional — issue ID e.g. `PROJ-42`, or path to `.work/stories/*.md` if not using an issue tracker)
 
 ---
 
@@ -15,7 +15,7 @@ Bootstrap your mental model at the start of every session before doing any work.
 
 ### 1. Load spec (if provided)
 
-If a **Linear issue ID** is given:
+If an **issue ID** is given:
 
 - Use `mcp__linear-server__get_issue` with the issue ID
 - Extract: title, description, acceptance criteria, status

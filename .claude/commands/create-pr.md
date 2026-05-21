@@ -69,6 +69,7 @@ PR open: <url>
 Next:
 1. Test manually using the checklist above
 2. Run /review <PR_NUMBER> once ready for code review
+3. After merge: run /reflect to capture learnings and evolve the system
 ```
 
 ---
