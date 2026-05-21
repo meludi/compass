@@ -120,7 +120,7 @@ This will ask you a few questions (package manager, commands, repo, branch, DB f
 
 `CLAUDE.md` is generated once by `/setup` and updated by you as the project evolves.
 
-**For greenfield projects** — directly after `/create-prd`, run:
+**For greenfield projects** — directly after `/ideate`, run:
 
 ```
 /setup-stack .work/prds/your-prd.prd.md
@@ -135,7 +135,7 @@ This scaffolds the framework, asks 4 style questions, creates canonical seed fil
 Two-level workflow:
 
 ```
-LEVEL 1 (once per initiative):  IDEATE → /create-prd → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
+LEVEL 1 (once per initiative):  /ideate (brain dump → PRD → self-review) → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
 LEVEL 2 (per story):            /worktree → /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
 ```
 

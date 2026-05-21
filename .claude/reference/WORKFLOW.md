@@ -10,7 +10,7 @@ The workflow has two clearly separated levels:
 
 ```
 LEVEL 1 — Initiative Setup (done once per initiative)
-  /ideate → /create-prd → /setup-stack (greenfield) → /create-stories → stories in .work/stories/ (+ Linear if configured)
+  /ideate (brain dump → spec → self-review) → /setup-stack (greenfield) → /create-stories → stories in .work/stories/ (+ Linear if configured)
 
 LEVEL 2 — PIV Loop (run for every story)
   PLAN → IMPLEMENT → VALIDATE → MERGE
@@ -64,14 +64,16 @@ Brain dump with the agent. Raw ideas, context, goals. No structure yet.
 
 **Result:** Shared understanding of the initiative — ready to write the PRD.
 
-### Step 2 — Write a PRD — `/create-prd`
+### Step 2 — IDEATE + PRD — `/ideate`
 
-The PRD becomes the source of truth for every AI conversation in this initiative. It is broken into stories — not recreated per feature.
+Brain dump → scope check → research → approaches → incremental design approval → write PRD → self-review → handoff. The full obra-inspired flow in one session.
 
 ```
-/create-prd "Dividend tracking feature set"
+/ideate "Dividend tracking feature set"
 → saves to .work/prds/dividend-tracking.prd.md
 ```
+
+For quick PRDs without the full ideation flow: `/create-prd` remains available.
 
 ### Step 3 — Scaffold the stack — `/setup-stack` _(greenfield only)_
 
@@ -300,8 +302,8 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | Command            | Level      | When to use                                                     | Model   | Plan Mode | Trigger |
 | ------------------ | ---------- | --------------------------------------------------------------- | ------- | --------- | ------- |
 | `/setup`           | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | —         | User |
-| `/ideate`          | Initiative | Brain dump + Subagent-Recherche + Klärungsfragen — vor /create-prd | Opus | **Ja**    | User |
-| `/create-prd`      | Initiative | Turn an initiative idea into a structured spec (PRD)            | Opus    | **Ja**    | User |
+| `/ideate`          | Initiative | Brain dump → approaches → PRD → self-review (full flow)         | Opus    | **Ja**    | User |
+| `/create-prd`      | Initiative | Quick PRD without ideation flow (deprecated for new initiatives) | Opus   | **Ja**    | User |
 | `/setup-stack`     | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet | —         | User |
 | `/create-stories`  | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | —         | User |
 | `/prime`           | PIV        | Start of every session — loads mental model                     | Sonnet  | —         | User |

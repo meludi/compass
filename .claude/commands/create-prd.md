@@ -5,6 +5,11 @@ argument-hint: <feature name or description>
 
 # /create-prd — Generate Product Requirements Document
 
+> **Note:** For new initiatives, use `/ideate` — it covers the full flow:
+> brain dump → scope check → approaches → design approval → spec → self-review → handoff.
+>
+> `/create-prd` remains available for quick PRDs without the ideation flow.
+
 > **Recommended:** `/model opus` + Plan Mode (`/plan`) — deep thinking for spec work, no accidental execution.
 
 Generate a PRD from the current conversation context. Use this before `/create-stories` or `/feature-plan`.
