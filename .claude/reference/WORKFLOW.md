@@ -299,24 +299,24 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 
 ## Command Reference
 
-| Command            | Level      | When to use                                                     | Model   | Plan Mode | Trigger |
-| ------------------ | ---------- | --------------------------------------------------------------- | ------- | --------- | ------- |
-| `/setup`           | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | —         | User |
-| `/ideate`          | Initiative | Brain dump → approaches → PRD → self-review (full flow)         | Opus    | **Ja**    | User |
-| `/create-prd`      | Initiative | Quick PRD without ideation flow (deprecated for new initiatives) | Opus   | **Ja**    | User |
-| `/setup-stack`     | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet | —         | User |
-| `/create-stories`  | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | —         | User |
-| `/prime`           | PIV        | Start of every session — loads mental model                     | Sonnet  | —         | User |
-| `/worktree`        | PIV        | Create worktree + branch + open new Claude session              | Haiku   | —         | User |
-| `/feature-plan`    | PIV        | Before implementing — design the changes                        | Opus    | **Ja**    | User |
-| `/feature-build`   | PIV        | Execute plan step by step                                       | Sonnet  | —         | User |
-| `/validate`        | PIV        | Run all checks — lint, types, tests                             | Haiku   | —         | User |
-| `/commit`          | PIV        | Stage and commit locally — no push, no PR                       | Haiku   | —         | User |
-| `/create-pr`       | PIV        | Commit + push + open PR in one step                             | Haiku   | —         | User |
-| `/review <PR>`     | PIV        | After PR is open — full parallel code review                    | Opus    | —         | User |
-| `/security-review` | PIV        | Security review of changed files                                | Opus    | —         | Auto (via `/review`) or User |
-| `/reflect`         | Anytime    | Capture learnings, evolve system — after merge, bug, or session | Sonnet  | —         | User |
-| `agent-browser`    | PIV        | Automated E2E testing after implementation                      | —       | —         | Auto (via `/feature-build`) or User |
+| Command            | Argument                                      | Level      | When to use                                                     | Model   | Plan Mode | Trigger |
+| ------------------ | --------------------------------------------- | ---------- | --------------------------------------------------------------- | ------- | --------- | ------- |
+| `/setup`           | —                                             | Once       | Configure project — generates `project.yml` + `CLAUDE.md`      | Sonnet  | —         | User |
+| `/ideate`          | `<initiative name>`                           | Initiative | Brain dump → approaches → PRD → self-review (full flow)         | Opus    | **Ja**    | User |
+| `/create-prd`      | `<feature name>`                              | Initiative | Quick PRD without ideation flow (deprecated for new initiatives) | Opus   | **Ja**    | User |
+| `/setup-stack`     | `[path to .work/prds/*.prd.md]`               | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet | —         | User |
+| `/create-stories`  | `[path to .work/prds/*.prd.md]`               | Initiative | Break PRD into stories (`.work/stories/` + optionally Linear)   | Sonnet  | —         | User |
+| `/prime`           | `[issue-id \| path to .work/stories/*.md]`    | PIV        | Start of every session — loads mental model                     | Sonnet  | —         | User |
+| `/worktree`        | `<feature-name>`                              | PIV        | Create worktree + branch + open new Claude session              | Haiku   | —         | User |
+| `/feature-plan`    | `"<feature description>"`                     | PIV        | Before implementing — design the changes                        | Opus    | **Ja**    | User |
+| `/feature-build`   | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step                                       | Sonnet  | —         | User |
+| `/validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test         | Sonnet  | —         | User |
+| `/commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                       | Haiku   | —         | User |
+| `/create-pr`       | —                                             | PIV        | Commit + push + open PR in one step                             | Haiku   | —         | User |
+| `/review`          | `<PR number>`                                 | PIV        | After PR is open — full parallel code review                    | Opus    | —         | User |
+| `/security-review` | —                                             | PIV        | Security review of changed files                                | Opus    | —         | Auto (via `/review`) or User |
+| `/reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session | Sonnet  | —         | User |
+| `agent-browser`    | —                                             | PIV        | Browser smoke test — UI verification before PR                  | —       | —         | Auto (via `/validate`) or User |
 
 ---
 

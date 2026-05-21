@@ -13,13 +13,13 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 | [Claude Code](https://claude.ai/code) | AI coding assistant — runs all slash commands | `npm install -g @anthropic-ai/claude-code` |
 | [Git](https://git-scm.com) | Version control + worktrees | pre-installed on most systems |
 | [GitHub CLI](https://cli.github.com) (`gh`) | Creating PRs and fetching diffs for `/review` | `brew install gh` → `gh auth login` |
+| [agent-browser](https://agent-browser.dev) | Browser smoke testing via `/validate` | `brew install agent-browser` or `npm install -g agent-browser` → `agent-browser install` |
 
 ### Optional
 
 | Tool | Purpose | Setup |
 |------|---------|-------|
 | [Linear](https://linear.app) | Issue tracker — stories can be synced as Linear issues | See below |
-| [agent-browser](https://agent-browser.dev) | Automated E2E testing via `/feature-build` | Included — `.claude/skills/agent-browser/` |
 | [pnpm](https://pnpm.io) | Recommended package manager (content store = efficient parallel worktrees) | `npm install -g pnpm` or `brew install pnpm` |
 
 ---
@@ -85,13 +85,29 @@ What `/setup-tracker` changes:
 
 ### agent-browser setup (optional)
 
-[agent-browser.dev](https://agent-browser.dev) — used by `/feature-build` for automated E2E testing after implementation.
+[agent-browser.dev](https://agent-browser.dev) — used by `/validate` for browser smoke testing before opening a PR.
 
-```bash
-npx skills add vercel-labs/agent-browser
+Two installs required: the skill (tells Claude how to use the CLI) and the CLI itself (the actual binary).
+
+**1. Install the skill** (already included in this repo — no action needed):
+
+```
+.claude/skills/agent-browser/   ← already present
 ```
 
-No MCP server, no further configuration — works automatically with Claude Code after install.
+**2. Install the CLI + browser:**
+
+```bash
+# Homebrew (recommended)
+brew install agent-browser
+agent-browser install   # downloads Chrome
+
+# npm
+npm install -g agent-browser
+agent-browser install   # downloads Chrome
+```
+
+`/validate` will detect automatically whether the CLI is available and the dev server is running — it skips the browser step silently if either is missing.
 
 ---
 

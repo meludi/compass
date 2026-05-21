@@ -6,7 +6,9 @@ allowed-tools: Bash(agent-browser:*)
 
 # Browser Automation with agent-browser
 
-Use after `/feature-build` to verify UI features before opening a PR. The dev server must be running (see `dev_cmd` and `dev_port` in `.claude/project.yml`).
+Used by `/validate` to verify UI before opening a PR. The dev server must be running (see `dev_cmd` and `dev_port` in `.claude/project.yml`).
+
+**Screenshot path convention:** always save to `.work/screenshots/{name}.png` — this directory is gitignored.
 
 ## Quick start
 
@@ -62,9 +64,9 @@ agent-browser get title
 ### Screenshots
 
 ```bash
-agent-browser screenshot                   # To stdout
-agent-browser screenshot path.png          # Save to file
-agent-browser screenshot --full            # Full page
+agent-browser screenshot                              # To stdout
+agent-browser screenshot .work/screenshots/{name}.png # Save to file (use this path)
+agent-browser screenshot --full                       # Full page
 ```
 
 ### Wait

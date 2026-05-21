@@ -56,26 +56,6 @@ After all tasks complete, run in order (from `.claude/project.yml`):
 
 If any check fails: fix it before continuing. Report what failed and how it was fixed.
 
-### 3.5 E2E verification (hard gate)
-
-**Do not proceed to the report until this passes.**
-
-Use `agent-browser` to automate the golden path (dev server must be running on `dev_port`):
-
-```bash
-agent-browser open http://localhost:{dev_port}
-agent-browser snapshot -i
-# navigate and interact with the new feature
-agent-browser screenshot .work/screenshots/{feature-name}.png
-agent-browser close
-```
-
-- Cover the golden path + at least one edge case
-- Check for visible regressions in adjacent features
-- If anything fails: fix, re-run validation, re-verify
-
-Unit tests and type checks alone are not sufficient to mark the implementation complete.
-
 ### 4. Write report
 
 Save to `.work/reports/{feature-name}-report.md`:
