@@ -36,7 +36,7 @@ claude .
 
 ## After the session opens
 
-Run `/prime` to load context, then start working.
+Run `/plan-feature` — it loads project context and creates the implementation plan.
 
 ## Notes
 
@@ -44,3 +44,4 @@ Run `/prime` to load context, then start working.
 - For parallel features: open a second terminal and run `/worktree <other-name>`
 - Dev server always runs from the main directory — never from a worktree
 - To remove a worktree when done: `bash .claude/scripts/worktree.sh <name> rm`
+- See `.claude/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.

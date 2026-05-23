@@ -120,14 +120,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 <!-- Load these only when relevant — not every session. Add entries as the project grows. -->
 
-| Topic               | File                                    |
-| ------------------- | --------------------------------------- |
-| Workflow concepts   | `.claude/reference/CONCEPTS.md`         |
-| Full workflow guide | `.claude/reference/WORKFLOW.md`         |
-| {component area}    | `.claude/reference/{component}.md`      |
+| Topic                | File                                    |
+| -------------------- | --------------------------------------- |
+| Workflow concepts    | `.claude/reference/CONCEPTS.md`         |
+| Command flow         | `.claude/reference/WORKFLOW.md`         |
+| Reference / handbook | `.claude/reference/HANDBOOK.md`         |
+| Worktrees            | `.claude/reference/WORKTREES.md`        |
+| {component area}     | `.claude/reference/{component}.md`      |
 
 <!-- Pattern: when a domain area becomes complex, extract its rules into a separate
-     reference doc and add it here. /prime loads this table — agents pull only what they need. -->
+     reference doc and add it here. /plan-feature loads this table — agents pull only what they need. -->
 
 ---
 

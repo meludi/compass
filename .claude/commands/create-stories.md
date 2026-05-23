@@ -13,7 +13,7 @@ Generate user stories from a PRD and create them as issues in your tracker via M
 
 `/create-stories <path to .work/prds/*.prd.md>`
 
-Or run after `/create-prd` when the PRD is already loaded.
+Or run after `/ideate` when the PRD is already loaded.
 
 ## Steps
 

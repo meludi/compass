@@ -1,9 +1,9 @@
 ---
-description: Execute an implementation plan step by step with validation after each task
+description: Execute an implementation plan step by step, with validation after each task and a full check at the end
 argument-hint: <path to .work/plans/*.plan.md>
 ---
 
-# /feature-build — Execute Implementation Plan
+# /build — Execute Implementation Plan
 
 > **Recommended:** `/model sonnet` — balanced model for this command.
 
@@ -13,7 +13,7 @@ Execute a plan from `.work/plans/` step by step with validation after each task.
 
 ## Input
 
-`/feature-build <path to .work/plans/*.plan.md>`
+`/build <path to .work/plans/*.plan.md>`
 
 ## Steps
 
@@ -46,13 +46,9 @@ For each task in the plan:
 
 7. Never start the next task while the current task's type check is failing
 
-### 3. Validate
+### 3. Full validation
 
-After all tasks complete, run in order (from `.claude/project.yml`):
-
-1. `lint_cmd && format_cmd`
-2. `type_check_cmd` (skip if blank)
-3. `test_cmd`
+After all tasks complete, run the full validation suite — lint, type check, tests, and the browser smoke test. This is the same suite as `/validate`; follow that command's process.
 
 If any check fails: fix it before continuing. Report what failed and how it was fixed.
 
@@ -75,6 +71,7 @@ Save to `.work/reports/{feature-name}-report.md`:
 - Type check: PASS / FAIL
 - Tests: PASS / FAIL (N passing, N failing)
 - Lint: PASS / FAIL
+- Browser smoke test: PASS / FAIL / skipped
 
 ## Deviations from plan
 
@@ -90,4 +87,4 @@ Save to `.work/reports/{feature-name}-report.md`:
 - Summarize what was built
 - List files changed
 - Report validation status
-- Next step: run `/create-pr` to commit, push, and open the PR
+- Next step: run `/ship` to commit, push, open the PR, and review

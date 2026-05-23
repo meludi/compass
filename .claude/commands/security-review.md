@@ -11,7 +11,7 @@ Perform a security-focused code review on the specified files, directory, or sta
 
 **Input**: $ARGUMENTS (defaults to staged git changes if no path provided)
 
-**When to run**: Auto-triggered by `/review` — or run manually on specific files.
+**When to run**: Auto-triggered by `/ship`'s review step — or run manually on specific files.
 
 ---
 

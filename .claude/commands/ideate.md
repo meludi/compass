@@ -43,6 +43,15 @@ Use this context to inform questions and the final PRD.
 
 ## Step 2 — Invite the brain dump
 
+**If the initiative was already discussed in depth earlier in this conversation**, a fresh brain dump is redundant. Summarize what you already understand and ask:
+
+```
+I have enough context from our conversation to write the spec directly.
+Skip the brain dump and go to clarifying questions? (yes/no)
+```
+
+On "yes", jump to Step 6. On "no", or if there is no prior context, invite the brain dump:
+
 ```
 Tell me everything about your initiative — unstructured, no format required.
 

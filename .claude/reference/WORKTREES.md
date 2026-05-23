@@ -2,6 +2,8 @@
 
 A worktree is a **feature branch with its own directory**. Not a clone, not a copy — Git shares the full history, but each worktree has an independent file checkout.
 
+Used by `/worktree` — see `HANDBOOK.md` for the command reference.
+
 ---
 
 ## Mental Model
@@ -35,7 +37,7 @@ All three share the same `.git` folder under the hood.
 
 ```
 /worktree <name>          → creates directory + branch + installs deps
-  └─ open claude session  → run /prime to load context, then start working
+  └─ open claude session  → run /plan-feature to load context and plan, then build
   └─ commit changes       → commits go to feat/<name> only
   └─ merge into main      → git merge or PR
   └─ worktree.sh <name> rm → removes directory + branch + prunes git metadata

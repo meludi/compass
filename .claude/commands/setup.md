@@ -130,5 +130,5 @@ Generated: .claude/CLAUDE.md
   ~ TODO:    code patterns, architecture details, testing patterns
              → update after your first feature
 
-Next: run /ideate — brain dump with the agent, then /create-prd to write the spec.
+Next: run /ideate — brain dump with the agent; it writes the spec.
 ```

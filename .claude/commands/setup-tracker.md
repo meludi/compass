@@ -1,5 +1,5 @@
 ---
-description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, prime.md, create-stories.md
+description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, plan-feature.md, create-stories.md
 ---
 
 # /setup-tracker — Configure Issue Tracker
@@ -68,7 +68,7 @@ Before applying, show exactly what will change across the 3 files:
 ```
 Files to update:
   .mcp.json                        — MCP server config + auth
-  .claude/commands/prime.md        — tool name for loading an issue
+  .claude/commands/plan-feature.md   — tool name for loading an issue
   .claude/commands/create-stories.md — tool name for creating issues
 ```
 
@@ -157,13 +157,13 @@ After confirmation, update all 3 files:
 
 ---
 
-### `.claude/commands/prime.md` — update "Load spec" step
+### `.claude/commands/plan-feature.md` — update the spec-loading step
 
-Description texts in `prime.md` are already tracker-neutral ("issue ID", not "Linear issue ID") — do not change them.
+Description texts in `plan-feature.md` are already tracker-neutral ("issue ID", not "Linear issue ID") — do not change them.
 
-Only update these two things:
+Update these three things:
 
-**1. MCP tool name** (in the "If an issue ID is given" block):
+**1. MCP tool name** (Step 1, the issue-ID branch):
 
 | Tracker | Tool |
 |---------|------|
@@ -176,22 +176,17 @@ Only update these two things:
 
 | Tracker | argument-hint |
 |---------|--------------|
-| Linear | `[issue-id \| path to .work/stories/*.md]` |
-| Jira (without Confluence) | `[issue-id \| path to .work/stories/*.md]` |
-| Jira (with Confluence URL configured) | `[issue-id \| confluence-page-url \| path to .work/stories/*.md]` |
-| Azure DevOps | `[work-item-id \| path to .work/stories/*.md]` |
+| Linear / Jira | `<path to .work/stories/*.md \| issue-id \| feature description>` |
+| Jira (with Confluence URL configured) | `<path to .work/stories/*.md \| issue-id \| confluence-page-url \| feature description>` |
+| Azure DevOps | `<path to .work/stories/*.md \| work-item-id \| feature description>` |
 
-**3. For Jira + Confluence only** — add a third input block after the issue ID block:
+**3. For Jira + Confluence only** — add a Confluence option to the Spec list in Step 1:
 
 ```
-If a **Confluence page URL** is given:
-- Use `mcp__atlassian__getConfluencePage` (official) or `mcp__jira__confluence_get_page` (community)
-- Extract: page title, body — use as additional session context
+A **Confluence page URL** → fetch with `mcp__atlassian__getConfluencePage` (official)
+or `mcp__jira__confluence_get_page` (community). Extract page title and body — use as
+additional session context.
 ```
-
-Also update the Mental Model example to match the ID format:
-- Linear / Jira: `**Issue:** PROJ-42 — {title} ({status})`
-- Azure DevOps: `**Issue:** 42 — {title} ({status})`
 
 ---
 
@@ -266,7 +261,7 @@ After applying, call the "get issue" tool with a real or test issue ID:
 
 Ask the user for an issue/work-item ID to test with. If they don't have one handy, skip the test.
 
-**On success:** "Tracker configured. Run `/prime <ISSUE-ID>` to load your first story."
+**On success:** "Tracker configured. Run `/plan-feature <ISSUE-ID>` to load your first story."
 **On error:** Show the exact error message and a concrete troubleshooting hint (wrong URL, missing token, OAuth not completed, etc.).
 
 ---

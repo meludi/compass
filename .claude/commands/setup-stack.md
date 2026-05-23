@@ -7,7 +7,7 @@ argument-hint: [path to .work/prds/*.prd.md]
 
 > **Recommended:** `/model sonnet` — balanced model for this command.
 
-Set up the tech stack for a new greenfield project. Run **once**, directly after `/create-prd` and before `/create-stories`.
+Set up the tech stack for a new greenfield project. Run **once**, directly after `/ideate` and before `/create-stories`.
 
 **What it does:**
 1. Detects brownfield projects (guard)
@@ -16,7 +16,7 @@ Set up the tech stack for a new greenfield project. Run **once**, directly after
 4. Scaffolds the project
 5. Installs additional best-practice tooling
 6. Asks 4 style decisions → records them in CLAUDE.md
-7. Creates 2–3 canonical seed files (the Mirror source for `/feature-plan`)
+7. Creates 2–3 canonical seed files (the Mirror source for `/plan-feature`)
 8. Updates CLAUDE.md Code Patterns section
 9. Updates `project.yml` with actual commands
 10. Verifies with lint + type check
@@ -240,7 +240,7 @@ Seed files to create:
   src/lib/utils.ts               — canonical utility module
   {framework-specific file}      — see table below
 
-These become the Mirror source for /feature-plan.
+These become the Mirror source for /plan-feature.
 Create? (yes/no)
 ```
 
@@ -513,5 +513,5 @@ Setup complete.
   Types:       ✓
 
 Next: /worktree <first-story-name>
-The seed files above are your Mirror source for /feature-plan.
+The seed files above are your Mirror source for /plan-feature.
 ```

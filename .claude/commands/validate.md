@@ -8,7 +8,7 @@ description: Run linter, type checker, tests, and browser smoke test — report 
 
 Run all validation checks and report results.
 
-**When to run**: Before `/create-pr`, or anytime you want a full health check.
+**When to run**: Before `/ship`, or anytime you want a full health check. Also run as the final step of `/build`.
 
 ---
 
@@ -84,4 +84,4 @@ List each failure with:
 2. Error message
 3. Suggested fix (if obvious)
 
-Fix all failures before proceeding to `/create-pr`.
+Fix all failures before proceeding to `/ship`.

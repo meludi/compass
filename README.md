@@ -12,7 +12,7 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 |------|---------|---------|
 | [Claude Code](https://claude.ai/code) | AI coding assistant — runs all slash commands | `npm install -g @anthropic-ai/claude-code` |
 | [Git](https://git-scm.com) | Version control + worktrees | pre-installed on most systems |
-| [GitHub CLI](https://cli.github.com) (`gh`) | Creating PRs and fetching diffs for `/review` | `brew install gh` → `gh auth login` |
+| [GitHub CLI](https://cli.github.com) (`gh`) | Creating PRs and fetching diffs for `/ship` | `brew install gh` → `gh auth login` |
 | [agent-browser](https://agent-browser.dev) | Browser smoke testing via `/validate` | `brew install agent-browser` or `npm install -g agent-browser` → `agent-browser install` |
 
 ### Optional
@@ -44,7 +44,7 @@ The Linear MCP server is already configured in `.mcp.json` (included in this rep
 
 With this in place:
 - `/create-stories` saves stories to `.work/stories/` **and** creates Linear issues
-- `/prime PROJ-42` loads the Linear issue as the session spec
+- `/plan-feature PROJ-42` loads the Linear issue as the session spec
 
 ---
 
@@ -78,7 +78,7 @@ Run `/setup-tracker` to switch — it updates the 3 files that reference Linear.
 
 What `/setup-tracker` changes:
 - `.mcp.json` — MCP server config + auth
-- `commands/prime.md` — tool name for loading an issue
+- `commands/plan-feature.md` — tool name for loading an issue
 - `commands/create-stories.md` — tool name for creating issues
 
 ---
@@ -152,15 +152,16 @@ Two-level workflow:
 
 ```
 LEVEL 1 (once per initiative):  /ideate (brain dump → PRD → self-review) → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
-LEVEL 2 (per story):            /worktree → /prime → /feature-plan → /feature-build → /validate → /create-pr → /review
+LEVEL 2 (per story):            /worktree → /plan-feature → /build → /ship
 ```
 
 - **IDEATE** — brain dump with the agent, no structure yet
 - **PIV** — Plan → Implement → Validate, the three phases of every story
 - **Linear is optional** — stories live in `.work/stories/`; Linear sync is available but not required
-- **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/worktree → edit → /validate → /create-pr` (see WORKFLOW.md)
+- **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/worktree → edit → /validate → /ship` (decline the review) — see WORKFLOW.md
 
-Full guide: `.claude/reference/WORKFLOW.md`
+Command flow: `.claude/reference/WORKFLOW.md`
+Reference (models, command table, troubleshooting): `.claude/reference/HANDBOOK.md`
 Concepts (the why): `.claude/reference/CONCEPTS.md`
 
 ---
@@ -171,9 +172,9 @@ Commands write plans, PRDs, stories, and reports to `.work/` — created automat
 
 ```
 .work/
-├── prds/        # specs from /ideate (or /create-prd) → committed
+├── prds/        # specs from /ideate                 → committed
 ├── stories/     # stories from /create-stories       → committed
-├── plans/       # plans from /feature-plan           → committed
+├── plans/       # plans from /plan-feature           → committed
 ├── reports/     # build reports                      → gitignored
 ├── screenshots/ # browser screenshots                → gitignored
 └── BACKLOG.md   # local backlog (no tracker)         → committed
@@ -215,7 +216,8 @@ Commands read this file at runtime — change a value once, all commands pick it
 ├── project.yml            # Project config — commands, repo, branch
 ├── reference/
 │   ├── CONCEPTS.md        # The four frameworks behind this workflow
-│   ├── WORKFLOW.md        # Full workflow guide
+│   ├── WORKFLOW.md        # The command flow — Level 1, Level 2, Quick Path
+│   ├── HANDBOOK.md        # Reference — models, command table, troubleshooting
 │   └── WORKTREES.md       # Git worktree mental model and lifecycle
 ├── scripts/
 │   └── worktree.sh        # Worktree lifecycle script (create, open, remove)
