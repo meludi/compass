@@ -5,7 +5,7 @@ command: what it does, how to call it, what it hands off.
 
 ```
 LEVEL 1 — Initiative Setup   /setup → /setup-tracker → /ideate → /setup-stack → /create-stories   (once per initiative)
-LEVEL 2 — PIV Loop           /worktree → /plan-feature → /build → /ship → /reflect                (per story)
+LEVEL 2 — PIV Loop           /worktree → /plan-feature → /implement → /ship → /reflect                (per story)
 QUICK PATH — trivial changes /worktree → edit → /validate → /ship
 ```
 
@@ -76,21 +76,21 @@ Creates an isolated worktree on `feat/<name>` and opens a fresh Claude session i
 
 ### 2. `/plan-feature`
 
-Loads project context, then writes an implementation plan to `.work/plans/`. Plan only — no code. Ends here on purpose: review the plan before building.
+Loads project context, then writes an implementation plan to `.work/plans/`. Plan only — no code. Ends here on purpose: review the plan before implementing.
 
 ```
 /plan-feature .work/stories/dividend-display.md
 → .work/plans/dividend-display.plan.md
 ```
 
-### 3. `/build`
+### 3. `/implement`
 
 Executes the plan task by task, type-checking after each. After all tasks pass, runs the full validation suite — lint, types, tests, browser smoke test — and writes a report to `.work/reports/`.
 
 _Includes: /validate (→ agent-browser)_
 
 ```
-/build .work/plans/dividend-display.plan.md
+/implement .work/plans/dividend-display.plan.md
 ```
 
 ### 4. `/ship`
@@ -124,7 +124,7 @@ For typos, single-line bugfixes, CSS/copy tweaks, and config-value changes, a PR
 /worktree <name>  →  make the edit by hand  →  /validate  →  /ship
 ```
 
-- Skips `/ideate`, `/setup-stack`, `/create-stories`, `/plan-feature`, and `/build` — no spec artifacts are produced.
+- Skips `/ideate`, `/setup-stack`, `/create-stories`, `/plan-feature`, and `/implement` — no spec artifacts are produced.
 - When `/ship` asks whether to run the review, answer **no** — the 3-subagent review is overkill for a one-line diff.
 - `/worktree` still applies: it keeps work off the base branch and isolated.
 
@@ -136,7 +136,7 @@ For typos, single-line bugfixes, CSS/copy tweaks, and config-value changes, a PR
 
 Not flow steps — they run inside the steps above (folded in) or on demand:
 
-- `/validate` — run lint, types, tests, and the browser smoke test on their own. No argument. Folded into `/build`.
+- `/validate` — run lint, types, tests, and the browser smoke test on their own. No argument. Folded into `/implement`.
 - `/commit` — stage and commit locally, no push or PR. No argument. Folded into `/ship`.
 - `/security-review [file-or-directory]` — security review of changed files; defaults to staged changes if no path is given. Auto-runs inside `/ship` on a risky diff; also runnable on demand.
 

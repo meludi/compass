@@ -152,7 +152,7 @@ Two-level workflow:
 
 ```
 LEVEL 1 (once per initiative):  /ideate (brain dump → PRD → self-review) → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
-LEVEL 2 (per story):            /worktree → /plan-feature → /build → /ship
+LEVEL 2 (per story):            /worktree → /plan-feature → /implement → /ship
 ```
 
 - **IDEATE** — brain dump with the agent, no structure yet

@@ -30,7 +30,7 @@ Your session-persistent workspace — local to your machine.
 ├── prds/          # /ideate              → committed
 ├── stories/       # /create-stories      → committed
 ├── plans/         # /plan-feature        → committed
-├── reports/       # /build               → gitignored
+├── reports/       # /implement               → gitignored
 ├── screenshots/   # agent-browser        → gitignored
 └── BACKLOG.md     # optional, no tracker → committed
 ```
@@ -51,11 +51,11 @@ Same human, same hours — multiple stories shipping simultaneously. Each story 
 
 # Terminal 1 — Story A
 /worktree feature-a
-# Session A: /plan-feature → /build → /ship
+# Session A: /plan-feature → /implement → /ship
 
 # Terminal 2 — Story B
 /worktree feature-b
-# Session B: /plan-feature → /build → /ship
+# Session B: /plan-feature → /implement → /ship
 ```
 
 The 10x reframe, the 5 pillars, and the 5 blockers this enables are explained in `CONCEPTS.md`.
@@ -108,7 +108,7 @@ The `/reflect` command guides you through all of the above.
 | | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
-| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/security-review` | `/setup`, `/setup-stack`, `/build`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
+| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
 | **Latency** | Moderate | Fast | Fastest |
 | **Context window** | 1M tokens | 1M tokens | 200k tokens |
 | **Max output** | 128k tokens | 64k tokens | 64k tokens |
@@ -130,13 +130,13 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/create-stories`  | `[path to .work/prds/*.prd.md]`               | Initiative | Break PRD into stories (`.work/stories/` + optionally a tracker)  | Sonnet  | —         | User |
 | `/worktree`        | `<feature-name>`                              | PIV        | Create worktree + branch + open new Claude session                | Haiku   | —         | User |
 | `/plan-feature`    | `<path to .work/stories/*.md \| issue-id \| feature description>` | PIV | Load context, then design the changes — plan only                | Opus    | **Yes**   | User |
-| `/build`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
+| `/implement`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
 | `/validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
 | `/commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/ship`) or User |
 | `/ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
 | `/security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/ship`) or User |
 | `/reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
-| `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/validate` and `/build`             | —       | —         | Auto or User |
+| `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/validate` and `/implement`             | —       | —         | Auto or User |
 
 ---
 

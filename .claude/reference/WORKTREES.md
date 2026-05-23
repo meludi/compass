@@ -37,7 +37,7 @@ All three share the same `.git` folder under the hood.
 
 ```
 /worktree <name>          → creates directory + branch + installs deps
-  └─ open claude session  → run /plan-feature to load context and plan, then build
+  └─ open claude session  → run /plan-feature to load context and plan, then implement
   └─ commit changes       → commits go to feat/<name> only
   └─ merge into main      → git merge or PR
   └─ worktree.sh <name> rm → removes directory + branch + prunes git metadata

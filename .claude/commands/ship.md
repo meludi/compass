@@ -10,7 +10,7 @@ Closes the PIV Loop: commits the work, opens a PR, and runs the parallel code re
 
 ## When to run
 
-After `/build` completes and all validation passes.
+After `/implement` completes and all validation passes.
 
 ---
 

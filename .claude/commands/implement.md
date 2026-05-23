@@ -3,7 +3,7 @@ description: Execute an implementation plan step by step, with validation after 
 argument-hint: <path to .work/plans/*.plan.md>
 ---
 
-# /build — Execute Implementation Plan
+# /implement — Execute Implementation Plan
 
 > **Recommended:** `/model sonnet` — balanced model for this command.
 
@@ -13,7 +13,7 @@ Execute a plan from `.work/plans/` step by step with validation after each task.
 
 ## Input
 
-`/build <path to .work/plans/*.plan.md>`
+`/implement <path to .work/plans/*.plan.md>`
 
 ## Steps
 

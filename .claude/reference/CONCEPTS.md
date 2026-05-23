@@ -21,7 +21,7 @@ IDEATE → STORY → PIV LOOP → SYSTEM EVOLUTION
 |-------|-------------|---------|
 | **IDEATE** | Brain dump with the agent. Raw ideas, no structure. AI asks clarifying questions. | (conversation) |
 | **STORY** | Write a PRD, break it into stories. Stories are the spec — tool-agnostic. | `/ideate`, `/create-stories` |
-| **PIV LOOP** | Per story: Plan → Implement → Validate → Merge. | `/worktree`, `/plan-feature`, `/build`, `/validate`, `/ship` |
+| **PIV LOOP** | Per story: Plan → Implement → Validate → Merge. | `/worktree`, `/plan-feature`, `/implement`, `/validate`, `/ship` |
 | **SYSTEM EVOLUTION** | Every bug is an opportunity. Fix the system, not just the symptom. | `/reflect`, update `CLAUDE.md`, commands, `reference/` |
 
 IDEATE and STORY happen once per initiative. The PIV Loop runs for every story.
@@ -50,7 +50,7 @@ Same human, same hours — five parallel stories, five worktrees, five fresh-con
 | # | Pillar | In this starter |
 |---|--------|----------------|
 | 1 | **Story is the Spec** | `.work/stories/*.md` or Linear issue — any worktree picks it up |
-| 2 | **Plan / Build / Validate** | `/plan-feature` → `/build` (validation folded in) → `/ship` |
+| 2 | **Plan / Implement / Validate** | `/plan-feature` → `/implement` (validation folded in) → `/ship` |
 | 3 | **Parallel Worktrees** | `/worktree` → isolated branch + dir + Claude session |
 | 4 | **Fresh-Session Review** | `/ship` spawns subagents that never saw the writer's chat |
 | 5 | **Self-Healing Layer** | System Evolution: bug → `/reflect` → rule → never returns |

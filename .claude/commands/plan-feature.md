@@ -44,7 +44,7 @@ ls .work/plans/ 2>/dev/null
 
 Recap in one or two lines: branch, spec, and whether a plan already exists.
 
-**If a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/build` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
+**If a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/implement` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
 
 ### 2. Understand the request
 
@@ -128,4 +128,4 @@ One sentence: what this plan achieves.
 
 ### 6. Output
 
-Report: plan saved to `.work/plans/{name}.plan.md` — ready for `/build`.
+Report: plan saved to `.work/plans/{name}.plan.md` — ready for `/implement`.

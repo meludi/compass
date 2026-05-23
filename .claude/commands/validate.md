@@ -8,7 +8,7 @@ description: Run linter, type checker, tests, and browser smoke test — report 
 
 Run all validation checks and report results.
 
-**When to run**: Before `/ship`, or anytime you want a full health check. Also run as the final step of `/build`.
+**When to run**: Before `/ship`, or anytime you want a full health check. Also run as the final step of `/implement`.
 
 ---
 
