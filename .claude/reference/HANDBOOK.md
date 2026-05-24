@@ -207,3 +207,27 @@ With no argument, `/context` skips the spec-loading step and only refreshes proj
 | Tracker issue not created          | Check the API key in `.claude/settings.local.json` and `enabledMcpjsonServers`.        |
 | Fork won't push `base_branch`      | Use `git push origin <base_branch>` from the terminal instead.                         |
 | Claude session feels slow/confused | Start a fresh session and run `/context` to reload the mental model.                   |
+| CI jobs not running as expected    | Check `autonomy_mode` in `.claude/project.yml` and that `ANTHROPIC_API_KEY` is set as a GitHub secret. See `AUTONOMY.md`. |
+
+---
+
+## Deploying
+
+The starter does not opinionate on deployment — pick what fits the project.
+Three common patterns once `auto-merge` lands code on your `base_branch`:
+
+**Vercel** — connect the repo at <https://vercel.com/new>, pick `base_branch`
+as the production branch. Every merge auto-deploys. Preview deployments are
+created per PR automatically.
+
+**Coolify** (self-hosted) — in the Coolify dashboard, create a service for the
+repo, set the deployment branch to `base_branch`, copy the webhook URL, and add
+it as a GitHub webhook (Settings → Webhooks → Push event).
+
+**Netlify** — connect the repo at <https://app.netlify.com>, pick `base_branch`,
+set build command and publish directory from `project.yml`. Deploy Previews per
+PR are enabled by default.
+
+For any of these: keep production secrets in the host's environment variables,
+not in the repo. The CI workflow only needs `ANTHROPIC_API_KEY`
+(see `AUTONOMY.md`).

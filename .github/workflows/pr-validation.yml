@@ -1,0 +1,154 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+# Behaviour is gated by `autonomy_mode` in .claude/project.yml:
+#   off          (default) — runs only `test` (lint + types + tests)
+#   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
+#   full         + auto-merge once all checks are green
+#
+# See .claude/reference/AUTONOMY.md for details, secrets, costs, and security notes.
+
+jobs:
+  # Read autonomy_mode and project commands from .claude/project.yml so the rest
+  # of the workflow has a single source of truth.
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      autonomy_mode: ${{ steps.read.outputs.autonomy_mode }}
+      test_cmd: ${{ steps.read.outputs.test_cmd }}
+      lint_cmd: ${{ steps.read.outputs.lint_cmd }}
+      type_check_cmd: ${{ steps.read.outputs.type_check_cmd }}
+      package_manager: ${{ steps.read.outputs.package_manager }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          read_field() {
+            grep "^$1:" .claude/project.yml 2>/dev/null \
+              | head -1 \
+              | cut -d: -f2- \
+              | sed 's/#.*//' \
+              | xargs \
+              || true
+          }
+          MODE=$(read_field autonomy_mode)
+          [ -z "$MODE" ] && MODE="off"
+          PM=$(read_field package_manager)
+          [ -z "$PM" ] && PM="npm"
+          {
+            echo "autonomy_mode=$MODE"
+            echo "test_cmd=$(read_field test_cmd)"
+            echo "lint_cmd=$(read_field lint_cmd)"
+            echo "type_check_cmd=$(read_field type_check_cmd)"
+            echo "package_manager=$PM"
+          } >> "$GITHUB_OUTPUT"
+          echo "autonomy_mode: $MODE"
+
+  test:
+    needs: config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          PM="${{ needs.config.outputs.package_manager }}"
+          case "$PM" in
+            pnpm) npm install -g pnpm && pnpm install --frozen-lockfile ;;
+            yarn) yarn install --frozen-lockfile ;;
+            bun)  npm install -g bun && bun install --frozen-lockfile ;;
+            *)    npm ci ;;
+          esac
+      - name: Lint
+        if: needs.config.outputs.lint_cmd != ''
+        run: ${{ needs.config.outputs.lint_cmd }}
+      - name: Type check
+        if: needs.config.outputs.type_check_cmd != ''
+        run: ${{ needs.config.outputs.type_check_cmd }}
+      - name: Test
+        if: needs.config.outputs.test_cmd != ''
+        run: ${{ needs.config.outputs.test_cmd }}
+
+  # autonomy_mode != off — inline PR review by claude-code-action.
+  # Posts findings as inline comments. Does NOT auto-fix or commit.
+  claude-review:
+    needs: [config, test]
+    if: needs.config.outputs.autonomy_mode != 'off'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this PR diff thoroughly. Cover:
+            1. Code quality and correctness
+            2. Type safety
+            3. Test coverage — are all changed code paths tested?
+            4. Edge cases without corresponding tests
+            5. Security concerns (injection, auth, data exposure, secrets in code)
+
+            Post inline comments on specific lines for anything requiring
+            attention. Do NOT auto-fix or commit — the author decides on each
+            finding. Keep comments concise and actionable.
+          allowed_tools: >
+            Bash(git diff*),
+            mcp__github__create_pull_request_review_comment
+
+  # autonomy_mode != off — dynamic test checklist as PR comment.
+  claude-checklist:
+    needs: [config, test]
+    if: needs.config.outputs.autonomy_mode != 'off'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Based on this PR diff, generate a manual testing checklist.
+            Format as GitHub checkboxes (`- [ ] item`).
+            Rules:
+            - Only include things that cannot be verified by unit tests
+            - Focus on user-facing behaviour and side effects
+            - Flag auth, payments, and data migrations separately
+            - Keep it concise — max 10 items
+
+            Post as a PR comment with this header:
+            ## Manual Verification Before Merge
+          allowed_tools: >
+            Bash(git diff*),
+            mcp__github__create_issue_comment
+
+  # autonomy_mode == full — enable auto-merge once all required checks pass.
+  # NOTE: native GitHub branch protection cannot enforce checkbox completion.
+  # For a hard checkbox gate, add a "ready-for-merge" label requirement to your
+  # branch protection rules and add the label manually after ticking the boxes.
+  auto-merge:
+    needs: [config, test, claude-review, claude-checklist]
+    if: needs.config.outputs.autonomy_mode == 'full'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Auto-Merge
+        run: gh pr merge --auto --squash ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

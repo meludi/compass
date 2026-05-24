@@ -158,3 +158,14 @@ One-sentence overall code health summary.
 - **Never push to base branch** — feature branch only
 - **Never merge the PR** — hand back to the user after the review
 - **No secrets** — never stage `.env.local`, `*.db`, or credential files
+
+---
+
+## Note on CI / auto-merge
+
+If `autonomy_mode` in `.claude/project.yml` is `review-only` or `full`, the CI
+workflow `.github/workflows/pr-validation.yml` adds inline PR comments and a
+dynamic test checklist on PR open. In `full` mode, the PR auto-merges once all
+required checks pass.
+
+See `.claude/reference/AUTONOMY.md` for full details.

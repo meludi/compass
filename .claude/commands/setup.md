@@ -47,6 +47,8 @@ src_dir: src/           # Source directory
 worktree_prefix: ""     # e.g. ../my-app- — placed as sibling of main project dir
 db_file: ""             # Optional — e.g. myapp.db — copied per worktree by worktree.sh
 
+autonomy_mode: off      # off | review-only | full — see .claude/reference/AUTONOMY.md
+
 description: ""         # One paragraph — what does this project do?
 ```
 
@@ -75,6 +77,7 @@ Check the following fields and collect all errors before reporting:
 | `base_branch` | Must not be empty |
 | `package_manager` | Must be one of: `npm`, `pnpm`, `yarn`, `bun` |
 | `dev_port` | Must be a number |
+| `autonomy_mode` | Must be one of: `off`, `review-only`, `full` (defaults to `off` if missing) |
 
 If any errors exist, output them all at once and stop:
 

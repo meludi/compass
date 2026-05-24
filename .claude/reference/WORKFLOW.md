@@ -144,4 +144,5 @@ Not flow steps — they run inside the steps above (folded in) or on demand:
 ---
 
 Reference: `HANDBOOK.md` (models, command table, troubleshooting, `.work/` layout) ·
-`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail).
+`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) ·
+`AUTONOMY.md` (CI workflow + `autonomy_mode` opt-in).

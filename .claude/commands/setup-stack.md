@@ -485,7 +485,43 @@ Wait for "yes" before writing.
 
 ---
 
-## Step 11 — Verify
+## Step 11 — Install CI workflow (optional)
+
+Ask:
+
+```
+Install the CI workflow (.github/workflows/pr-validation.yml)?
+
+The starter ships a PR-validation workflow with three modes:
+  off          — pure CI (lint + types + tests). No API calls. Default.
+  review-only  — adds Claude inline PR review + auto-generated test checklist.
+  full         — adds auto-merge once all checks are green.
+
+(yes / no — defaults to no)
+```
+
+If **no**: skip to Step 12.
+
+If **yes**: ask which mode the project should start in. Default `off`. Update
+`autonomy_mode` in `.claude/project.yml` to the chosen value.
+
+The workflow file is already present in the starter at
+`.github/workflows/pr-validation.yml` — no copy step needed unless the user
+deleted it; if missing, restore from the starter.
+
+For `review-only` or `full`, remind the user to set the API key as a GitHub
+secret:
+
+```bash
+gh secret set ANTHROPIC_API_KEY
+```
+
+Full setup details (secrets, branch protection, costs, security
+considerations) live in `.claude/reference/AUTONOMY.md`.
+
+---
+
+## Step 12 — Verify
 
 Run lint and type check (skip `type_check_cmd` if blank):
 

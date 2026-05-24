@@ -111,6 +111,30 @@ agent-browser install   # downloads Chrome
 
 ---
 
+### CI & autonomy (optional)
+
+The starter ships `.github/workflows/pr-validation.yml`. Default mode is
+`off` — pure CI (lint + types + tests), no API calls. Opt in to inline Claude
+PR reviews, auto-generated test checklists, and auto-merge by setting
+`autonomy_mode` in `.claude/project.yml`.
+
+Full details, secrets, costs, and security notes: `.claude/reference/AUTONOMY.md`.
+
+---
+
+### Deploying (optional)
+
+Connect the repo to one of:
+
+- **Vercel** — <https://vercel.com/new>, pick `base_branch` as production.
+- **Coolify** (self-hosted) — create service, set branch, add Coolify webhook to GitHub.
+- **Netlify** — <https://app.netlify.com>, pick `base_branch`, set build + publish dir.
+
+Once configured, every merge to `base_branch` auto-deploys. The starter is
+deploy-target-agnostic on purpose.
+
+---
+
 ## Setup
 
 **1. Copy into your project**
