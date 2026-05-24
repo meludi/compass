@@ -136,6 +136,7 @@ For typos, single-line bugfixes, CSS/copy tweaks, and config-value changes, a PR
 
 Not flow steps — they run inside the steps above (folded in) or on demand:
 
+- `/context [issue-id | story-path | feature description]` — load project rules, git state, optional spec, and on-demand docs. Auto-runs as Step 1 of `/plan-feature` and `/implement`. Standalone for mid-story resume, debugging, or before `/reflect`.
 - `/validate` — run lint, types, tests, and the browser smoke test on their own. No argument. Folded into `/implement`.
 - `/commit` — stage and commit locally, no push or PR. No argument. Folded into `/ship`.
 - `/security-review [file-or-directory]` — security review of changed files; defaults to staged changes if no path is given. Auto-runs inside `/ship` on a risky diff; also runnable on demand.

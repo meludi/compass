@@ -11,6 +11,8 @@ Guided session to improve the system based on what you've learned. Runs the Self
 
 Run anytime: after a merge, after a frustrating session, after a bug, or periodically.
 
+> If the session feels stale, run `/context` first to refresh the mental model.
+
 ---
 
 ## Step 1 — Choose scope

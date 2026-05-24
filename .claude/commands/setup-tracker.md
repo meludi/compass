@@ -1,5 +1,5 @@
 ---
-description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, plan-feature.md, create-stories.md
+description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, context.md, create-stories.md
 ---
 
 # /setup-tracker — Configure Issue Tracker
@@ -68,7 +68,7 @@ Before applying, show exactly what will change across the 3 files:
 ```
 Files to update:
   .mcp.json                        — MCP server config + auth
-  .claude/commands/plan-feature.md   — tool name for loading an issue
+  .claude/commands/context.md      — tool name for loading an issue (called by /plan-feature, /implement)
   .claude/commands/create-stories.md — tool name for creating issues
 ```
 
@@ -157,13 +157,13 @@ After confirmation, update all 3 files:
 
 ---
 
-### `.claude/commands/plan-feature.md` — update the spec-loading step
+### `.claude/commands/context.md` — update the spec-loading step
 
-Description texts in `plan-feature.md` are already tracker-neutral ("issue ID", not "Linear issue ID") — do not change them.
+Description texts in `context.md` are already tracker-neutral ("issue ID", not "Linear issue ID") — do not change them.
 
 Update these three things:
 
-**1. MCP tool name** (Step 1, the issue-ID branch):
+**1. MCP tool name** (Step 3, the issue-ID branch):
 
 | Tracker | Tool |
 |---------|------|
@@ -261,7 +261,7 @@ After applying, call the "get issue" tool with a real or test issue ID:
 
 Ask the user for an issue/work-item ID to test with. If they don't have one handy, skip the test.
 
-**On success:** "Tracker configured. Run `/plan-feature <ISSUE-ID>` to load your first story."
+**On success:** "Tracker configured. Run `/context <ISSUE-ID>` (or `/plan-feature <ISSUE-ID>`) to load your first story."
 **On error:** Show the exact error message and a concrete troubleshooting hint (wrong URL, missing token, OAuth not completed, etc.).
 
 ---

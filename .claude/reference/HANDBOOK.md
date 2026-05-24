@@ -129,6 +129,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/setup-tracker`   | —                                             | Once       | Switch issue tracker (Linear / Jira / Azure DevOps)               | Sonnet  | —         | User |
 | `/create-stories`  | `[path to .work/prds/*.prd.md]`               | Initiative | Break PRD into stories (`.work/stories/` + optionally a tracker)  | Sonnet  | —         | User |
 | `/worktree`        | `<feature-name>`                              | PIV        | Create worktree + branch + open new Claude session                | Haiku   | —         | User |
+| `/context`         | `[issue-id \| path to .work/stories/*.md \| feature description]` _(optional)_ | PIV | Refresh mental model — rules, git, spec, on-demand docs. Auto in plan/implement; standalone on resume or stale context | Sonnet  | —         | Auto (via `/plan-feature`, `/implement`) or User |
 | `/plan-feature`    | `<path to .work/stories/*.md \| issue-id \| feature description>` | PIV | Load context, then design the changes — plan only                | Opus    | **Yes**   | User |
 | `/implement`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
 | `/validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
@@ -137,6 +138,62 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/ship`) or User |
 | `/reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
 | `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/validate` and `/implement`             | —       | —         | Auto or User |
+
+### When to run `/context` standalone
+
+`/context` runs automatically as the first step of `/plan-feature` and `/implement`, so you rarely need to call it yourself. Run it explicitly when:
+
+- **Mid-story resume** — coming back to a worktree after time away. Run `/context` to see a clean recap (branch, plan status, existing report) before deciding whether to `/implement` or revise the plan.
+- **Stale session** — after a long conversation, when the agent starts missing things it should know. Bare `/context` (no argument) reloads rules + git state without writing a plan.
+- **Before `/reflect`** — gives `/reflect` an up-to-date project state to analyze.
+- **Debugging missing context** — if the agent overlooked a pattern or rule, run `/context` to verify what is actually in the working set.
+
+With no argument, `/context` skips the spec-loading step and only refreshes project rules, git state, and existing plans/reports.
+
+### When to run `/validate` standalone
+
+`/validate` runs automatically as the final step of `/implement` (full validation suite after all tasks). Run it explicitly when:
+
+- **Before `/ship`** — sanity check that nothing has regressed after a manual edit or commit fix.
+- **Quick Path changes** (typo, copy tweak, config value) — used in place of `/implement` to verify the change before shipping.
+- **Debugging a failing check** — re-run a specific lint/type/test cycle without re-running the implementation flow.
+- **Mid-implementation** — if you suspect a previous task broke something, run `/validate` to confirm before continuing.
+
+### When to run `/commit` standalone
+
+`/commit` runs automatically as the first step of `/ship` (commit + push + PR + review). Run it explicitly when:
+
+- **WIP checkpoint** — saving progress mid-story without pushing or opening a PR yet.
+- **Multiple commits per story** — when you want several focused commits before opening the PR via `/ship`.
+- **Doc-only or trivial change** — when `/ship`'s PR + review flow is overkill and you just want a tidy commit.
+- **Pre-`/ship` cleanup** — committing a small fix before the actual ship step.
+
+### When to run `/security-review` standalone
+
+`/security-review` auto-runs inside `/ship` when the diff touches risky paths (API routes, DB queries, auth, forms). Run it explicitly when:
+
+- **Pre-emptive scan** — before `/ship`, when you know you touched sensitive code and want feedback early.
+- **Specific files** — pass a file or directory path to audit it without involving the rest of a diff.
+- **External code** — reviewing a contributed PR, a third-party snippet, or vendored code.
+- **After a security advisory** — when an upstream CVE drops and you want to verify exposure.
+
+### When to run `agent-browser` standalone
+
+`agent-browser` runs automatically inside `/validate` (and therefore `/implement`) for the smoke test. Run it explicitly when:
+
+- **UI debugging** — manually inspect a page or component, open the snapshot, click around interactively.
+- **Screenshot capture** — grabbing a screenshot for documentation, a PR description, or a tracker issue.
+- **Cross-feature regression check** — verifying that a change in one area didn't break adjacent UI.
+- **Custom URL** — when the dev server isn't on the standard port or you want to test a non-local URL.
+
+### When to run `/reflect`
+
+`/reflect` is anytime-triggered — no auto path. Run it when:
+
+- **After a merge** — capture what deviated, what was missing, what should become a rule before the next story starts.
+- **After a frustrating session** — when you corrected the same thing twice, or the agent missed something obvious.
+- **After a bug** — fix both the bug AND the system that allowed it (`BUG → ? → + RULE`).
+- **Periodically** — a deep-review pass across `CLAUDE.md`, commands, and reference docs to keep them aligned with how the project has evolved.
 
 ---
 
@@ -149,4 +206,4 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | Type errors after implement        | Run `type_check_cmd` (from `.claude/project.yml`) and fix before committing.           |
 | Tracker issue not created          | Check the API key in `.claude/settings.local.json` and `enabledMcpjsonServers`.        |
 | Fork won't push `base_branch`      | Use `git push origin <base_branch>` from the terminal instead.                         |
-| Claude session feels slow/confused | Start a fresh session and run `/plan-feature` to reload context.                       |
+| Claude session feels slow/confused | Start a fresh session and run `/context` to reload the mental model.                   |

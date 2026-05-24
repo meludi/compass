@@ -36,7 +36,7 @@ claude .
 
 ## After the session opens
 
-Run `/plan-feature` — it loads project context and creates the implementation plan.
+Run `/plan-feature` — it loads project context (via `/context`) and creates the implementation plan. For orientation-only without writing a plan, call `/context` directly.
 
 ## Notes
 

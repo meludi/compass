@@ -129,7 +129,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | {component area}     | `.claude/reference/{component}.md`      |
 
 <!-- Pattern: when a domain area becomes complex, extract its rules into a separate
-     reference doc and add it here. /plan-feature loads this table — agents pull only what they need. -->
+     reference doc and add it here. /context loads this table (called by /plan-feature
+     and /implement) — agents pull only what they need. -->
 
 ---
 

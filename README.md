@@ -78,7 +78,7 @@ Run `/setup-tracker` to switch — it updates the 3 files that reference Linear.
 
 What `/setup-tracker` changes:
 - `.mcp.json` — MCP server config + auth
-- `commands/plan-feature.md` — tool name for loading an issue
+- `commands/context.md` — tool name for loading an issue (called by `/plan-feature` and `/implement`)
 - `commands/create-stories.md` — tool name for creating issues
 
 ---

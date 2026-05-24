@@ -17,14 +17,18 @@ Execute a plan from `.work/plans/` step by step with validation after each task.
 
 ## Steps
 
-### 1. Load plan
+### 1. Load context
+
+Execute the loading procedure from `commands/context.md` (Steps 1–5). Critical for mid-story resume: project rules and git state are refreshed before continuing on an existing plan.
+
+### 2. Load plan
 
 - Read the plan file
 - Read `.claude/project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
 - Extract: goal, files to change, tasks, acceptance criteria
 - Confirm branch is correct (`git branch --show-current`)
 
-### 2. Execute tasks
+### 3. Execute tasks
 
 For each task in the plan:
 
@@ -46,13 +50,13 @@ For each task in the plan:
 
 7. Never start the next task while the current task's type check is failing
 
-### 3. Full validation
+### 4. Full validation
 
 After all tasks complete, run the full validation suite — lint, type check, tests, and the browser smoke test. This is the same suite as `/validate`; follow that command's process.
 
 If any check fails: fix it before continuing. Report what failed and how it was fixed.
 
-### 4. Write report
+### 5. Write report
 
 Save to `.work/reports/{feature-name}-report.md`:
 
@@ -82,7 +86,7 @@ Save to `.work/reports/{feature-name}-report.md`:
 {What the user needs to do: test manually, open PR, etc.}
 ```
 
-### 5. Output
+### 6. Output
 
 - Summarize what was built
 - List files changed

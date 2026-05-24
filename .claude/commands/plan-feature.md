@@ -19,32 +19,9 @@ This command loads project context itself, so it is the first thing you run in a
 
 ### 1. Load context
 
-Build the mental model before planning.
+Execute the loading procedure from `commands/context.md` (Steps 1–5). That file is the canonical home of loading logic — keeping it here would cause drift with `/context` and `/implement`.
 
-**Spec** — if an argument was given:
-
-- An **issue ID** (e.g. `PROJ-42`) → fetch it with `mcp__linear-server__get_issue`. Extract title, description, acceptance criteria, status.
-- A **`.work/stories/*.md` path** → read the file. Extract title, acceptance criteria, technical notes.
-- This becomes the spec for the session. With a plain feature description and no tracker, the description itself is the spec.
-
-**Project rules:**
-
-- `.claude/CLAUDE.md` — conventions, stack, patterns
-- `.claude/project.yml` — commands, repo, base branch
-- Any relevant reference docs from the CLAUDE.md On-Demand Context table
-
-**Git state + existing plan:**
-
-```bash
-git branch --show-current
-git log --oneline -5
-git status --short
-ls .work/plans/ 2>/dev/null
-```
-
-Recap in one or two lines: branch, spec, and whether a plan already exists.
-
-**If a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/implement` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
+**If the recap from `/context` shows a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/implement` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
 
 ### 2. Understand the request
 
