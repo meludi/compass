@@ -108,7 +108,7 @@ The `/reflect` command guides you through all of the above.
 | | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
-| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
+| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/auto-implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
 | **Latency** | Moderate | Fast | Fastest |
 | **Context window** | 1M tokens | 1M tokens | 200k tokens |
 | **Max output** | 128k tokens | 64k tokens | 64k tokens |
@@ -132,6 +132,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/context`         | `[issue-id \| path to .work/stories/*.md \| feature description]` _(optional)_ | PIV | Refresh mental model — rules, git, spec, on-demand docs. Auto in plan/implement; standalone on resume or stale context | Sonnet  | —         | Auto (via `/plan-feature`, `/implement`) or User |
 | `/plan-feature`    | `<path to .work/stories/*.md \| issue-id \| feature description>` | PIV | Load context, then design the changes — plan only                | Opus    | **Yes**   | User |
 | `/implement`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
+| `/auto-implement`  | `<path to .work/plans/*.plan.md>`             | PIV        | Run a confirmed plan to PR-open without confirmation — implement + commit + push + PR. Never merges. | Sonnet  | —         | User |
 | `/validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
 | `/commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/ship`) or User |
 | `/ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |

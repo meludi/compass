@@ -111,6 +111,8 @@ chmod +x .husky/pre-commit
 
 The template runs tests locally and asks Claude for a review — but does **not** auto-fix and does **not** auto-commit. Findings are printed to your terminal; you decide what to fix.
 
+If you run `/auto-implement` (see below) with this hook installed, the hook still fires on the auto-commit: it acts as a final safety net (tests must pass, review findings are printed). It does not turn into an auto-fixer.
+
 ---
 
 ## Security considerations
@@ -124,7 +126,8 @@ The template runs tests locally and asks Claude for a review — but does **not*
 
 ## Relationship to other commands
 
-- `/ship` — local commit + push + PR + 3-subagent chat review. Always runs the chat review regardless of `autonomy_mode`.
+- `/ship` — local commit + push + PR + 3-subagent chat review. Always runs the chat review regardless of `autonomy_mode`. Commit step is gated by user confirmation.
+- `/auto-implement` — runs a pre-approved plan from `.work/plans/` all the way to PR-open without intermediate confirmation. The only local command that may auto-commit. Never merges. Pre-flight checks (feat/* branch, worktree, plan exists) gate it. Works on top of any `autonomy_mode`: if `review-only` is on, the PR it opens still gets the CI review jobs.
 - `/validate` — local lint + types + tests + browser smoke test. Mirrors what the `test` CI job runs.
 - `/security-review` — local security-focused review. Auto-runs inside `/ship` on risky diffs. The CI `claude-review` includes security as one of five focus areas; for deeper audits, run `/security-review` locally.
 

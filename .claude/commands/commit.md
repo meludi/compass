@@ -40,5 +40,5 @@ git commit -m "<confirmed message>"
 
 ## Rules
 
-- **Never auto-commit** — always show state and wait for confirmation
+- **Never auto-commit** — always show state and wait for confirmation. The only sanctioned exception is `/auto-implement`, which runs on a `feat/*` branch with a pre-approved plan and stops at PR-open.
 - **No Co-Authored-By** — no AI attribution

@@ -7,6 +7,7 @@ command: what it does, how to call it, what it hands off.
 LEVEL 1 — Initiative Setup   /setup → /setup-tracker → /ideate → /setup-stack → /create-stories   (once per initiative)
 LEVEL 2 — PIV Loop           /worktree → /plan-feature → /implement → /ship → /reflect                (per story)
 QUICK PATH — trivial changes /worktree → edit → /validate → /ship
+AUTO PATH — confirmed plan   /worktree → /plan-feature → /auto-implement                              (no HITL after plan approval)
 ```
 
 Reference (models, full command table, troubleshooting, `.work/` layout): `HANDBOOK.md`.
@@ -129,6 +130,34 @@ For typos, single-line bugfixes, CSS/copy tweaks, and config-value changes, a PR
 - `/worktree` still applies: it keeps work off the base branch and isolated.
 
 **Do not use it for** anything with logic, new files, or acceptance criteria — that goes through the full Level 2 PIV Loop.
+
+---
+
+## Auto Path — confirmed plan to PR without HITL
+
+When the plan is already reviewed and stable, `/auto-implement` runs the entire pipeline from the plan to an open PR in one go — no commit confirmation, no review prompt. Merge stays manual.
+
+```
+/worktree <name>  →  /plan-feature <story>  →  (review & approve the plan)  →  /auto-implement .work/plans/<name>.plan.md
+```
+
+- Plan freezes after approval — `/auto-implement` reads `.work/plans/<name>.plan.md` as immutable input.
+- Implementation runs the same per-task type-check loop as `/implement`, then the full validation suite.
+- Commit, push, and `gh pr create` all run without asking. Hard stop at PR-open. Never merges.
+- The only command in the workflow that may auto-commit. The standard `Never auto-commit` rule in `commit.md` and `ship.md` still holds everywhere else.
+
+**Use it for:** small to medium stories that follow existing patterns. Plans you would have approved via `/implement` → `/ship` anyway, where the in-between confirmations add no value.
+
+**Do not use it for:** DB migrations, auth/security boundaries, first-time use of a new library or pattern, or anything where you want to inspect intermediate state. There: stay on `/implement` → `/ship` with all the gates intact.
+
+**Pre-conditions enforced inside `/auto-implement`:**
+
+- Current branch matches `feat/*` — refuses on the base branch.
+- Running inside a worktree (matches `worktree_prefix` from `project.yml`).
+- Plan file exists at the given path.
+- Working tree is clean or only contains plan-scoped changes.
+
+If any check fails, `/auto-implement` aborts before touching anything.
 
 ---
 

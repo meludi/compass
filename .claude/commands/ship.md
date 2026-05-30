@@ -153,7 +153,7 @@ One-sentence overall code health summary.
 
 ## Rules
 
-- **Never auto-commit** — always show state and wait for confirmation
+- **Never auto-commit** — always show state and wait for confirmation. The only sanctioned exception is `/auto-implement`, which runs on a `feat/*` branch with a pre-approved plan and stops at PR-open.
 - **No Co-Authored-By** — no AI attribution in commits or PR body
 - **Never push to base branch** — feature branch only
 - **Never merge the PR** — hand back to the user after the review
