@@ -121,6 +121,12 @@ Use before `/ship` for early feedback on local changes, or after for re-reviews 
 
 _Includes: /security-review_
 
+### 4c. Fix review findings (human step)
+
+Reviewers point; you fix. Findings are never auto-fixed or auto-committed. Apply them locally with `/code-review --fix`, then continue (`/commit` / push). If the CI `claude-review` job ran on the PR, GitHub notifies you of its comments and its `## Review Summary` — fix locally and push, which re-triggers the review.
+
+Detail (both fix loops, CI behaviour): `AUTONOMY.md` → _Fixing review findings_.
+
 ### 5. `/reflect`
 
 Captures learnings and evolves the system — updates commands, `CLAUDE.md`, or `reference/` docs so a mistake never repeats. Run it right after a merge; also useful anytime the workflow itself needs a fix.

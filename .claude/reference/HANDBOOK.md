@@ -187,6 +187,30 @@ Always run `/clear` before `/review` — the three subagents benefit from a clea
 2. No argument, PR exists for current branch → `gh pr diff` (inferred)
 3. No argument, no PR → `git diff {base_branch}...HEAD` (local fallback)
 
+### `/review` vs `/code-review` — and choosing an effort level
+
+Two different reviewers with confusingly similar names:
+
+- **`/review`** — this starter's command (`commands/review.md`). Fans out 3 subagents tuned to *your* project: CLAUDE.md convention compliance, pattern reuse, test-coverage gaps. **Advisory only** — reports inline, never edits or commits. One fixed configuration.
+- **`/code-review`** — a built-in Claude Code skill (not in this repo). Generic deep bug hunt with a tunable **effort dial**, a verify stage to filter false positives, and `--fix` / `--comment` flags. `ultra` runs in the cloud.
+
+They overlap (both flag reuse/simplification) but are complementary: `/review` for *your* conventions, `/code-review` for deep bugs + direct fixing. Higher effort = more tokens and time, but higher recall and fewer false positives. **Match the level to the risk** (and pass it explicitly — don't rely on the default):
+
+| Level | Cost | Use it for |
+|-------|------|-----------|
+| `low` / `medium` | cheap, fast | Trivial or small diffs; a quick pre-`/ship` pass; few but high-confidence findings |
+| `high` | moderate | Normal feature work, non-trivial logic — broader coverage, may surface less-certain findings |
+| `max` | high | Risky changes where a missed bug is costly — widest local coverage, includes uncertain findings |
+| `ultra` | highest (cloud) | High-stakes diffs: DB migrations, auth, money logic, large refactors; a final pre-merge gate on critical PRs |
+
+```
+/code-review low              # quick local pass
+/code-review high --fix       # deep hunt + apply fixes (then re-run /validate)
+/code-review ultra 42         # cloud review of PR #42
+```
+
+> After `/code-review --fix` changes code, run `/validate` again — fixes can break lint/types/tests.
+
 ### When to run `/security-review` standalone
 
 `/security-review` auto-runs inside `/ship` when the diff touches risky paths (API routes, DB queries, auth, forms). Run it explicitly when:

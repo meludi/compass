@@ -101,9 +101,17 @@ jobs:
             Post inline comments on specific lines for anything requiring
             attention. Do NOT auto-fix or commit — the author decides on each
             finding. Keep comments concise and actionable.
+
+            After the inline comments, post exactly ONE summary comment with the
+            header `## Review Summary`. State the number of findings by severity,
+            then add this line verbatim:
+            *Findings are NOT auto-fixed. Fix them locally via `/code-review --fix`
+            (or in your editor), then push — CI will re-review. CI never commits.*
+            If there are no findings, post `## Review Summary` with `No issues found.`
           allowed_tools: >
             Bash(git diff*),
-            mcp__github__create_pull_request_review_comment
+            mcp__github__create_pull_request_review_comment,
+            mcp__github__create_issue_comment
 
   # autonomy_mode != off — dynamic test checklist as PR comment.
   claude-checklist:

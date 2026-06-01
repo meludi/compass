@@ -49,6 +49,34 @@ Without this gate, `auto-merge` will fire as soon as CI is green, regardless of 
 
 ---
 
+## Fixing review findings (human action)
+
+**The reviewers point; the human fixes; CI never commits.** Neither the local review commands (`/review`, `/code-review`) nor the CI `claude-review` job changes code — they surface findings. Applying a fix is always a deliberate human step. The only sanctioned auto-commit anywhere in the workflow is `/auto-implement` (a pre-approved plan on a `feat/*` branch).
+
+There are two distinct fix loops depending on *when* you review:
+
+### Loop 1 — before the PR (local, synchronous)
+
+```
+/code-review --fix   →   findings shown + applied in your working tree   →   /commit → /ship
+```
+
+You are live in the session. Findings appear in the chat, fixes land in your working tree immediately, no GitHub round-trip. The starter's own `/review` only **finds** — the fix application comes from the built-in `/code-review --fix`.
+
+### Loop 2 — after the PR (CI, asynchronous)
+
+```
+PR open  →  CI claude-review runs  →  inline comments + one `## Review Summary` comment on GitHub
+         →  GitHub notifies you (PR author)  →  you fix locally (`/code-review --fix`)  →  push
+         →  the push (synchronize) re-triggers CI  →  re-review
+```
+
+You find out there is something to fix via GitHub's native notification — as the PR author you are notified of every review comment (bell / email / the PR's comment count). The `## Review Summary` comment makes the to-do unmissable: it states the finding count and repeats the instruction to fix locally and push.
+
+**Known behaviour:** every push (`synchronize`) re-runs `claude-review`, so a new `## Review Summary` comment is posted per iteration. This is accepted — it doubles as a per-round record. The starter does **not** update a single comment in place (that would need a comment lookup + edit and isn't worth the complexity).
+
+---
+
 ## Setup
 
 ### 1. Required secret

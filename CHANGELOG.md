@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.0 — 2026-06-01
+
+### Added
+- CI `claude-review` now posts a single `## Review Summary` comment on the PR alongside its inline comments — finding count plus a verbatim reminder that findings are fixed locally (`/code-review --fix`, then push), never by CI. Makes the post-PR fix step unmissable via GitHub's native notification.
+- `reference/AUTONOMY.md` — new "Fixing review findings (human action)" section documenting both fix loops (local pre-PR, CI post-PR) and the principle that reviewers point while the human fixes; CI never commits.
+- `reference/HANDBOOK.md` — new "`/review` vs `/code-review` — and choosing an effort level" section: clarifies the two reviewers and gives a level-by-level recommendation table (`low`/`medium`/`high`/`max`/`ultra`) matched to change risk.
+
+### Changed
+- `reference/WORKFLOW.md` — added step "4c. Fix review findings (human step)" with a pointer to AUTONOMY.md.
+
 ## v1.2.0 — 2026-06-01
 
 ### Added
