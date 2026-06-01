@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.0 — 2026-06-01
+
+### Added
+- `/review` — standalone parallel code review command (3 subagents: code-reviewer, pr-test-analyzer, codebase-explorer). Works with or without an open PR: falls back to `git diff {base_branch}...HEAD` when no PR exists. `/ship` now delegates to `/review` instead of duplicating the logic.
+- `CLAUDE.md` — maintainer rules for this repo (changelog discipline, commit format, project context).
+- Per-worktree dev server ports: `worktree.sh` now assigns each worktree a unique port (`dev_port + N`), writes it to `.worktree-port`, and prints the ready-to-use start command after setup.
+- `.worktree-port` added to `.gitignore`.
+
+### Changed
+- `commands/ship.md` — steps 6–9 (subagent fan-out, aggregation, security check, verdict) removed; step 5 now delegates to `/review`. `/clear` hint added to the review prompt.
+- `commands/worktree.md` — updated Notes and "After the session opens" to reflect per-worktree port and editor hint.
+- `reference/WORKTREES.md` — corrected "Dev server runs from main only" rule; added "Dev Server per Worktree" section and port table.
+- `reference/WORKFLOW.md` — `/review` added as standalone step 4b; `/ship` includes entry updated.
+- `reference/HANDBOOK.md` — `/review` added to command table and Models table; "When to run `/review` standalone" section added; troubleshooting entry updated.
+- `scripts/worktree.sh` — reads `dev_port` and `dev_cmd` from `project.yml`; port assignment and `.worktree-port` write added.
+
 ## v1.1.0 — 2026-05-30
 
 ### Added
