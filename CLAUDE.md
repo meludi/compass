@@ -10,10 +10,16 @@ Rules for maintaining this repository.
 - Sections: `### Added`, `### Changed`, `### Fixed`, `### Removed`
 - Entries describe user-visible changes — what the user gains, not what files changed
 
-## Commits
+## Commits & Tags
 
 - Conventional Commit format: `feat:`, `fix:`, `docs:`, `chore:`
 - No Co-Authored-By attribution
+- After every CHANGELOG version bump: create an annotated tag and push it
+
+```bash
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin vX.Y.Z
+```
 
 ## What this repo is
 
