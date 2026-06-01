@@ -6,15 +6,22 @@ Rules for maintaining this repository.
 
 **Always update `CHANGELOG.md` before committing.** Every commit that adds, changes, or removes a command, script, reference doc, or workflow behavior gets a changelog entry.
 
-- Use `## vX.Y.Z — YYYY-MM-DD` headers (bump minor for new features, patch for fixes/docs)
 - Sections: `### Added`, `### Changed`, `### Fixed`, `### Removed`
 - Entries describe user-visible changes — what the user gains, not what files changed
 
 ## Commits & Tags
 
-- Conventional Commit format: `feat:`, `fix:`, `docs:`, `chore:`
+Conventional Commit format — drives versioning:
+
+| Commit type | Version bump | Tag? |
+|---|---|---|
+| `feat:` | Minor (`1.2.0` → `1.3.0`) | Yes |
+| `fix:` | Patch (`1.2.0` → `1.2.1`) | Yes |
+| `feat!:` / `BREAKING CHANGE:` | Major (`1.2.0` → `2.0.0`) | Yes |
+| `docs:`, `chore:`, `refactor:` | none | No |
+
 - No Co-Authored-By attribution
-- After every CHANGELOG version bump: create an annotated tag and push it
+- Tag on the last commit of the release (after CHANGELOG update), then push:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
