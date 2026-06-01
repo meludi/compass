@@ -8,9 +8,12 @@
 # Reads from .claude/project.yml:
 #   package_manager  — npm | pnpm | yarn | bun
 #   db_file          — optional DB to copy per worktree (e.g. myapp.db); leave blank to skip
+#   dev_port         — base dev server port (default 3000); worktrees get dev_port + N
+#   dev_cmd          — dev server start command (default: npm run dev)
 #
 # Rules:
-#   - Dev server ALWAYS runs from the main project dir, never from the worktree.
+#   - Each worktree gets its own dev port (dev_port + N), stored in .worktree-port.
+#   - Start the dev server from the worktree: PORT=$(cat .worktree-port) <dev_cmd>
 #   - .env.local is symlinked from main (read-only config, safe to share).
 #   - db_file is COPIED (not symlinked) — each worktree gets its own isolated DB.
 #   - No manual file copying across worktrees — all changes via git commit on feature branch.
@@ -28,7 +31,11 @@ BRANCH="feat/$NAME"
 YML="$ROOT/.claude/project.yml"
 PM=$(grep -m1 "^package_manager:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' ' || true)
 DB=$(grep -m1 "^db_file:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' ' || true)
+DEV_PORT=$(grep -m1 "^dev_port:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' "' || true)
+DEV_CMD=$(grep -m1 "^dev_cmd:" "$YML" 2>/dev/null | sed 's/^dev_cmd:[[:space:]]*//' | tr -d '"' || true)
 PM="${PM:-npm}"
+DEV_PORT="${DEV_PORT:-3000}"
+DEV_CMD="${DEV_CMD:-npm run dev}"
 
 if [ "$ACTION" = "rm" ]; then
   git -C "$ROOT" worktree remove --force "$TARGET" 2>/dev/null || true
@@ -40,12 +47,17 @@ if [ "$ACTION" = "rm" ]; then
 fi
 
 if [ ! -d "$TARGET" ]; then
+  WORKTREE_COUNT=$(git -C "$ROOT" worktree list | wc -l | tr -d ' ')
+  WORKTREE_PORT=$((DEV_PORT + WORKTREE_COUNT))
+
   git -C "$ROOT" worktree add "$TARGET" -b "$BRANCH"
 
   # .env.local: symlink from main (config, not state)
   if [ -f "$ROOT/.env.local" ]; then
     ln -sf "$ROOT/.env.local" "$TARGET/.env.local"
   fi
+
+  echo "$WORKTREE_PORT" > "$TARGET/.worktree-port"
 
   # DB: copy from main so each worktree has an isolated DB
   if [ -n "$DB" ] && [ -f "$ROOT/$DB" ]; then
@@ -65,6 +77,9 @@ if [ ! -d "$TARGET" ]; then
 fi
 
 echo "[worktree] worktree: $TARGET  branch: $BRANCH"
+if [ -f "$TARGET/.worktree-port" ]; then
+  echo "[worktree] dev server:  PORT=$(cat "$TARGET/.worktree-port") $DEV_CMD"
+fi
 if [ "$ACTION" = "open" ]; then
   cd "$TARGET" && claude
 fi

@@ -108,7 +108,7 @@ The `/reflect` command guides you through all of the above.
 | | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
-| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/auto-implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
+| **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/review`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/auto-implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
 | **Latency** | Moderate | Fast | Fastest |
 | **Context window** | 1M tokens | 1M tokens | 200k tokens |
 | **Max output** | 128k tokens | 64k tokens | 64k tokens |
@@ -136,7 +136,8 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
 | `/commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/ship`) or User |
 | `/ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
-| `/security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/ship`) or User |
+| `/review`          | `[PR-number]`                                 | PIV        | 3-subagent parallel review + security check + verdict; works with or without a PR | Opus    | —         | Auto (via `/ship`) or User |
+| `/security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/review`) or User |
 | `/reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
 | `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/validate` and `/implement`             | —       | —         | Auto or User |
 
@@ -168,6 +169,23 @@ With no argument, `/context` skips the spec-loading step and only refreshes proj
 - **Multiple commits per story** — when you want several focused commits before opening the PR via `/ship`.
 - **Doc-only or trivial change** — when `/ship`'s PR + review flow is overkill and you just want a tidy commit.
 - **Pre-`/ship` cleanup** — committing a small fix before the actual ship step.
+
+### When to run `/review` standalone
+
+`/review` triggers automatically when you answer "yes" inside `/ship`. Run it explicitly when:
+
+- **Before `/ship`** — review local changes early, before pushing. No PR needed; falls back to `git diff {base_branch}...HEAD`.
+- **Re-review** — after addressing feedback from a previous run, re-run to verify the findings are resolved.
+- **Manual push** — you pushed and opened the PR yourself (without `/ship`), and now want the review.
+- **External PR** — reviewing a contributed PR or a branch you did not write. Pass the PR number: `/review 42`.
+- **Clean-context review** — the conversation has grown long; run `/clear` first, then `/review` for the sharpest results.
+
+Always run `/clear` before `/review` — the three subagents benefit from a clean context window.
+
+**Diff source resolution:**
+1. PR number passed as argument → `gh pr diff <number>`
+2. No argument, PR exists for current branch → `gh pr diff` (inferred)
+3. No argument, no PR → `git diff {base_branch}...HEAD` (local fallback)
 
 ### When to run `/security-review` standalone
 
@@ -202,7 +220,7 @@ With no argument, `/context` skips the spec-loading step and only refreshes proj
 
 | Problem                            | Fix                                                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| Dev server error in worktree       | You started `dev_cmd` (from `.claude/project.yml`) from the worktree. Run it from the main project dir instead. |
+| Dev server port conflict in worktree | Run `PORT=$(cat .worktree-port) <dev_cmd>` — each worktree has its own port in `.worktree-port`. |
 | DB state missing in worktree       | `/worktree` copies DB at creation time. If main DB has new data, copy again manually.  |
 | Type errors after implement        | Run `type_check_cmd` (from `.claude/project.yml`) and fix before committing.           |
 | Tracker issue not created          | Check the API key in `.claude/settings.local.json` and `enabledMcpjsonServers`.        |

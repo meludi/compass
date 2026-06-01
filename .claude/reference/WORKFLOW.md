@@ -96,9 +96,9 @@ _Includes: /validate (→ agent-browser)_
 
 ### 4. `/ship`
 
-Commits, pushes, opens a PR, then asks whether to run the parallel code review (3 subagents + security check).
+Commits, pushes, opens a PR, then asks whether to run the parallel code review.
 
-_Includes: /commit, /security-review_
+_Includes: /commit, /review, /security-review_
 
 ```
 /ship
@@ -106,6 +106,20 @@ _Includes: /commit, /security-review_
 
 After the review passes: merge the PR, then remove the worktree —
 `bash .claude/scripts/worktree.sh <story-name> rm`.
+
+### 4b. `/review` (standalone)
+
+Runs the 3-subagent parallel review — without going through `/ship`. Works with or without an open PR.
+
+```
+/clear          ← clean context for the subagents
+/review         ← PR if one exists, otherwise local branch diff
+/review 42      ← explicit PR number
+```
+
+Use before `/ship` for early feedback on local changes, or after for re-reviews and external PRs.
+
+_Includes: /security-review_
 
 ### 5. `/reflect`
 

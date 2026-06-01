@@ -38,10 +38,31 @@ claude .
 
 Run `/plan-feature` — it loads project context (via `/context`) and creates the implementation plan. For orientation-only without writing a plan, call `/context` directly.
 
+Start the dev server for this worktree (each gets its own port):
+
+```bash
+PORT=$(cat .worktree-port) {dev_cmd}
+```
+
+## Open in your editor
+
+While Claude runs in the terminal, open the worktree in a separate VS Code window:
+
+```bash
+code ../<worktree-dir>              # from the main project directory
+code .                              # if your terminal is already inside the worktree
+```
+
+After `/plan-feature` creates the plan, open it directly to review:
+
+```bash
+code .work/plans/<feature-name>.plan.md
+```
+
 ## Notes
 
 - Run from the **main project directory** — never from an existing worktree
 - For parallel features: open a second terminal and run `/worktree <other-name>`
-- Dev server always runs from the main directory — never from a worktree
+- Each worktree gets its own dev port printed after setup — start with `PORT=$(cat .worktree-port) {dev_cmd}`
 - To remove a worktree when done: `bash .claude/scripts/worktree.sh <name> rm`
 - See `.claude/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.
