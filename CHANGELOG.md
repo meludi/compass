@@ -9,6 +9,7 @@
 - `.worktree-port` added to `.gitignore`.
 
 ### Changed
+- `README.md` — Setup section now includes `git clone` step and `.mcp.json` copy; directory tree updated with `AUTONOMY.md`, `templates/`, `.github/workflows/`, and `.mcp.json`.
 - `commands/ship.md` — steps 6–9 (subagent fan-out, aggregation, security check, verdict) removed; step 5 now delegates to `/review`. `/clear` hint added to the review prompt.
 - `commands/worktree.md` — updated Notes and "After the session opens" to reflect per-worktree port and editor hint.
 - `reference/WORKTREES.md` — corrected "Dev server runs from main only" rule; added "Dev Server per Worktree" section and port table.

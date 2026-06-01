@@ -137,11 +137,13 @@ deploy-target-agnostic on purpose.
 
 ## Setup
 
-**1. Copy into your project**
+**1. Clone and copy into your project**
 
 ```bash
+git clone https://github.com/meludi/claude-workflow-starter
 cp -r claude-workflow-starter/.claude your-project/
 cp -r claude-workflow-starter/.work your-project/
+cp claude-workflow-starter/.mcp.json your-project/
 cp claude-workflow-starter/.gitignore your-project/  # or merge manually
 ```
 
@@ -239,11 +241,18 @@ Commands read this file at runtime — change a value once, all commands pick it
 ├── commands/              # All slash commands
 ├── project.yml            # Project config — commands, repo, branch
 ├── reference/
+│   ├── AUTONOMY.md        # CI autonomy layer — inline reviews, auto-merge, costs, security
 │   ├── CONCEPTS.md        # The four frameworks behind this workflow
 │   ├── WORKFLOW.md        # The command flow — Level 1, Level 2, Quick Path
 │   ├── HANDBOOK.md        # Reference — models, command table, troubleshooting
 │   └── WORKTREES.md       # Git worktree mental model and lifecycle
 ├── scripts/
 │   └── worktree.sh        # Worktree lifecycle script (create, open, remove)
-└── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
+├── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
+└── templates/
+    └── husky-pre-commit.sh  # Pre-commit hook template — copied by /setup if Husky is detected
+.github/
+└── workflows/
+    └── pr-validation.yml  # CI workflow — lint, types, tests; opt-in Claude PR review + auto-merge
+.mcp.json                  # MCP server config (Linear by default; swap via /setup-tracker)
 ```
