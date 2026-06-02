@@ -126,6 +126,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Command flow         | `.claude/reference/WORKFLOW.md`         |
 | Reference / handbook | `.claude/reference/HANDBOOK.md`         |
 | Test quality         | `.claude/reference/HANDBOOK.md` → Test quality |
+| Refactor candidates  | `.claude/reference/HANDBOOK.md` → Refactor candidates |
 | Worktrees            | `.claude/reference/WORKTREES.md`        |
 | CI & autonomy        | `.claude/reference/AUTONOMY.md`         |
 | {component area}     | `.claude/reference/{component}.md`      |

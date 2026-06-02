@@ -45,6 +45,7 @@ Check everything listed in the project's CLAUDE.md:
 - Copy-pasted code that should be abstracted
 - Type safety violations (`any` abuse)
 - Missing validation at system boundaries
+- Structural refactor smells — long methods, shallow modules, feature envy, primitive obsession (see `.claude/reference/HANDBOOK.md` → *Refactor candidates*)
 
 ### Architecture
 

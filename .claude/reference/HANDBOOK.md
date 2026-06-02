@@ -250,6 +250,23 @@ Write tests one behavior at a time alongside the code (see `/implement` Step 3) 
 
 ---
 
+## Refactor candidates
+
+After a task's tests are **green** (never while red), scan for these and clean up — used by `/implement` (post-green), `/review`, and `/code-review`:
+
+| Smell | Remediation |
+|---|---|
+| Duplication / copy-paste | Extract a function or module; reuse an existing utility instead of reimplementing |
+| Long method | Break into smaller helpers; keep tests on the public interface |
+| Shallow module (big interface, little behind it) | Combine or **deepen** — hide more complexity behind a smaller interface |
+| Feature envy (a function mostly uses another object's data) | Move the logic to where the data lives |
+| Primitive obsession (bare strings/numbers for domain concepts) | Introduce a small value object / typed wrapper |
+| Existing code the new code just revealed as awkward | Fix it now while context is fresh — or note it in `.work/BACKLOG.md` |
+
+Refactor in small steps and re-run tests after each — behavior must not change. Tests written per the *Test quality* rules above stay green through these moves; if a refactor breaks a test without changing behavior, the test was coupled to implementation.
+
+---
+
 ## Troubleshooting
 
 | Problem                            | Fix                                                                                   |

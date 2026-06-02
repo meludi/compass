@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.0 — 2026-06-02
+
+### Added
+- **Refactor candidates** catalogue in `reference/HANDBOOK.md` — structural smells with remediations (duplication, long method, shallow/deep modules, feature envy, primitive obsession, plus code the new change reveals as awkward). Scanned post-green by `/implement`, and referenced by the `code-reviewer` agent and `/code-review`. Surfaced in the On-Demand Context table (`CLAUDE-template.md`).
+
 ## v1.6.0 — 2026-06-02
 
 ### Added
