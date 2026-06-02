@@ -8,16 +8,23 @@
 #   worktree.sh feature-name rm -f    -> force removal (skips the guards)
 #
 # Reads from .claude/project.yml:
-#   package_manager  — npm | pnpm | yarn | bun
-#   db_file          — optional DB to copy per worktree (e.g. myapp.db); leave blank to skip
-#   dev_port         — base dev server port (default 3000); worktrees get dev_port + N
-#   dev_cmd          — dev server start command (default: npm run dev)
+#   package_manager        — npm | pnpm | yarn | bun (used when install_cmd is blank)
+#   install_cmd            — custom install command for any stack; overrides package_manager
+#   db_file                — optional file DB to copy per worktree (e.g. myapp.db, SQLite)
+#   worktree_setup_cmd     — hook run in the new worktree after install (e.g. createdb myapp_$WT_NAME)
+#   worktree_teardown_cmd  — hook run before removal (e.g. dropdb myapp_$WT_NAME)
+#   dev_port               — base dev server port (default 3000); worktrees get dev_port + N
+#   dev_cmd                — dev server start command (default: npm run dev)
 #
-# Rules:
-#   - Each worktree gets its own dev port (dev_port + N), stored in .worktree-port.
-#   - Start the dev server from the worktree: PORT=$(cat .worktree-port) <dev_cmd>
-#   - .env.local is symlinked from main (read-only config, safe to share).
-#   - db_file is COPIED (not symlinked) — each worktree gets its own isolated DB.
+# Hooks run with CWD = the worktree dir and these vars exported:
+#   WT_NAME  WT_DIR  WT_BRANCH  WT_PORT
+# For anything non-trivial, point a hook at a script file (avoids YAML quoting pitfalls).
+#
+# Isolation scope: dir + branch + port are universal. Dependency install needs
+# package_manager or install_cmd. State isolation: db_file copy handles a single
+# file DB (SQLite); server DBs (Postgres/MySQL/…) need worktree_setup_cmd/teardown_cmd.
+#   - .env.local is symlinked from main (shared config) — per-worktree env must be
+#     written by worktree_setup_cmd into a file your stack loads.
 #   - No manual file copying across worktrees — all changes via git commit on feature branch.
 
 set -euo pipefail
@@ -29,13 +36,21 @@ PARENT="$(dirname "$ROOT")"
 TARGET="$PARENT/$(basename "$ROOT")-$NAME"
 BRANCH="feat/$NAME"
 
-# Read from .claude/project.yml (strip inline comments + surrounding quotes/space)
+# Read from .claude/project.yml. read_yml strips a trailing " # comment", trims
+# whitespace, and removes one surrounding quote pair — internal quotes are preserved
+# so command values (install_cmd, hooks) survive intact.
 YML="$ROOT/.claude/project.yml"
 read_yml() {
-  grep -m1 "^$1:" "$YML" 2>/dev/null | cut -d: -f2- | sed 's/#.*//; s/^[[:space:]]*//; s/[[:space:]]*$//' | tr -d '"' || true
+  grep -m1 "^$1:" "$YML" 2>/dev/null \
+    | cut -d: -f2- \
+    | sed -E 's/[[:space:]]+#.*$//; s/^[[:space:]]+//; s/[[:space:]]+$//; s/^"(.*)"$/\1/; s/^'\''(.*)'\''$/\1/' \
+    || true
 }
 PM=$(read_yml package_manager)
+INSTALL_CMD=$(read_yml install_cmd)
 DB=$(read_yml db_file)
+WT_SETUP_CMD=$(read_yml worktree_setup_cmd)
+WT_TEARDOWN_CMD=$(read_yml worktree_teardown_cmd)
 DEV_PORT=$(read_yml dev_port)
 DEV_CMD=$(read_yml dev_cmd)
 BASE=$(read_yml base_branch)
@@ -43,6 +58,20 @@ PM="${PM:-npm}"
 DEV_PORT="${DEV_PORT:-3000}"
 DEV_CMD="${DEV_CMD:-npm run dev}"
 BASE="${BASE:-main}"
+
+# Run a project.yml hook (setup/teardown) with worktree env exported.
+# Non-fatal: a failing hook warns but does not abort the script.
+run_hook() {
+  local cmd="$1" label="$2" rc=0
+  [ -z "$cmd" ] && return 0
+  echo "[worktree] $label hook: $cmd"
+  ( cd "$TARGET" 2>/dev/null \
+      && WT_NAME="$NAME" WT_DIR="$TARGET" WT_BRANCH="$BRANCH" \
+         WT_PORT="$(cat "$TARGET/.worktree-port" 2>/dev/null || echo "")" \
+         bash -c "$cmd" ) || rc=$?
+  [ "$rc" -ne 0 ] && echo "[worktree] WARNING: $label hook exited $rc — continuing"
+  return 0
+}
 
 # rm supports a force flag: worktree.sh <name> rm [-f|--force]
 FORCE=""
@@ -92,7 +121,8 @@ if [ "$ACTION" = "rm" ]; then
     fi
   fi
 
-  # Guards passed (or --force) → remove
+  # Guards passed (or --force) → teardown hook, then remove
+  run_hook "$WT_TEARDOWN_CMD" "teardown"
   if [ -n "$FORCE" ]; then
     git -C "$ROOT" worktree remove --force "$TARGET" 2>/dev/null || true
   else
@@ -132,13 +162,21 @@ if [ ! -d "$TARGET" ]; then
     echo "[worktree] db_file=$DB configured but not found in $ROOT — skipping"
   fi
 
-  # Install dependencies
-  case "$PM" in
-    pnpm) pnpm --dir "$TARGET" install --frozen-lockfile --prefer-offline ;;
-    yarn) yarn --cwd "$TARGET" install --frozen-lockfile ;;
-    bun)  bun install --cwd "$TARGET" ;;
-    *)    npm --prefix "$TARGET" ci ;;
-  esac
+  # Install dependencies — custom install_cmd wins, else the package manager.
+  if [ -n "$INSTALL_CMD" ]; then
+    echo "[worktree] install: $INSTALL_CMD"
+    ( cd "$TARGET" && bash -c "$INSTALL_CMD" )
+  else
+    case "$PM" in
+      pnpm) pnpm --dir "$TARGET" install --frozen-lockfile --prefer-offline ;;
+      yarn) yarn --cwd "$TARGET" install --frozen-lockfile ;;
+      bun)  bun install --cwd "$TARGET" ;;
+      *)    npm --prefix "$TARGET" ci ;;
+    esac
+  fi
+
+  # Per-worktree setup hook (DB/schema/env) — runs after install.
+  run_hook "$WT_SETUP_CMD" "setup"
 fi
 
 echo "[worktree] worktree: $TARGET  branch: $BRANCH"

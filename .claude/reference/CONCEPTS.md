@@ -45,7 +45,7 @@ Same human, same hours — five parallel stories, five worktrees, five fresh-con
 |---------|-----|
 | Port `:3000` conflict | Dev server runs from main dir only — never from worktrees |
 | `node_modules` × N | Each worktree installs its own (pnpm content store deduplicates) |
-| DB races | `worktree.sh` copies `db_file` per worktree — isolated state |
+| DB races | `worktree.sh` copies `db_file` (file DB) or runs `worktree_setup_cmd` (server DB) per worktree — isolated state. See `WORKTREES.md` → Isolation scope |
 | Token blowouts | Subagents for research; only summaries return to main context |
 | PR pile-up | `/ship` fans out 3 parallel subagents per PR |
 

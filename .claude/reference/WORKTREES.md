@@ -34,6 +34,77 @@ All three share the same `.git` folder under the hood.
 
 ---
 
+## Isolation scope
+
+Worktree isolation is **not automatic for every stack**. What you get out of the box and what you wire up:
+
+| Concern | Isolated how | Universal? |
+|---|---|---|
+| Directory + branch | `git worktree` | ✅ any stack |
+| Dev port | `dev_port + N` in `.worktree-port`, used via `PORT=$(cat .worktree-port) <dev_cmd>` | ✅ any stack that reads `PORT` |
+| Dependencies | `package_manager` (JS) **or** `install_cmd` (any stack, e.g. `uv sync`) | ✅ with `install_cmd` |
+| File DB (SQLite) | `db_file` copied per worktree | ✅ for a single file DB |
+| Server DB (Postgres/MySQL/…) | **not automatic** — use `worktree_setup_cmd` / `worktree_teardown_cmd` | ⚙️ you write the hook |
+| Env / connection string | `.env.local` is **symlinked (shared)** — per-worktree values come from the setup hook | ⚙️ you write the hook |
+
+So a fully autonomous dev server per worktree is automatic only for **JS + a file DB**. For a server DB or a non-JS stack you supply the missing pieces via hooks.
+
+### Hooks
+
+`worktree_setup_cmd` runs after install (in the new worktree); `worktree_teardown_cmd` runs before removal. Both get `WT_NAME`, `WT_DIR`, `WT_BRANCH`, `WT_PORT` exported. Example (Postgres, in `.claude/project.yml`):
+
+```yaml
+install_cmd: "uv sync"
+worktree_setup_cmd: createdb "myapp_$WT_NAME" && echo "DATABASE_URL=postgres:///myapp_$WT_NAME" > .env.worktree
+worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
+```
+
+Your app must load `.env.worktree` (or whatever file the hook writes) — the starter does not inject it. For anything non-trivial, point a hook at a script file.
+
+> **Security:** hooks run arbitrary shell from `project.yml` at the same trust level as `dev_cmd` — only run worktrees from configs you trust.
+
+### Recipes
+
+Copy-paste `project.yml` fragments. Each assumes the relevant client (`mongosh`, `createdb`/`dropdb`, `docker`) is installed locally and that **`.env.worktree` is gitignored**. The dev command sources `.env.worktree` because `.env.local` is shared.
+
+**Payload CMS + MongoDB** — Mongo creates a db on first write, so just point at a unique name:
+
+```yaml
+package_manager: pnpm
+worktree_setup_cmd: echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload_$WT_NAME" > .env.worktree
+worktree_teardown_cmd: mongosh "mongodb://127.0.0.1:27017/payload_$WT_NAME" --quiet --eval "db.dropDatabase()"
+dev_cmd: bash -lc 'set -a; [ -f .env.worktree ] && . ./.env.worktree; set +a; PORT=$(cat .worktree-port) pnpm dev'
+```
+
+**Python (FastAPI / Django) + Postgres**:
+
+```yaml
+install_cmd: uv sync
+worktree_setup_cmd: createdb "myapp_$WT_NAME" && echo "DATABASE_URL=postgresql:///myapp_$WT_NAME" > .env.worktree
+worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
+dev_cmd: bash -lc 'set -a; [ -f .env.worktree ] && . ./.env.worktree; set +a; uv run uvicorn app:app --port $(cat .worktree-port)'
+```
+
+Run migrations as part of setup if needed — append e.g. `&& uv run alembic upgrade head` (after the env is written) to `worktree_setup_cmd`.
+
+**Any stack via Docker Compose** — isolate by compose project name:
+
+```yaml
+worktree_setup_cmd: COMPOSE_PROJECT_NAME=myapp_$WT_NAME docker compose up -d
+worktree_teardown_cmd: COMPOSE_PROJECT_NAME=myapp_$WT_NAME docker compose down -v
+```
+
+Containers and volumes are per-worktree, but **host ports still collide** — shift them via `.env.worktree` (e.g. write `DB_PORT=...` keyed off `WT_PORT`) and reference those vars in `compose.yml`.
+
+**Non-JS, install only** (Go — no DB):
+
+```yaml
+install_cmd: go mod download
+dev_cmd: bash -lc 'PORT=$(cat .worktree-port) go run ./cmd/server'
+```
+
+---
+
 ## Lifecycle
 
 ```

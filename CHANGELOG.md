@@ -1,9 +1,17 @@
 # Changelog
 
-## Unreleased
+## v1.4.0 — 2026-06-02
 
 ### Added
-- `TESTING.md` (repo root) — maintainer self-test covering all four workflow flows (Stage 0 Setup, Loop 1 PIV, Loop 2 Fix in both `off` and `review-only` modes, Quick Path) plus the guarded worktree lifecycle, run against a throwaway sandbox repo. Stack-agnostic; not shipped via `.claude/`. (Version to be assigned at merge.)
+- `install_cmd` (`project.yml`) — custom install command for any stack (e.g. `uv sync`, `poetry install`, `go mod download`); overrides the package-manager install in `worktree.sh`. JS projects leave it blank.
+- `worktree_setup_cmd` / `worktree_teardown_cmd` (`project.yml`) — per-worktree isolation hooks run by `worktree.sh` on create (after install) / before removal, with `WT_NAME` / `WT_DIR` / `WT_BRANCH` / `WT_PORT` exported. Enables server-DB isolation (Postgres/MySQL) that the `db_file` copy can't cover.
+- `reference/WORKTREES.md` — "Isolation scope" section: what worktrees isolate automatically (dir/branch/port, file DB) vs what needs hooks (server DB, non-JS), with a security note; plus copy-paste **Recipes** for Payload CMS + MongoDB, Python + Postgres, Docker Compose, and a non-JS install-only stack.
+- `TESTING.md` (repo root) — maintainer self-test covering all four workflow flows (Stage 0 Setup, Loop 1 PIV, Loop 2 Fix in both `off` and `review-only` modes, Quick Path) plus the guarded worktree lifecycle, run against a throwaway sandbox repo. Stack-agnostic; not shipped via `.claude/`.
+
+### Changed
+- `scripts/worktree.sh` — `read_yml` now strips only a trailing ` # comment` and one surrounding quote pair, **preserving internal quotes** so command values (`install_cmd`, hooks) survive intact (also a more robust fix for the earlier comment-pollution issue).
+- `commands/setup.md`, `project.yml` — document the new fields (with a commented Postgres example).
+- `reference/CONCEPTS.md` — the "DB races" blocker now notes the setup hook for server DBs.
 
 ## v1.3.0 — 2026-06-02
 
