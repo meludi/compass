@@ -78,7 +78,7 @@ review  →  fix  →  /validate  →  /commit  →  push  →  (CI re-reviews �
 
 > **`commit` ≠ PR update.** A commit is local. The **push** updates the open PR and (in `review-only`/`full`) triggers an automatic CI re-review. Repeat until clean.
 
-**Step 4 — merge & cleanup:** merge the PR yourself (`gh pr merge --squash`), then remove the worktree: `bash .claude/scripts/worktree.sh <name> rm`.
+**Step 4 — merge & cleanup:** merge the PR yourself (`gh pr merge --squash`), then remove the worktree with `/worktree <name> rm` (guarded — refuses on unmerged/uncommitted work).
 
 ### The same loop, two modes
 

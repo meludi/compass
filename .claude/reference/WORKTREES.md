@@ -41,7 +41,7 @@ All three share the same `.git` folder under the hood.
   └─ open claude session  → run /plan-feature to load context and plan, then implement
   └─ commit changes       → commits go to feat/<name> only
   └─ merge into main      → git merge or PR
-  └─ worktree.sh <name> rm → removes directory + branch + prunes git metadata
+  └─ worktree.sh <name> rm → guarded removal: dir + branch + prune (refuses on uncommitted/unmerged work; --force overrides)
 ```
 
 ---
@@ -100,6 +100,6 @@ cd /path/to/worktree && claude .
 | Command | What it does |
 |---|---|
 | `bash .claude/scripts/worktree.sh <name> open` | Create worktree, install deps, open Claude |
-| `bash .claude/scripts/worktree.sh <name> rm` | Remove worktree directory, delete branch, prune git metadata |
+| `bash .claude/scripts/worktree.sh <name> rm` | Guarded removal: dir + branch + prune. Refuses on uncommitted/unmerged work — add `-f`/`--force` to override |
 | `git worktree list` | List all active worktrees |
 | `git worktree prune` | Clean up stale metadata (fixes Git GUI errors) |

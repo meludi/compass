@@ -1,6 +1,6 @@
 ---
-description: Create a new worktree + feature branch and open a fresh Claude session
-argument-hint: <feature-name>
+description: Create a worktree + feature branch, or remove one (guarded) with `rm`
+argument-hint: <feature-name> [rm]
 ---
 
 # /worktree — Create Worktree and Open Session
@@ -13,13 +13,13 @@ Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code sessio
 
 ## Steps
 
-Use the worktree script (handles install, `.env.local` symlink, and DB copy):
+Parse `$ARGUMENTS`: if the last token is `rm`, this is a **removal** — see *Removing a worktree* below. Otherwise **create + open**:
 
 ```bash
-bash .claude/scripts/worktree.sh $ARGUMENTS open
+bash .claude/scripts/worktree.sh <name> open
 ```
 
-Or manually:
+The script handles branch, install, `.env.local` symlink, DB copy, and port assignment. Manual equivalent:
 
 ```bash
 git worktree add {worktree_prefix}{name} -b feat/{name}
@@ -59,10 +59,31 @@ After `/plan-feature` creates the plan, open it directly to review:
 code .work/plans/<feature-name>.plan.md
 ```
 
+## Removing a worktree
+
+When the PR is merged, clean up from the **main project directory**:
+
+```bash
+bash .claude/scripts/worktree.sh <name> rm
+```
+
+Removal is **guarded** — it refuses and changes nothing if:
+
+- the worktree has **uncommitted changes**, or
+- the branch has **commits not merged** into `base_branch` (the message notes whether they're pushed/recoverable or local-only).
+
+If a guard trips, surface the reason to the user and **ask before** re-running with `--force` — never force automatically:
+
+```bash
+bash .claude/scripts/worktree.sh <name> rm --force
+```
+
+On success it removes the directory, prunes worktree metadata, and deletes the branch (safe `git branch -d`; `-D` only under `--force`).
+
 ## Notes
 
 - Run from the **main project directory** — never from an existing worktree
 - For parallel features: open a second terminal and run `/worktree <other-name>`
 - Each worktree gets its own dev port printed after setup — start with `PORT=$(cat .worktree-port) {dev_cmd}`
-- To remove a worktree when done: `bash .claude/scripts/worktree.sh <name> rm`
+- To remove a worktree when done: `/worktree <name> rm` (guarded) — see *Removing a worktree* above
 - See `.claude/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.

@@ -3,7 +3,9 @@
 #
 #   worktree.sh feature-name          -> create worktree on feat/feature-name
 #   worktree.sh feature-name open     -> create + launch claude inside it
-#   worktree.sh feature-name rm       -> remove worktree dir + git branch
+#   worktree.sh feature-name rm       -> remove worktree dir + git branch (guarded:
+#                                        refuses on uncommitted or unmerged work)
+#   worktree.sh feature-name rm -f    -> force removal (skips the guards)
 #
 # Reads from .claude/project.yml:
 #   package_manager  — npm | pnpm | yarn | bun
@@ -27,22 +29,85 @@ PARENT="$(dirname "$ROOT")"
 TARGET="$PARENT/$(basename "$ROOT")-$NAME"
 BRANCH="feat/$NAME"
 
-# Read from .claude/project.yml
+# Read from .claude/project.yml (strip inline comments + surrounding quotes/space)
 YML="$ROOT/.claude/project.yml"
-PM=$(grep -m1 "^package_manager:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' ' || true)
-DB=$(grep -m1 "^db_file:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' ' || true)
-DEV_PORT=$(grep -m1 "^dev_port:" "$YML" 2>/dev/null | cut -d: -f2 | tr -d ' "' || true)
-DEV_CMD=$(grep -m1 "^dev_cmd:" "$YML" 2>/dev/null | sed 's/^dev_cmd:[[:space:]]*//' | tr -d '"' || true)
+read_yml() {
+  grep -m1 "^$1:" "$YML" 2>/dev/null | cut -d: -f2- | sed 's/#.*//; s/^[[:space:]]*//; s/[[:space:]]*$//' | tr -d '"' || true
+}
+PM=$(read_yml package_manager)
+DB=$(read_yml db_file)
+DEV_PORT=$(read_yml dev_port)
+DEV_CMD=$(read_yml dev_cmd)
+BASE=$(read_yml base_branch)
 PM="${PM:-npm}"
 DEV_PORT="${DEV_PORT:-3000}"
 DEV_CMD="${DEV_CMD:-npm run dev}"
+BASE="${BASE:-main}"
+
+# rm supports a force flag: worktree.sh <name> rm [-f|--force]
+FORCE=""
+case "${3:-}" in -f | --force) FORCE=1 ;; esac
 
 if [ "$ACTION" = "rm" ]; then
-  git -C "$ROOT" worktree remove --force "$TARGET" 2>/dev/null || true
+  WT_EXISTS=0; [ -d "$TARGET" ] && WT_EXISTS=1
+  BR_EXISTS=0; git -C "$ROOT" show-ref --verify --quiet "refs/heads/$BRANCH" && BR_EXISTS=1
+
+  if [ "$WT_EXISTS" -eq 0 ] && [ "$BR_EXISTS" -eq 0 ]; then
+    echo "[worktree] nothing to remove: no dir at $TARGET and no branch $BRANCH"
+    exit 0
+  fi
+
+  # Refuse if invoked from inside the worktree being removed
+  case "$PWD/" in
+    "$TARGET/"*) echo "[worktree] refusing: you are inside $TARGET — run from the main project dir"; exit 1 ;;
+  esac
+
+  if [ -z "$FORCE" ]; then
+    # Guard 1 — uncommitted changes in the worktree
+    if [ "$WT_EXISTS" -eq 1 ] && [ -n "$(git -C "$TARGET" status --porcelain 2>/dev/null)" ]; then
+      echo "[worktree] refusing: uncommitted changes in $TARGET — commit/stash, or pass --force"
+      exit 1
+    fi
+    # Guard 2 — commits not merged into the base branch
+    if [ "$BR_EXISTS" -eq 1 ]; then
+      if git -C "$ROOT" show-ref --verify --quiet "refs/heads/$BASE"; then
+        BASEREF="$BASE"
+      elif git -C "$ROOT" show-ref --verify --quiet "refs/remotes/origin/$BASE"; then
+        BASEREF="origin/$BASE"
+      else
+        echo "[worktree] refusing: base branch '$BASE' not found locally or on origin — cannot verify merge; pass --force to remove anyway"
+        exit 1
+      fi
+      AHEAD=$(git -C "$ROOT" rev-list --count "$BASEREF..$BRANCH" 2>/dev/null || echo 0)
+      if [ "$AHEAD" -gt 0 ]; then
+        if git -C "$ROOT" rev-parse --verify --quiet "$BRANCH@{upstream}" >/dev/null 2>&1; then
+          UNPUSHED=$(git -C "$ROOT" rev-list --count "$BRANCH@{upstream}..$BRANCH" 2>/dev/null || echo 0)
+          [ "$UNPUSHED" -eq 0 ] && NOTE="pushed to its upstream — recoverable from remote" || NOTE="$UNPUSHED commit(s) not pushed — local-only, will be lost"
+        else
+          NOTE="no upstream set — local-only, will be lost"
+        fi
+        echo "[worktree] refusing: $BRANCH has $AHEAD commit(s) not merged into $BASEREF ($NOTE). Merge first, or pass --force"
+        exit 1
+      fi
+    fi
+  fi
+
+  # Guards passed (or --force) → remove
+  if [ -n "$FORCE" ]; then
+    git -C "$ROOT" worktree remove --force "$TARGET" 2>/dev/null || true
+  else
+    git -C "$ROOT" worktree remove "$TARGET" 2>/dev/null || true
+  fi
   rm -rf "$TARGET"
   git -C "$ROOT" worktree prune
-  git -C "$ROOT" branch -D "$BRANCH" 2>/dev/null || true
-  echo "[worktree] removed $TARGET"
+  if [ "$BR_EXISTS" -eq 1 ]; then
+    if [ -n "$FORCE" ]; then
+      git -C "$ROOT" branch -D "$BRANCH" 2>/dev/null || true
+    else
+      git -C "$ROOT" branch -d "$BRANCH" 2>/dev/null || true
+    fi
+  fi
+  echo "[worktree] removed $TARGET (branch $BRANCH)"
   exit 0
 fi
 
