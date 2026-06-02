@@ -5,7 +5,7 @@ argument-hint: <path to .work/plans/*.plan.md>
 
 # /implement — Execute Implementation Plan
 
-> **Recommended:** `/model sonnet` — balanced model for this command.
+> **Model:** `/model sonnet` — balanced model for this command.
 
 Execute a plan from `.work/plans/` step by step with validation after each task.
 
@@ -92,3 +92,5 @@ Save to `.work/reports/{feature-name}-report.md`:
 - List files changed
 - Report validation status
 - Next step: run `/ship` to commit, push, open the PR, and review
+
+**Commit checkpoint:** if all checks passed, the working tree is a consistent unit. Before continuing, suggest a commit — `State is consistent ("<one-sentence description>") — run /commit before continuing?` Suggest only; never commit without confirmation.

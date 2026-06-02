@@ -5,7 +5,7 @@ argument-hint: <feature-name> [rm]
 
 # /worktree — Create Worktree and Open Session
 
-> **Recommended:** `/model haiku` — saves tokens, this command only runs shell operations.
+> **Model:** `/model haiku` — saves tokens, this command only runs shell operations.
 
 Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code session inside it.
 

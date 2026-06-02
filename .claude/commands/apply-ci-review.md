@@ -5,7 +5,7 @@ argument-hint: [PR-number]
 
 # /apply-ci-review — Apply CI review findings
 
-> **Recommended:** `/model opus` — applying review feedback needs careful editing.
+> **Model:** `/model opus` — applying review feedback needs careful editing.
 
 Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/code-review`.
 

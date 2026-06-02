@@ -118,6 +118,21 @@ The starter ships `.github/workflows/pr-validation.yml`. Default mode is
 PR reviews, auto-generated test checklists, and auto-merge by setting
 `autonomy_mode` in `.claude/project.yml`.
 
+**Using an LLM for CI review needs an API key as a GitHub secret.** Whenever
+`autonomy_mode` is `review-only` or `full`, the review runs in GitHub Actions —
+so the key lives as a **repository secret**, not in `project.yml` or a local
+`.env`. Pick the provider with `ci_review_provider`, then set the matching
+secret:
+
+```bash
+gh secret set ANTHROPIC_API_KEY   # ci_review_provider: claude (default)
+gh secret set OPENAI_API_KEY      # ci_review_provider: openai
+gh secret set GEMINI_API_KEY      # ci_review_provider: gemini
+```
+
+If the mode is on but the secret is missing, the review job fails (red) instead
+of skipping. `/setup-stack` checks for the secret and warns; it never sets it.
+
 Full details, secrets, costs, and security notes: `.claude/reference/AUTONOMY.md`.
 
 ---

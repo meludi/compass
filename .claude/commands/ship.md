@@ -4,7 +4,7 @@ description: Commit, push, open a PR, then optionally run parallel code review
 
 # /ship — Commit, PR, and Review
 
-> **Recommended:** `/model opus` — the review step needs deep analysis.
+> **Model:** `/model opus` — the review step needs deep analysis.
 
 Closes the PIV Loop: commits the work, opens a PR, and runs the parallel code review — all in one command.
 

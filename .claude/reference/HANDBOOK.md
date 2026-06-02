@@ -88,7 +88,7 @@ The `/reflect` command guides you through all of the above.
 
 ## Models
 
-| | Opus 4.7 | Sonnet 4.6 | Haiku 4.5 |
+| | Opus 4.8 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
 | **In this workflow** | `/ideate`, `/plan-feature`, `/ship`, `/review`, `/security-review` | `/setup`, `/setup-stack`, `/implement`, `/auto-implement`, `/validate`, `/create-stories`, `/reflect` | `/commit`, `/worktree` |
@@ -153,6 +153,12 @@ With no argument, `/context` skips the spec-loading step and only refreshes proj
 - **Multiple commits per story** — when you want several focused commits before opening the PR via `/ship`.
 - **Doc-only or trivial change** — when `/ship`'s PR + review flow is overkill and you just want a tidy commit.
 - **Pre-`/ship` cleanup** — committing a small fix before the actual ship step.
+
+### Commit checkpoints — when to commit
+
+Commit when the state is **consistent and describable in one sentence** — by logical unit, not by elapsed time. A passing task, a working scaffold, a green validation run are all natural checkpoints. Several commands end by surfacing such a checkpoint and suggesting `/commit`.
+
+The suggestion is always a prompt, never an action: Claude proposes the commit, you confirm. **Nothing auto-commits** — the only sanctioned exception is `/auto-implement` (a pre-approved plan on a `feat/*` branch).
 
 ### When to run `/review` standalone
 
@@ -241,7 +247,7 @@ The Fix-loop entry point for the CI case (`review-only` / `full`). After the CI 
 | Tracker issue not created          | Check the API key in `.claude/settings.local.json` and `enabledMcpjsonServers`.        |
 | Fork won't push `base_branch`      | Use `git push origin <base_branch>` from the terminal instead.                         |
 | Claude session feels slow/confused | Start a fresh session and run `/context` to reload the mental model.                   |
-| CI jobs not running as expected    | Check `autonomy_mode` in `.claude/project.yml` and that `ANTHROPIC_API_KEY` is set as a GitHub secret. See `AUTONOMY.md`. |
+| CI jobs not running as expected    | Check `autonomy_mode` and `ci_review_provider` in `.claude/project.yml` and that the matching secret (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`) is set. See `AUTONOMY.md`. |
 
 ---
 
@@ -263,5 +269,6 @@ set build command and publish directory from `project.yml`. Deploy Previews per
 PR are enabled by default.
 
 For any of these: keep production secrets in the host's environment variables,
-not in the repo. The CI workflow only needs `ANTHROPIC_API_KEY`
+not in the repo. The CI workflow only needs the review provider's key —
+`ANTHROPIC_API_KEY` by default, or `OPENAI_API_KEY` / `GEMINI_API_KEY`
 (see `AUTONOMY.md`).

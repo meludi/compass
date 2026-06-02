@@ -5,7 +5,7 @@ argument-hint: <initiative name or description>
 
 # /ideate — Initiative Brain Dump + PRD
 
-> **Recommended:** `/model opus` + Plan Mode (`/plan`) — deep thinking, no accidental execution.
+> **Model:** `/model opus` + Plan Mode (`/plan`) — deep thinking, no accidental execution.
 
 Full ideation flow for a new initiative or epic. Covers brain dump, research, scope check, clarifying questions, approaches, incremental design approval, and writes the PRD — all in one session.
 

@@ -5,7 +5,7 @@ argument-hint: [PR-number]
 
 # /review — Parallel Code Review
 
-> **Recommended:** `/model opus` — deep analysis needed.
+> **Model:** `/model opus` — deep analysis needed.
 > **Before running:** `/clear` — gives all three subagents a clean context window.
 
 Runs a 3-agent parallel review. Works with or without an open PR.

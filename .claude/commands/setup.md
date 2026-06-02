@@ -4,7 +4,7 @@ description: Set up claude-workflow-starter for a new project
 
 # /setup — Project Setup
 
-> **Recommended:** `/model sonnet` — balanced model for this command.
+> **Model:** `/model sonnet` — balanced model for this command.
 
 Configure this Claude workflow for your project. Run once after copying the starter into your project. Runs in two phases — same command both times.
 
@@ -55,7 +55,10 @@ db_file: ""             # Optional — e.g. myapp.db — copied per worktree (fi
 worktree_setup_cmd: ""     # runs after install
 worktree_teardown_cmd: ""  # runs before removal
 
-autonomy_mode: off      # off | review-only | full — see .claude/reference/AUTONOMY.md
+autonomy_mode: off          # off | review-only | full — see .claude/reference/AUTONOMY.md
+ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
+                            # Secret per provider (gh secret set): ANTHROPIC_API_KEY /
+                            # OPENAI_API_KEY / GEMINI_API_KEY. See .claude/reference/AUTONOMY.md.
 
 description: ""         # One paragraph — what does this project do?
 ```

@@ -5,7 +5,7 @@ argument-hint: [path to .work/stories/*.md | issue-id | feature description]
 
 # /context — Build the Project Mental Model
 
-> **Recommended:** `/model sonnet` — light, just reading and summarizing.
+> **Model:** `/model sonnet` — light, just reading and summarizing.
 
 Build the project mental model: read project rules, capture git state, optionally load a spec (issue, story, or feature description), and surface any existing plan or report for the current story.
 

@@ -4,7 +4,7 @@ description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .
 
 # /setup-tracker — Configure Issue Tracker
 
-> **Recommended:** `/model sonnet` — balanced model for this command.
+> **Model:** `/model sonnet` — balanced model for this command.
 
 Switch between issue trackers. Updates the 3 files that reference Linear so the whole workflow points to the new tracker.
 

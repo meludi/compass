@@ -4,7 +4,7 @@ description: Run linter, type checker, tests, and browser smoke test — report 
 
 # /validate
 
-> **Recommended:** `/model sonnet` — needed for browser interaction step.
+> **Model:** `/model sonnet` — needed for browser interaction step.
 
 Run all validation checks and report results.
 
@@ -73,6 +73,8 @@ Report: screenshot path + any console errors found (`agent-browser errors`).
 - **Status**: ✅ ALL PASSING / ❌ {N} FAILURES
 - **Action needed**: {None / list of things to fix}
 ```
+
+**Commit checkpoint:** when status is ALL PASSING, this is a consistent state worth saving. Suggest `State is consistent ("<one-sentence description>") — run /commit before continuing?` Suggest only; never commit without confirmation.
 
 ---
 

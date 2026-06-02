@@ -3,10 +3,18 @@
 The starter ships with `.github/workflows/pr-validation.yml`. Its behaviour is controlled by a single field in `.claude/project.yml`:
 
 ```yaml
-autonomy_mode: off    # off | review-only | full
+autonomy_mode: off          # off | review-only | full
+ci_review_provider: claude  # claude | openai | gemini
 ```
 
-You can change this value at any time, commit, and the next PR run picks up the new behaviour. No reinstall, no second workflow file.
+You can change these at any time, commit, and the next PR run picks up the new behaviour. No reinstall, no second workflow file.
+
+`ci_review_provider` selects which LLM runs the CI review (defaults to `claude` if omitted):
+
+- **`claude`** — uses `anthropics/claude-code-action@v1`. Posts **inline** PR comments plus a `## Review Summary` and a manual-test checklist. Secret: `ANTHROPIC_API_KEY`. Recommended.
+- **`openai`** / **`gemini`** — uses a generic API call and posts **one `## Review Summary` PR comment** (no inline comments, no separate checklist — those have no drop-in equivalent outside claude-code-action). Secret: `OPENAI_API_KEY` or `GEMINI_API_KEY`.
+
+`autonomy_mode: off` disables the review regardless of provider.
 
 ---
 
@@ -113,13 +121,23 @@ You find out there is something to fix via GitHub's native notification — as t
 
 ### 1. Required secret
 
-For `review-only` and `full`, set `ANTHROPIC_API_KEY` in your repo:
+For `review-only` and `full`, set the secret that matches `ci_review_provider`:
 
 ```bash
-gh secret set ANTHROPIC_API_KEY
+gh secret set ANTHROPIC_API_KEY   # ci_review_provider: claude (default)
+gh secret set OPENAI_API_KEY      # ci_review_provider: openai
+gh secret set GEMINI_API_KEY      # ci_review_provider: gemini
 ```
 
-Get a key at <https://console.anthropic.com>. The starter does not need any additional secrets — `GITHUB_TOKEN` is provided by GitHub automatically.
+Get a Claude key at <https://console.anthropic.com>. The starter does not need any additional secrets — `GITHUB_TOKEN` is provided by GitHub automatically. If the mode is on but the matching secret is missing, the review job fails (red) rather than skipping.
+
+Verify a secret is present (names only, never values):
+
+```bash
+gh secret list
+```
+
+`gh secret set <NAME>` is interactive — run it yourself; `/setup-stack` checks for the secret but never sets it (it would have to handle the raw key).
 
 ### 2. Branch protection rules
 
@@ -153,6 +171,8 @@ Based on Sonnet 4.6 pricing, per-PR cost is roughly:
 | **Sum** | ~11 000 | **~$0.033** |
 
 A team doing 10 PRs/day on `review-only` mode pays around **$0.33/day** in Claude API costs.
+
+The figures above are for `ci_review_provider: claude`. With `openai`/`gemini` there is a single summary call per PR (no checklist job), and cost depends on that provider's pricing for the model used.
 
 To save budget on draft PRs, the workflow only triggers on `opened`, `synchronize`, and `ready_for_review` — so draft PRs are excluded by default.
 

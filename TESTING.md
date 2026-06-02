@@ -20,7 +20,7 @@ Quick Path             /worktree → edit → /validate → /ship
 
 - [ ] `gh` authenticated (`gh auth status`)
 - [ ] Node + your package manager installed
-- [ ] An `ANTHROPIC_API_KEY` available (needed for the `review-only` part of Loop 2)
+- [ ] An `ANTHROPIC_API_KEY` available (needed for the `review-only` part of Loop 2; if `ci_review_provider` is `openai`/`gemini`, use that provider's key instead)
 - [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `.claude/reference/AUTONOMY.md` → Cost estimate)
 
 ---

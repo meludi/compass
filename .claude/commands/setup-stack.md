@@ -5,7 +5,7 @@ argument-hint: [path to .work/prds/*.prd.md]
 
 # /setup-stack — Tech Stack Setup
 
-> **Recommended:** `/model sonnet` — balanced model for this command.
+> **Model:** `/model sonnet` — balanced model for this command.
 
 Set up the tech stack for a new greenfield project. Run **once**, directly after `/ideate` and before `/create-stories`.
 
@@ -16,10 +16,10 @@ Set up the tech stack for a new greenfield project. Run **once**, directly after
 4. Scaffolds the project
 5. Installs additional best-practice tooling
 6. Asks 4 style decisions → records them in CLAUDE.md
-7. Creates 2–3 canonical seed files (the Mirror source for `/plan-feature`)
+7. Creates canonical seed files + a visible welcome screen + a first smoke test
 8. Updates CLAUDE.md Code Patterns section
 9. Updates `project.yml` with actual commands
-10. Verifies with lint + type check
+10. Verifies with lint + type check + smoke test, then boots the app to confirm it runs
 
 **Input:** `$ARGUMENTS` — optional path to `.work/prds/*.prd.md`
 
@@ -238,9 +238,11 @@ Show planned files before creating. Wait for "yes".
 Seed files to create:
   src/components/ui/Button.tsx   — canonical component
   src/lib/utils.ts               — canonical utility module
-  {framework-specific file}      — see table below
+  {welcome screen}               — visible entry point, see table below
+  {smoke test}                   — first runnable test for the welcome screen
 
-These become the Mirror source for /plan-feature.
+The first three become the Mirror source for /plan-feature.
+The welcome screen is what the user sees when they run the app (Step 12).
 Create? (yes/no)
 ```
 
@@ -307,38 +309,55 @@ For arrow variant, use `export const cn = (...inputs: ClassValue[]): string =>` 
 
 For non-Tailwind projects: omit `cn()`, keep `formatDate()` only.
 
-**File 3 — Framework-specific:**
+**File 3 — Welcome screen (the visible entry point):**
+
+This file is both the Mirror-source pattern example **and** a screen the user can actually see (frontend) or hit (backend) when the app runs in Step 12. Use the project `name` from `.claude/project.yml` in the heading. Wire it into the app entry point so it shows on first run (replace the scaffold's default placeholder page).
 
 | Framework | File | Content |
 |-----------|------|---------|
-| Next.js App Router | `src/app/page.tsx` | Server component + async data fetch (see template below) |
-| Vite + React | `src/hooks/useCounter.ts` | Canonical custom hook (see template below) |
-| Express | `src/routes/health.ts` | Canonical route module (see template below) |
-| Fastify | `src/routes/health.ts` | Schema-first route (see template below) |
-| Remix | `app/routes/_index.tsx` | Loader + component in same file |
-| SvelteKit | `src/routes/+page.server.ts` | Typed load function |
-| Other | (skip file 3) | — |
+| Next.js App Router | `src/app/page.tsx` | Welcome page — project name + `Button` |
+| Vite + React | `src/App.tsx` + `src/hooks/useCounter.ts` | Welcome screen using `Button` + the `useCounter` hook |
+| Express | `src/routes/welcome.ts` | Root `/` route returning a welcome HTML page |
+| Fastify | `src/routes/welcome.ts` | Root `/` route returning a welcome HTML page |
+| Remix | `app/routes/_index.tsx` | Welcome screen — loader + component |
+| SvelteKit | `src/routes/+page.svelte` | Welcome screen |
+| Other | (adapt) | A minimal welcome entry point for the chosen framework |
 
 **Next.js `src/app/page.tsx`:**
 ```tsx
-async function getData(): Promise<{ message: string }> {
-  return { message: "Welcome" }
-}
+import { Button } from "@/components/ui/Button"
 
-export default async function HomePage() {
-  const { message } = await getData()
-
+export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">{message}</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-24">
+      <h1 className="text-4xl font-bold">Welcome to {name}</h1>
+      <p className="text-gray-600">Your app is running.</p>
+      <Button>Get started</Button>
     </main>
   )
 }
 ```
 Note: `export default` is required by Next.js for page files — this is the documented exception to "named exports only".
 
-**Vite + React `src/hooks/useCounter.ts`:**
+**Vite + React** — replace the scaffold's `src/App.tsx`, keep the hook as a canonical example:
+```tsx
+// src/App.tsx
+import { Button } from "@/components/ui/Button"
+import { useCounter } from "@/hooks/useCounter"
+
+export function App() {
+  const { count, increment } = useCounter()
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6">
+      <h1 className="text-4xl font-bold">Welcome to {name}</h1>
+      <p className="text-gray-600">Your app is running.</p>
+      <Button onClick={increment}>Clicked {count} times</Button>
+    </main>
+  )
+}
+```
 ```ts
+// src/hooks/useCounter.ts
 import { useState } from "react"
 
 export function useCounter(initialValue = 0) {
@@ -351,36 +370,55 @@ export function useCounter(initialValue = 0) {
   return { count, increment, decrement, reset }
 }
 ```
-(For arrow variant, use arrow functions throughout.)
+(For arrow variant, use arrow functions throughout. Ensure `src/main.tsx` imports `{ App }`.)
 
-**Express `src/routes/health.ts`:**
+**Express `src/routes/welcome.ts`** (register on the app so `GET /` serves it):
 ```ts
 import { Router, Request, Response } from "express"
 
-export const healthRouter = Router()
+export const welcomeRouter = Router()
 
-healthRouter.get("/health", (_req: Request, res: Response) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() })
+welcomeRouter.get("/", (_req: Request, res: Response) => {
+  res
+    .type("html")
+    .send("<h1>Welcome to {name}</h1><p>Your API is running.</p>")
 })
 ```
 
-**Fastify `src/routes/health.ts`:**
+**Fastify `src/routes/welcome.ts`:**
 ```ts
 import { FastifyPluginAsync } from "fastify"
 
-const healthRoute: FastifyPluginAsync = async (fastify) => {
-  fastify.get("/health", {
-    schema: {
-      response: { 200: { type: "object", properties: { status: { type: "string" } } } },
-    },
-    handler: async () => ({ status: "ok" }),
+const welcomeRoute: FastifyPluginAsync = async (fastify) => {
+  fastify.get("/", async (_req, reply) => {
+    reply.type("text/html").send("<h1>Welcome to {name}</h1><p>Your API is running.</p>")
   })
 }
 
-export default healthRoute
+export default welcomeRoute
 ```
 
 For feature-based folder structure (`folder_structure = feature`): also create `src/features/.gitkeep` to establish the pattern.
+
+**File 4 — Smoke test (first runnable test):**
+
+One minimal test that proves the welcome entry point works — the first runnable test for the project. Use the project's test runner: **vitest** for most stacks, **Jest** for Next.js. If the minimal test deps are missing, show them and ask before installing (same confirm rule as Step 6):
+
+- Frontend (Next.js / Vite / Remix): a render test via `@testing-library/react` (+ `jsdom` env for vitest) asserting the welcome heading renders.
+- Backend (Express / Fastify): a request test — `fastify.inject({ method: "GET", url: "/" })` for Fastify; `supertest` for Express — asserting `GET /` returns 200 and the welcome text.
+
+Representative frontend test (`src/App.test.tsx` for Vite, adapt the import for others):
+```tsx
+import { render, screen } from "@testing-library/react"
+import { App } from "./App"
+
+test("renders the welcome screen", () => {
+  render(<App />)
+  expect(screen.getByText(/welcome to/i)).toBeInTheDocument()
+})
+```
+
+Keep it to a single assertion — this is a smoke test, not a coverage exercise. It becomes the Mirror source for how tests are written in this project.
 
 ---
 
@@ -505,32 +543,73 @@ If **no**: skip to Step 12.
 If **yes**: ask which mode the project should start in. Default `off`. Update
 `autonomy_mode` in `.claude/project.yml` to the chosen value.
 
+For `review-only` or `full`, also ask which LLM runs the CI review and write
+`ci_review_provider` (default `claude`):
+
+```
+Which model runs the CI review?
+  claude  — inline comments + checklist (recommended). Secret: ANTHROPIC_API_KEY
+  openai  — single summary comment.                    Secret: OPENAI_API_KEY
+  gemini  — single summary comment.                    Secret: GEMINI_API_KEY
+```
+
 The workflow file is already present in the starter at
 `.github/workflows/pr-validation.yml` — no copy step needed unless the user
 deleted it; if missing, restore from the starter.
 
-For `review-only` or `full`, remind the user to set the API key as a GitHub
-secret:
+For `review-only` or `full`, **verify the matching secret is present** before
+finishing — otherwise the review job runs red on the first PR. Determine the
+secret name from `ci_review_provider` (`claude`→`ANTHROPIC_API_KEY`,
+`openai`→`OPENAI_API_KEY`, `gemini`→`GEMINI_API_KEY`) and check:
 
 ```bash
-gh secret set ANTHROPIC_API_KEY
+gh secret list | grep -q "^<SECRET_NAME>" && echo "present" || echo "MISSING"
 ```
+
+(Requires `gh` authenticated and the repo to exist on GitHub. If `gh secret list`
+errors — no remote yet — report that the secret can't be checked and move on.)
+
+- **Present:** confirm and continue.
+- **MISSING:** warn that the chosen mode will fail red until the secret is set,
+  and tell the user to set it **themselves** — it is interactive (it prompts for
+  the key value), so do **not** run it from here:
+
+  ```
+  ! gh secret set <SECRET_NAME>
+  ```
+
+  The `!` prefix runs it in this session so the user can paste the value. Claude
+  never handles the raw key.
 
 Full setup details (secrets, branch protection, costs, security
 considerations) live in `.claude/reference/AUTONOMY.md`.
 
 ---
 
-## Step 12 — Verify
+## Step 12 — Verify and boot
 
-Run lint and type check (skip `type_check_cmd` if blank):
+Run lint, type check, and the smoke test (skip `type_check_cmd` if blank):
 
 ```bash
 {lint_cmd}
 {type_check_cmd}
+{test_cmd}
 ```
 
-Report results inline. If failures found: show the errors and suggest a fix direction, but do not auto-fix.
+Then run a **boot check** — prove the app actually starts, so the user inherits a working welcome screen, not just code that compiles:
+
+- If a build command exists (`build` script in `package.json`): run it and confirm it succeeds.
+- Otherwise start the dev server briefly and confirm it serves before stopping it:
+
+```bash
+{dev_cmd} &
+DEV_PID=$!
+sleep 5
+curl -sf -o /dev/null "http://localhost:{dev_port}" && echo "boot: ok" || echo "boot: FAILED"
+kill $DEV_PID
+```
+
+Report each result inline. If anything fails: show the errors and suggest a fix direction, but do not auto-fix.
 
 **On success:**
 
@@ -542,12 +621,22 @@ Setup complete.
                {export_style} exports, {framework_specific summary}
   Seed files:  src/components/ui/Button.tsx
                src/lib/utils.ts
-               {framework-specific file}
+               {welcome screen}
+               {smoke test}
   CLAUDE.md:   Code Patterns section filled
   project.yml: Commands updated
   Lint:        ✓
   Types:       ✓
+  Smoke test:  ✓
+  Boot check:  ✓
 
-Next: /worktree <first-story-name>
-The seed files above are your Mirror source for /plan-feature.
+See your welcome screen — run the app and open it:
+
+  {dev_cmd}      then open http://localhost:{dev_port}
+
+(Optional: use the agent-browser skill to capture a screenshot.)
+
+The first three seed files are your Mirror source for /plan-feature.
 ```
+
+**Commit checkpoint:** the scaffold is a consistent, describable unit ("scaffold {framework} stack with welcome screen and smoke test"). Suggest committing it before the first feature: `Run /commit to save the scaffold, then /worktree <first-story-name>?` Suggest only; never commit without confirmation.

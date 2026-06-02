@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.5.0 — 2026-06-02
+
+### Added
+- `/setup-stack` now leaves a **runnable app**: it scaffolds a visible welcome screen (project name + `Button`) wired into the app entry point, adds a first smoke test for it, and ends with a **boot check** (build or briefly start the dev server) plus exact instructions to open the app in the browser.
+- `ci_review_provider` (`project.yml`) — choose which LLM runs the CI PR review: `claude` (default, inline comments + checklist via `claude-code-action`, `ANTHROPIC_API_KEY`), or `openai` / `gemini` (a single `## Review Summary` comment via the provider API, `OPENAI_API_KEY` / `GEMINI_API_KEY`). New `external-review` job in `pr-validation.yml`; `auto-merge` tolerates whichever review path is skipped. The field is now a visible default in the `project.yml` template (`commands/setup.md`) next to `autonomy_mode`, which is also surfaced in the committed `project.yml`.
+- `/setup-stack` Step 11 now **verifies** the matching CI secret is present (`gh secret list`) when enabling `review-only`/`full`, and warns if it's missing — instead of silently producing red checks. It still never sets the secret (interactive, handles the raw key); the user runs `gh secret set` themselves.
+- Commit checkpoints — `/implement`, `/validate`, and `/setup-stack` now suggest a `/commit` when the working tree is a consistent, one-sentence-describable unit. Suggestion only; nothing auto-commits. Documented as a convention in `reference/HANDBOOK.md`.
+
+### Changed
+- Model recommendation in every command normalized to a single `> **Model:** /model <alias>` callout right under the title, using stable aliases (no version numbers) so it never goes stale; `reference/HANDBOOK.md` model table updated to Opus 4.8.
+- `reference/AUTONOMY.md`, `reference/HANDBOOK.md`, `TESTING.md`, `commands/setup-stack.md`, `README.md` — document the review-provider choice and the matching GitHub secret per provider (incl. the README "CI & autonomy" note that an LLM-backed CI review requires the key as a GitHub secret).
+
 ## v1.4.0 — 2026-06-02
 
 ### Added

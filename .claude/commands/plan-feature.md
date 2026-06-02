@@ -5,7 +5,7 @@ argument-hint: <path to .work/stories/*.md | issue-id | feature description>
 
 # /plan-feature — Create Implementation Plan
 
-> **Recommended:** `/model opus` + Plan Mode (`/plan`) — deep thinking for architecture decisions, no accidental execution.
+> **Model:** `/model opus` + Plan Mode (`/plan`) — deep thinking for architecture decisions, no accidental execution.
 
 Transform a story (or feature description) into a concrete implementation plan. **Plan only — no code written.**
 

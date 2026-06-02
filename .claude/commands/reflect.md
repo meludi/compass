@@ -4,7 +4,7 @@ description: Evolve the system based on learnings — run after a merge, a bug, 
 
 # /reflect — System Reflection
 
-> **Recommended:** `/model sonnet` — balanced model for this command.
+> **Model:** `/model sonnet` — balanced model for this command.
 
 Guided session to improve the system based on what you've learned. Runs the Self-Healing Loop:
 `BUG / DEVIATION / GAP → RULE → system gets smarter`.

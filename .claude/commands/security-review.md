@@ -5,7 +5,7 @@ argument-hint: [file-or-directory]
 
 # /security-review
 
-> **Recommended:** `/model opus` — deep analysis for security review.
+> **Model:** `/model opus` — deep analysis for security review.
 
 Perform a security-focused code review on the specified files, directory, or staged changes.
 

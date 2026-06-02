@@ -5,7 +5,7 @@ argument-hint: <path to .work/plans/*.plan.md>
 
 # /auto-implement — Plan to PR without confirmation
 
-> **Recommended:** `/model sonnet`. Use only when the plan in `.work/plans/` has already been reviewed and approved.
+> **Model:** `/model sonnet` — use only when the plan in `.work/plans/` has already been reviewed and approved.
 
 This is the **explicit, sanctioned exception** to the `Never auto-commit` rule. It runs the entire pipeline from a confirmed plan to an open PR without asking — implement, validate, commit, push, open PR. It **never** merges. The PR-open is the hard stop.
 
