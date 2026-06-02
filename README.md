@@ -245,6 +245,12 @@ db_file: myapp.db          # optional — copied per worktree for isolation
 
 Commands read this file at runtime — change a value once, all commands pick it up.
 
+It is schema-backed: `.claude/project.schema.json` drives editor autocomplete + inline
+validation (via the `# yaml-language-server: $schema=` line at the top of the file),
+and `/setup` validates against it — a mistyped key or bad value is reported, not
+silently ignored. A single reader (`.claude/scripts/read-config.sh`) parses it for
+both `worktree.sh` and CI. Keep fields flat (no nesting).
+
 ---
 
 ## What's included
@@ -256,6 +262,7 @@ Commands read this file at runtime — change a value once, all commands pick it
 ├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
 ├── commands/              # All slash commands
 ├── project.yml            # Project config — commands, repo, branch
+├── project.schema.json    # JSON Schema for project.yml — editor + /setup validation
 ├── reference/
 │   ├── AUTONOMY.md        # CI autonomy layer — inline reviews, auto-merge, costs, security
 │   ├── CONCEPTS.md        # The four frameworks behind this workflow
@@ -263,7 +270,8 @@ Commands read this file at runtime — change a value once, all commands pick it
 │   ├── HANDBOOK.md        # Reference — models, command table, troubleshooting
 │   └── WORKTREES.md       # Git worktree mental model and lifecycle
 ├── scripts/
-│   └── worktree.sh        # Worktree lifecycle script (create, open, remove)
+│   ├── worktree.sh        # Worktree lifecycle script (create, open, remove)
+│   └── read-config.sh     # Single reader for project.yml (used by worktree.sh + CI)
 ├── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
 └── templates/
     └── husky-pre-commit.sh  # Pre-commit hook template — copied by /setup if Husky is detected

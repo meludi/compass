@@ -23,52 +23,27 @@ Read `.claude/project.yml`.
 
 ---
 
-## Phase 1 — Write Template
+## Phase 1 — Prepare the config
 
-Write `.claude/project.yml` with the following content (preserve all inline comments):
+The canonical template is the **shipped `.claude/project.yml`** — it carries the
+schema reference (`# yaml-language-server: $schema=./project.schema.json`) and
+inline docs. **Do not rewrite or duplicate it** (no embedded copy lives here, on
+purpose). Edit it in place. If the file is somehow missing, restore it from the
+starter.
 
-```yaml
-# Project configuration — edit these values, then run /setup again to generate CLAUDE.md
-name: ""                # Required — short identifier, e.g. my-app
-repo: ""                # Required — GitHub slug, e.g. owner/my-app
-base_branch: main       # Branch PRs are opened against
+**Pre-fill what can be detected** — leave the rest for the user:
 
-package_manager: npm    # npm | pnpm | yarn | bun
-install_cmd: ""         # Optional — custom install for any stack, e.g. uv sync. Blank = use package_manager
-
-dev_cmd: npm run dev    # Start dev server
-dev_port: 3000          # Dev server port (number)
-
-test_cmd: npm test
-lint_cmd: npm run lint
-format_cmd: npm run format
-type_check_cmd: ""      # Optional — e.g. npm run typecheck — leave blank if not used
-
-src_dir: src/           # Source directory
-worktree_prefix: ""     # e.g. ../my-app- — placed as sibling of main project dir
-db_file: ""             # Optional — e.g. myapp.db — copied per worktree (file/SQLite only)
-
-# Per-worktree isolation hooks (optional) — run in the worktree with WT_NAME/WT_DIR/
-# WT_BRANCH/WT_PORT exported. For server DBs. Example (Postgres):
-#   worktree_setup_cmd: createdb "myapp_$WT_NAME"
-#   worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
-worktree_setup_cmd: ""     # runs after install
-worktree_teardown_cmd: ""  # runs before removal
-
-autonomy_mode: off          # off | review-only | full — see .claude/reference/AUTONOMY.md
-ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
-                            # Secret per provider (gh secret set): ANTHROPIC_API_KEY /
-                            # OPENAI_API_KEY / GEMINI_API_KEY. See .claude/reference/AUTONOMY.md.
-
-description: ""         # One paragraph — what does this project do?
-```
+- `package_manager` — from the lockfile (`pnpm-lock.yaml`→pnpm, `yarn.lock`→yarn, `bun.lockb`→bun, else npm).
+- `dev_cmd` / `test_cmd` / `lint_cmd` / `format_cmd` / `type_check_cmd` — from the matching `package.json` script when it exists (e.g. set `npm run lint` only if a `lint` script is present); **blank** the field if there is no matching script. This keeps `project.yml` an accurate snapshot instead of guessing. Skip for non-JS projects (no `package.json`) — the user fills `install_cmd` and commands manually.
+- `repo` — from `git remote get-url origin` (as `owner/repo`).
+- `base_branch` — the repo's current default branch.
 
 Then output:
 
 ```
-.claude/project.yml written with defaults.
-
-Open the file, fill in your values, then run /setup again.
+.claude/project.yml is ready (schema-validated, commands taken from package.json).
+Fill in: name, description — and anything detection left blank.
+Then run /setup again.
 ```
 
 Stop. Do not proceed to Phase 2.
@@ -77,18 +52,12 @@ Stop. Do not proceed to Phase 2.
 
 ## Phase 2 — Validate + Generate
 
-### Step 1 — Validate
+### Step 1 — Validate against the schema
 
-Check the following fields and collect all errors before reporting:
-
-| Field | Rule |
-|---|---|
-| `name` | Must not be empty |
-| `repo` | Must not be empty, must match `owner/repo` format |
-| `base_branch` | Must not be empty |
-| `package_manager` | Must be one of: `npm`, `pnpm`, `yarn`, `bun` |
-| `dev_port` | Must be a number |
-| `autonomy_mode` | Must be one of: `off`, `review-only`, `full` (defaults to `off` if missing) |
+Validate `.claude/project.yml` against `.claude/project.schema.json` — that file
+is the single source of validation rules (required keys, enums, types, the
+`repo` `owner/repo` pattern, `dev_port` integer). Collect **all** violations
+before reporting; do not stop at the first.
 
 If any errors exist, output them all at once and stop:
 
@@ -96,18 +65,20 @@ If any errors exist, output them all at once and stop:
 Validation failed — fix the following in .claude/project.yml:
 
   - package_manager: "npmp" is not valid. Must be one of: npm, pnpm, yarn, bun
-  - dev_port: "abc" is not a number
+  - dev_port: "abc" is not an integer
+  - repo: "my-app" must match owner/repo
 ```
 
 Do not generate CLAUDE.md until all errors are resolved.
 
-### Step 2 — Warn about unvalidatable fields
+### Step 2 — Sanity-check commands
 
-After successful validation, always output this notice:
+The command fields were taken from `package.json` in Phase 1, but the schema
+cannot confirm they actually run. Briefly confirm they look right:
 
 ```
-Note: dev_cmd, test_cmd, lint_cmd, format_cmd, type_check_cmd cannot be
-validated automatically. Please review these manually before continuing.
+Commands (from package.json — verify they run):
+  dev: {dev_cmd} · test: {test_cmd} · lint: {lint_cmd} · format: {format_cmd} · types: {type_check_cmd or "—"}
 ```
 
 ### Step 3 — Generate `.claude/CLAUDE.md`

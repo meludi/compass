@@ -36,24 +36,21 @@ PARENT="$(dirname "$ROOT")"
 TARGET="$PARENT/$(basename "$ROOT")-$NAME"
 BRANCH="feat/$NAME"
 
-# Read from .claude/project.yml. read_yml strips a trailing " # comment", trims
-# whitespace, and removes one surrounding quote pair — internal quotes are preserved
-# so command values (install_cmd, hooks) survive intact.
-YML="$ROOT/.claude/project.yml"
-read_yml() {
-  grep -m1 "^$1:" "$YML" 2>/dev/null \
-    | cut -d: -f2- \
-    | sed -E 's/[[:space:]]+#.*$//; s/^[[:space:]]+//; s/[[:space:]]+$//; s/^"(.*)"$/\1/; s/^'\''(.*)'\''$/\1/' \
-    || true
-}
-PM=$(read_yml package_manager)
-INSTALL_CMD=$(read_yml install_cmd)
-DB=$(read_yml db_file)
-WT_SETUP_CMD=$(read_yml worktree_setup_cmd)
-WT_TEARDOWN_CMD=$(read_yml worktree_teardown_cmd)
-DEV_PORT=$(read_yml dev_port)
-DEV_CMD=$(read_yml dev_cmd)
-BASE=$(read_yml base_branch)
+# Read from .claude/project.yml via the shared reader (scripts/read-config.sh) so
+# the parsing rules live in one place (also used by CI). read_config strips a
+# trailing " # comment", trims whitespace, and removes one surrounding quote pair —
+# internal quotes are preserved so command values (install_cmd, hooks) survive intact.
+export PROJECT_YML="$ROOT/.claude/project.yml"
+# shellcheck source=read-config.sh
+source "$ROOT/.claude/scripts/read-config.sh"
+PM=$(read_config package_manager)
+INSTALL_CMD=$(read_config install_cmd)
+DB=$(read_config db_file)
+WT_SETUP_CMD=$(read_config worktree_setup_cmd)
+WT_TEARDOWN_CMD=$(read_config worktree_teardown_cmd)
+DEV_PORT=$(read_config dev_port)
+DEV_CMD=$(read_config dev_cmd)
+BASE=$(read_config base_branch)
 PM="${PM:-npm}"
 DEV_PORT="${DEV_PORT:-3000}"
 DEV_CMD="${DEV_CMD:-npm run dev}"

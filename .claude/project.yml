@@ -1,20 +1,24 @@
-# Project configuration — fill in your values, or run /setup
+# yaml-language-server: $schema=./project.schema.json
+# Project configuration — fill in your values, or run /setup.
+# Schema: .claude/project.schema.json (editor autocomplete + /setup validation).
+
+# — Identity —
 name: ""                # e.g. my-project
 repo: ""                # GitHub slug, e.g. owner/my-project
 base_branch: main       # Branch PRs are opened against
 
+# — Commands — (left blank? /setup fills these from package.json scripts)
 package_manager: npm    # npm | pnpm | yarn | bun
 install_cmd: ""         # Optional — custom install for any stack, e.g. uv sync. Blank = use package_manager
-
 dev_cmd: npm run dev    # Start dev server
 dev_port: 3000          # Dev server port
-
 test_cmd: npm test
 lint_cmd: npm run lint
 format_cmd: npm run format
 type_check_cmd: ""      # Optional, e.g. npm run typecheck — leave blank if not used
-
 src_dir: src/           # Source directory
+
+# — Worktrees —
 worktree_prefix: ""     # e.g. ../my-project- — worktrees are placed as siblings of the main
                         # project dir (../), not inside it — avoids IDE confusion and nested git issues
 db_file: ""             # Optional: e.g. myapp.db — copied per worktree (file/SQLite DBs only)
@@ -28,7 +32,7 @@ db_file: ""             # Optional: e.g. myapp.db — copied per worktree (file/
 worktree_setup_cmd: ""     # runs after install (create DB/schema, write per-worktree env)
 worktree_teardown_cmd: ""  # runs before removal (drop the per-worktree DB/schema)
 
-# CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
+# — CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
 # is installed. See .claude/reference/AUTONOMY.md.
 autonomy_mode: off          # off | review-only | full
 ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.

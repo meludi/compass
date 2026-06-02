@@ -27,14 +27,8 @@ jobs:
       - uses: actions/checkout@v4
       - id: read
         run: |
-          read_field() {
-            grep "^$1:" .claude/project.yml 2>/dev/null \
-              | head -1 \
-              | cut -d: -f2- \
-              | sed 's/#.*//' \
-              | xargs \
-              || true
-          }
+          # Shared reader (scripts/read-config.sh) — same parser worktree.sh uses.
+          read_field() { bash .claude/scripts/read-config.sh "$1"; }
           MODE=$(read_field autonomy_mode)
           [ -z "$MODE" ] && MODE="off"
           PROVIDER=$(read_field ci_review_provider)

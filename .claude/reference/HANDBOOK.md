@@ -267,6 +267,17 @@ Refactor in small steps and re-run tests after each — behavior must not change
 
 ---
 
+## Project config & validation
+
+`.claude/project.yml` is the single source of project config. Two things keep it robust:
+
+- **Schema** — `.claude/project.schema.json` defines required keys, enums, and types. The `# yaml-language-server: $schema=` line at the top of `project.yml` gives autocomplete + inline validation in editors with the YAML extension, and `/setup` validates against it (a mistyped key or bad enum is reported, not silently defaulted).
+- **One reader** — `.claude/scripts/read-config.sh` (`read_config <key>`) is the only parser; `worktree.sh` sources it and CI calls it. It reads **flat** `key: value` only (by design — zero runtime dependencies). Don't nest fields; add new ones flat and to the schema.
+
+Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/setup`/`/setup-stack`; re-run `/setup` to re-sync if scripts change.
+
+---
+
 ## Troubleshooting
 
 | Problem                            | Fix                                                                                   |

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.8.0 — 2026-06-02
+
+### Added
+- `.claude/project.schema.json` — JSON Schema for `project.yml` (required keys, enums, types, `owner/repo` pattern, `dev_port` integer). A `# yaml-language-server: $schema=` line in `project.yml` enables editor autocomplete + inline validation; `/setup` validates against it so a mistyped key or bad value is reported instead of silently defaulting.
+- `.claude/scripts/read-config.sh` — single shared reader (`read_config <key>`) for `project.yml`, used by both `scripts/worktree.sh` (sourced) and CI (executed). Zero runtime dependencies (flat `key: value` only).
+
+### Changed
+- `scripts/worktree.sh` and `.github/workflows/pr-validation.yml` now use the shared reader instead of two separate hand-rolled `grep|cut|sed` parsers.
+- `/setup` no longer embeds a duplicate `project.yml` template (which had drifted from the shipped file) — it edits the canonical shipped file in place, pre-fills command fields from `package.json`, and validates against the schema.
+- `project.yml` fields grouped under comment headers (Identity / Commands / Worktrees / CI) for readability; format stays flat YAML (no nesting, no new dependency).
+
 ## v1.7.0 — 2026-06-02
 
 ### Added
