@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- `TESTING.md` (repo root) — maintainer self-test covering all four workflow flows (Stage 0 Setup, Loop 1 PIV, Loop 2 Fix in both `off` and `review-only` modes, Quick Path) plus the guarded worktree lifecycle, run against a throwaway sandbox repo. Stack-agnostic; not shipped via `.claude/`. (Version to be assigned at merge.)
+
 ## v1.3.0 — 2026-06-02
 
 ### Added
