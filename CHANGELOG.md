@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.0 — 2026-06-02
+
+### Added
+- Test-quality guidance — new **Test quality** section in `reference/HANDBOOK.md` (behavior over implementation, public interface only, survives refactor, integration over heavy mocking), surfaced in the On-Demand Context table (`CLAUDE-template.md`) and referenced by `/plan-feature`, `/implement`, `/validate`.
+- `/plan-feature` task template — optional `Behavior` line (the observable behavior to verify). Present for logic tasks, omitted for pure UI/glue/config.
+
+### Changed
+- `/implement` Step 3 now branches by task type: **logic-bearing tasks** (those with a `Behavior` line) are built **test-first** (RED → GREEN, one behavior at a time, the test is the per-task gate alongside the type check); **UI/glue/config tasks** keep the type-check-only gate. Post-green cleanup cross-links the built-in `/code-review` rather than refactoring while red.
+
 ## v1.5.0 — 2026-06-02
 
 ### Added

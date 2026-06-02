@@ -237,6 +237,19 @@ The Fix-loop entry point for the CI case (`review-only` / `full`). After the CI 
 
 ---
 
+## Test quality — what a good test looks like
+
+Used by `/plan-feature` (when listing behaviors), `/implement` (when writing a task's test), and `/validate` (when judging the test step). Stack-neutral:
+
+- **Test behavior, not implementation.** Assert what the code does through its results, not how it does it internally.
+- **Use the public interface.** Drive the code the way a real caller would; don't reach into private internals or assert on intermediate state.
+- **A good test survives an internal refactor.** If renaming or restructuring an internal function breaks the test while behavior is unchanged, the test was coupled to implementation — fix the test.
+- **Prefer integration-style over heavy mocking.** Exercise real code paths; mock only true boundaries (network, clock, external services), not your own collaborators.
+
+Write tests one behavior at a time alongside the code (see `/implement` Step 3) — not all tests up front, which tends to test imagined rather than actual behavior.
+
+---
+
 ## Troubleshooting
 
 | Problem                            | Fix                                                                                   |

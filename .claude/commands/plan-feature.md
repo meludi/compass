@@ -34,7 +34,7 @@ Use the `codebase-explorer` subagent to find:
 
 - Existing components, hooks, utilities that can be reused
 - Naming patterns and file structure conventions
-- Existing tests for similar features
+- Existing tests for similar features — note the patterns so planned behaviors follow `reference/HANDBOOK.md` → *Test quality* (behavior over implementation, public interface)
 
 If the feature requires an unknown library or pattern: spawn a web-search agent for isolated research. Only the summary returns to main context.
 
@@ -78,6 +78,7 @@ One sentence: what this plan achieves.
 - **File**: `src/...`
 - **Action**: CREATE / UPDATE
 - **Implement**: {what to do}
+- **Behavior**: {observable behavior to verify with a test — include for logic-bearing tasks; omit for pure UI/glue/config}
 - **Mirror**: `src/path/to/example.tsx:10-30` — follow this pattern
 - **Validate**: `type_check_cmd` from `.claude/project.yml`
 
@@ -90,6 +91,8 @@ One sentence: what this plan achieves.
 - **Validate**: `type_check_cmd` from `.claude/project.yml`
 
 {...repeat for each task}
+
+The `Behavior` line is what `/implement` writes a test against (test-first, RED→GREEN). Add it only for tasks with real logic; leave it off for pure UI/glue/config tasks.
 
 ## Validation
 
