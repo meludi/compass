@@ -34,6 +34,7 @@ repo: ""                # Required — GitHub slug, e.g. owner/my-app
 base_branch: main       # Branch PRs are opened against
 
 package_manager: npm    # npm | pnpm | yarn | bun
+install_cmd: ""         # Optional — custom install for any stack, e.g. uv sync. Blank = use package_manager
 
 dev_cmd: npm run dev    # Start dev server
 dev_port: 3000          # Dev server port (number)
@@ -45,7 +46,14 @@ type_check_cmd: ""      # Optional — e.g. npm run typecheck — leave blank if
 
 src_dir: src/           # Source directory
 worktree_prefix: ""     # e.g. ../my-app- — placed as sibling of main project dir
-db_file: ""             # Optional — e.g. myapp.db — copied per worktree by worktree.sh
+db_file: ""             # Optional — e.g. myapp.db — copied per worktree (file/SQLite only)
+
+# Per-worktree isolation hooks (optional) — run in the worktree with WT_NAME/WT_DIR/
+# WT_BRANCH/WT_PORT exported. For server DBs. Example (Postgres):
+#   worktree_setup_cmd: createdb "myapp_$WT_NAME"
+#   worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
+worktree_setup_cmd: ""     # runs after install
+worktree_teardown_cmd: ""  # runs before removal
 
 autonomy_mode: off      # off | review-only | full — see .claude/reference/AUTONOMY.md
 
