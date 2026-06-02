@@ -41,24 +41,7 @@ Plans, PRDs, stories, and BACKLOG are committed — they are your project's spec
 
 ## Parallel Development
 
-> Bolting AI on = 2x. Building for parallelism = 10x.
-
-Same human, same hours — multiple stories shipping simultaneously. Each story runs in its own worktree, branch, and Claude session.
-
-```
-# Main directory — dev server only
-{dev_cmd from `.claude/project.yml`}
-
-# Terminal 1 — Story A
-/worktree feature-a
-# Session A: /plan-feature → /implement → /ship
-
-# Terminal 2 — Story B
-/worktree feature-b
-# Session B: /plan-feature → /implement → /ship
-```
-
-The 10x reframe, the 5 pillars, and the 5 blockers this enables are explained in `CONCEPTS.md`.
+Each story runs in its own worktree, branch, and Claude session, so several can ship simultaneously (the dev server runs from the main dir only). The 10x reframe, the 5 pillars, and the 5 blockers are explained in `CONCEPTS.md`; worktree mechanics in `WORKTREES.md`.
 
 ---
 
@@ -137,6 +120,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/ship`) or User |
 | `/ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
 | `/review`          | `[PR-number]`                                 | PIV        | 3-subagent parallel review + security check + verdict; works with or without a PR | Opus    | —         | Auto (via `/ship`) or User |
+| `/apply-ci-review` | `[PR-number]`                                 | PIV (Fix)  | Apply the CI review's comments locally + validate — no commit    | Opus    | —         | User |
 | `/security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/review`) or User |
 | `/reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
 | `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/validate` and `/implement`             | —       | —         | Auto or User |
@@ -210,6 +194,13 @@ They overlap (both flag reuse/simplification) but are complementary: `/review` f
 ```
 
 > After `/code-review --fix` changes code, run `/validate` again — fixes can break lint/types/tests.
+
+### When to run `/apply-ci-review`
+
+The Fix-loop entry point for the CI case (`review-only` / `full`). After the CI `claude-review` posts comments on your PR, `/apply-ci-review` pulls them and applies the fixes **locally**, then runs `/validate`. It stops before commit — you commit and push, and the push re-triggers the CI review.
+
+- Use it instead of a second local review: the CI already reviewed the diff, so `/code-review` would be redundant.
+- In `off` mode (no CI review) or before the PR exists, use `/code-review --fix` instead.
 
 ### When to run `/security-review` standalone
 

@@ -1,197 +1,140 @@
 # Workflow
 
-The day-to-day command flow — two levels plus a quick path. Each step below is one
-command: what it does, how to call it, what it hands off.
+The map of how work flows through this starter: **one setup, two loops, one axis.**
 
 ```
-LEVEL 1 — Initiative Setup   /setup → /setup-tracker → /ideate → /setup-stack → /create-stories   (once per initiative)
-LEVEL 2 — PIV Loop           /worktree → /plan-feature → /implement → /ship → /reflect                (per story)
-QUICK PATH — trivial changes /worktree → edit → /validate → /ship
-AUTO PATH — confirmed plan   /worktree → /plan-feature → /auto-implement                              (no HITL after plan approval)
+STAGE 0 — Setup (once per initiative)   /setup → [/setup-tracker] → /ideate → [/setup-stack] → /create-stories
+LOOP 1 — PIV (per story)                /worktree → /plan-feature → /implement → /ship → /reflect
+LOOP 2 — Fix (until the PR is clean)    review → fix → /validate → /commit → push → (repeat) → merge → cleanup
+AXIS — autonomy_mode                    off = Loop 2 stays local · review-only = CI re-reviews each push
 ```
 
-Reference (models, full command table, troubleshooting, `.work/` layout): `HANDBOOK.md`.
-The *why* behind this structure: `CONCEPTS.md`.
+Each step is one command. The *why* behind the structure: `CONCEPTS.md`. Full command table, `.work/` layout, models, glossary, troubleshooting: `HANDBOOK.md`.
 
 ---
 
-## Level 1 — Initiative Setup
+## Stage 0 — Setup (once per initiative)
 
 Run once when starting a project or a new initiative.
 
-### 1. `/setup`
-
-Configures the project — generates `.claude/project.yml` and `.claude/CLAUDE.md`. Run once per project, before anything else.
-
-```
-/setup
-```
-
-### 1b. `/setup-tracker` _(optional)_
-
-Switches the issue tracker. Linear is the default and works out of the box — run this only to use Jira or Azure DevOps instead.
-
-```
-/setup-tracker
-```
-
-### 2. `/ideate`
-
-Structured brain dump → PRD: scope check, research, approaches, incremental design approval, self-review — all in one session. Skips the brain dump if the initiative is already well understood from the conversation.
-
-```
-/ideate "Dividend tracking feature set"
-→ .work/prds/dividend-tracking.prd.md
-```
-
-### 3. `/setup-stack` _(greenfield only)_
-
-Scaffolds the framework from the PRD's tech notes, fills the CLAUDE.md Code Patterns section, and creates canonical seed files. Skip for brownfield — existing code already provides the patterns.
-
-```
-/setup-stack .work/prds/dividend-tracking.prd.md
-```
-
-### 4. `/create-stories`
-
-Breaks the PRD into individual, actionable stories with acceptance criteria. Each story becomes the spec for one PIV Loop iteration.
-
-```
-/create-stories .work/prds/dividend-tracking.prd.md
-→ .work/stories/   (+ tracker issues if configured)
-```
+| Step | Command | Does |
+|---|---|---|
+| 1 | `/setup` | Configures the project — generates `.claude/project.yml` + `.claude/CLAUDE.md`. Run first. |
+| 1b | `/setup-tracker` _(optional)_ | Switch issue tracker. Linear works out of the box — only for Jira / Azure DevOps. |
+| 2 | `/ideate "<initiative>"` | Brain dump → PRD (scope check, approaches, self-review) → `.work/prds/`. |
+| 3 | `/setup-stack` _(greenfield only)_ | Scaffold framework from the PRD, fill `CLAUDE.md` Code Patterns, drop seed files. Skip for brownfield. |
+| 4 | `/create-stories <prd>` | Break the PRD into stories → `.work/stories/` (+ tracker issues if configured). Each story = one PIV iteration. |
 
 ---
 
-## Level 2 — PIV Loop
+## Loop 1 — PIV (per story)
 
-Run once per story. Pick a story from `.work/stories/` (or your tracker), then:
+Pick a story from `.work/stories/` (or your tracker), then run this loop once per story.
 
-### 1. `/worktree`
+### 1. `/worktree <story-name>`
+Creates an isolated worktree on `feat/<name>` and opens a fresh Claude session. Steps 2–4 run in that session. Detail: `WORKTREES.md`.
 
-Creates an isolated worktree on `feat/<name>` and opens a fresh Claude session inside it. Steps 2–4 run in that session.
+### 2. `/plan-feature <story>`
+Loads project context, then writes an implementation plan to `.work/plans/`. **Plan only — no code.** Ends here on purpose: review the plan before implementing.
 
-```
-/worktree <story-name>
-```
-
-### 2. `/plan-feature`
-
-Loads project context, then writes an implementation plan to `.work/plans/`. Plan only — no code. Ends here on purpose: review the plan before implementing.
-
-```
-/plan-feature .work/stories/dividend-display.md
-→ .work/plans/dividend-display.plan.md
-```
-
-### 3. `/implement`
-
-Executes the plan task by task, type-checking after each. After all tasks pass, runs the full validation suite — lint, types, tests, browser smoke test — and writes a report to `.work/reports/`.
-
-_Includes: /validate (→ agent-browser)_
-
-```
-/implement .work/plans/dividend-display.plan.md
-```
+### 3. `/implement <plan>`
+Executes the plan task by task, type-checking after each, then runs the full validation suite. _Folds in: `/validate` (→ agent-browser)._
 
 ### 4. `/ship`
-
-Commits, pushes, opens a PR, then asks whether to run the parallel code review.
-
-_Includes: /commit, /review, /security-review_
-
-```
-/ship
-```
-
-After the review passes: merge the PR, then remove the worktree —
-`bash .claude/scripts/worktree.sh <story-name> rm`.
-
-### 4b. `/review` (standalone)
-
-Runs the 3-subagent parallel review — without going through `/ship`. Works with or without an open PR.
-
-```
-/clear          ← clean context for the subagents
-/review         ← PR if one exists, otherwise local branch diff
-/review 42      ← explicit PR number
-```
-
-Use before `/ship` for early feedback on local changes, or after for re-reviews and external PRs.
-
-_Includes: /security-review_
-
-### 4c. Fix review findings (human step)
-
-Reviewers point; you fix. Findings are never auto-fixed or auto-committed. Apply them locally with `/code-review --fix`, then continue (`/commit` / push). If the CI `claude-review` job ran on the PR, GitHub notifies you of its comments and its `## Review Summary` — fix locally and push, which re-triggers the review.
-
-Detail (both fix loops, CI behaviour): `AUTONOMY.md` → _Fixing review findings_.
+Commits, pushes, opens a PR, then offers the parallel review. _Folds in: `/commit`, `/review`, `/security-review`._
 
 ### 5. `/reflect`
+Captures learnings and evolves the system (commands, `CLAUDE.md`, `reference/`). Run after a merge — or anytime the workflow itself needs a fix.
 
-Captures learnings and evolves the system — updates commands, `CLAUDE.md`, or `reference/` docs so a mistake never repeats. Run it right after a merge; also useful anytime the workflow itself needs a fix.
+> **Auto Path:** when a plan is already reviewed and stable, replace steps 3–4 with `/auto-implement <plan>` — runs implement → commit → push → PR-open with no intermediate confirmation. Hard-stops at PR-open; never merges. The only command that may auto-commit. Not for DB migrations, auth boundaries, or first use of a new pattern.
+
+---
+
+## Loop 2 — Fix (until the PR is clean)
+
+A PR is open. Review surfaces findings; **you** fix them; CI never commits. This loop repeats until clean, then you merge. It is the same loop whether the review is local or in CI — only the entry differs.
 
 ```
-/reflect
+review  →  fix  →  /validate  →  /commit  →  push  →  (CI re-reviews → repeat)  →  merge  →  cleanup
 ```
+
+**Step 1 — review** (pick the reviewer for the job):
+
+| Reviewer | What it is | Use when |
+|---|---|---|
+| `/code-review [level]` | built-in deep bug hunt; effort dial `low`→`ultra`; can `--fix` | correctness/bugs; want fixes applied |
+| `/review` | this starter's 3 subagents — *your* CLAUDE.md conventions, reuse, test gaps | convention/reuse/test-coverage check |
+| CI `claude-review` | runs on the PR in `review-only`/`full`; posts comments on GitHub | automatic on each push (no API key → does not run) |
+
+**Step 2 — fix** (always a human action; pick the path):
+
+| Path | Command | Use when |
+|---|---|---|
+| Local fix | `/code-review [level] --fix` | `off` mode / before the PR / want a fresh deep review + fix |
+| Apply CI findings | `/apply-ci-review [pr]` | `review-only`/`full` — act on the CI comments already on the PR (no redundant second review) |
+| Manual | edit by hand | small, obvious fixes |
+
+**Step 3 — verify & publish:** `/validate` (fixes can break lint/types/tests) → `/commit` → `git push`.
+
+> **`commit` ≠ PR update.** A commit is local. The **push** updates the open PR and (in `review-only`/`full`) triggers an automatic CI re-review. Repeat until clean.
+
+**Step 4 — merge & cleanup:** merge the PR yourself (`gh pr merge --squash`), then remove the worktree: `bash .claude/scripts/worktree.sh <name> rm`.
+
+### The same loop, two modes
+
+The shape is identical; what differs is **who triggers the review** and **how you know it's clean**.
+
+**`off` — you drive every round (local):**
+```
+/code-review [--fix]  →  /validate  →  /commit  →  push  →  CI runs `test` only  →  merge when satisfied
+```
+You start each review yourself; there is no automatic re-review. The "clean" signal is your own judgement.
+
+**`review-only` — CI reviews every push (CI-assisted):**
+```
+push  →  CI claude-review posts comments + `## Review Summary`  →  GitHub notifies you
+     →  /apply-ci-review  →  /validate  →  /commit  →  push  →  CI re-reviews  →  repeat until clean  →  merge
+```
+Review is automatic on each push; you consume it with `/apply-ci-review`. The "clean" signal is a `## Review Summary` with no findings — plus an audit trail on the PR.
+
+| | `off` | `review-only` |
+|---|---|---|
+| Who triggers the review | you, each round | CI, automatically on every push |
+| Fix entry | `/code-review --fix` | `/apply-ci-review` |
+| Re-review after a fix | manual (run it again) | automatic on push |
+| "Clean" signal | your judgement | `## Review Summary` shows no findings |
+| Findings live | in chat (ephemeral) | PR comments (audit trail) |
+
+---
+
+## Axis — `autonomy_mode`
+
+A cross-cutting setting (`.claude/project.yml`), not a step — it decides how Loop 2 runs (see *The same loop, two modes* above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/apply-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
+
+Comparison matrix, cost, and security notes: `AUTONOMY.md`.
 
 ---
 
 ## Quick Path — trivial changes
 
-For typos, single-line bugfixes, CSS/copy tweaks, and config-value changes, a PRD, a story, and a plan are pure ceremony. Skip them:
+For typos, one-line bugfixes, CSS/copy tweaks, config values — a PRD/story/plan is pure ceremony:
 
 ```
-/worktree <name>  →  make the edit by hand  →  /validate  →  /ship
+/worktree <name>  →  make the edit by hand  →  /validate  →  /ship   (answer "no" to the review)
 ```
 
-- Skips `/ideate`, `/setup-stack`, `/create-stories`, `/plan-feature`, and `/implement` — no spec artifacts are produced.
-- When `/ship` asks whether to run the review, answer **no** — the 3-subagent review is overkill for a one-line diff.
-- `/worktree` still applies: it keeps work off the base branch and isolated.
-
-**Do not use it for** anything with logic, new files, or acceptance criteria — that goes through the full Level 2 PIV Loop.
+**Not for** anything with logic, new files, or acceptance criteria — that goes through Loop 1.
 
 ---
 
-## Auto Path — confirmed plan to PR without HITL
+## Other commands (folded or on-demand)
 
-When the plan is already reviewed and stable, `/auto-implement` runs the entire pipeline from the plan to an open PR in one go — no commit confirmation, no review prompt. Merge stays manual.
-
-```
-/worktree <name>  →  /plan-feature <story>  →  (review & approve the plan)  →  /auto-implement .work/plans/<name>.plan.md
-```
-
-- Plan freezes after approval — `/auto-implement` reads `.work/plans/<name>.plan.md` as immutable input.
-- Implementation runs the same per-task type-check loop as `/implement`, then the full validation suite.
-- Commit, push, and `gh pr create` all run without asking. Hard stop at PR-open. Never merges.
-- The only command in the workflow that may auto-commit. The standard `Never auto-commit` rule in `commit.md` and `ship.md` still holds everywhere else.
-
-**Use it for:** small to medium stories that follow existing patterns. Plans you would have approved via `/implement` → `/ship` anyway, where the in-between confirmations add no value.
-
-**Do not use it for:** DB migrations, auth/security boundaries, first-time use of a new library or pattern, or anything where you want to inspect intermediate state. There: stay on `/implement` → `/ship` with all the gates intact.
-
-**Pre-conditions enforced inside `/auto-implement`:**
-
-- Current branch matches `feat/*` — refuses on the base branch.
-- Running inside a worktree (matches `worktree_prefix` from `project.yml`).
-- Plan file exists at the given path.
-- Working tree is clean or only contains plan-scoped changes.
-
-If any check fails, `/auto-implement` aborts before touching anything.
+- `/context [spec]` — load rules, git state, optional spec, on-demand docs. Auto-runs as step 1 of `/plan-feature` and `/implement`; standalone on resume or stale context.
+- `/validate` — lint + types + tests + browser smoke test. Folded into `/implement`; standalone before `/ship` or to debug a failing check.
+- `/commit` — stage + commit locally, no push/PR. Folded into `/ship`; standalone for WIP checkpoints.
+- `/security-review [path]` — security review of changed files. Auto-runs inside `/ship` on risky diffs; standalone on demand.
 
 ---
 
-## Other commands
-
-Not flow steps — they run inside the steps above (folded in) or on demand:
-
-- `/context [issue-id | story-path | feature description]` — load project rules, git state, optional spec, and on-demand docs. Auto-runs as Step 1 of `/plan-feature` and `/implement`. Standalone for mid-story resume, debugging, or before `/reflect`.
-- `/validate` — run lint, types, tests, and the browser smoke test on their own. No argument. Folded into `/implement`.
-- `/commit` — stage and commit locally, no push or PR. No argument. Folded into `/ship`.
-- `/security-review [file-or-directory]` — security review of changed files; defaults to staged changes if no path is given. Auto-runs inside `/ship` on a risky diff; also runnable on demand.
-
----
-
-Reference: `HANDBOOK.md` (models, command table, troubleshooting, `.work/` layout) ·
-`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) ·
-`AUTONOMY.md` (CI workflow + `autonomy_mode` opt-in).
+Reference: `HANDBOOK.md` (command table, `.work/`, models, glossary, troubleshooting) ·
+`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) · `AUTONOMY.md` (CI + `autonomy_mode`).

@@ -49,7 +49,7 @@ All three share the same `.git` folder under the hood.
 ## Rules
 
 - **Changes in a worktree only affect its branch** — main is never touched
-- **Each worktree runs its own dev server** — start with `PORT=$(cat .worktree-port) <dev_cmd>`; port is assigned automatically (`dev_port + N`)
+- **Each worktree runs its own dev server** on its own port — see *Dev Server per Worktree* below
 - **Same branch cannot be checked out in two worktrees simultaneously**
 - **`node_modules` is duplicated per worktree** — 3 worktrees = 3× disk usage
 - **Always clean up** with `worktree.sh <name> rm` after merging — stale worktree metadata breaks Git GUIs (e.g. Fork)
@@ -78,37 +78,9 @@ All three dev servers run simultaneously without conflicts.
 
 ## Working with Multiple Worktrees in VS Code
 
-**Option A — Separate windows (recommended for parallel features):**
-```bash
-code /path/to/claude-workflow-starter-mil-6-…
-code /path/to/claude-workflow-starter-mil-7-…
-```
-Each window has its own Git panel, terminal, and Claude session.
-
-To review the implementation plan after `/plan-feature`, open it from inside the worktree:
-```bash
-code .work/plans/<feature-name>.plan.md
-```
-
-**Option B — Multi-root workspace (all in one window):**
-Create a `stock-lookup.code-workspace` file:
-```json
-{
-  "folders": [
-    { "path": "." },
-    { "path": "../claude-workflow-starter-mil-6-…" },
-    { "path": "../claude-workflow-starter-mil-7-…" }
-  ]
-}
-```
-Open with `code stock-lookup.code-workspace`.
-
-**Option C — One window, multiple terminals:**
-Stay in the main window, open a terminal per worktree:
-```bash
-cd ../claude-workflow-starter-mil-6-… && claude .
-```
-The Explorer shows main, but each terminal and Claude session operates on its own branch.
+- **Separate windows (recommended):** `code /path/to/<repo>-<name>` per worktree — each gets its own Git panel, terminal, and Claude session. Open the plan with `code .work/plans/<name>.plan.md`.
+- **Multi-root workspace:** one `*.code-workspace` file listing `.` plus each `../<repo>-<name>` folder; open it in a single window.
+- **One window, many terminals:** `cd ../<repo>-<name> && claude .` per terminal — the Explorer stays on main, each session works on its own branch.
 
 ---
 

@@ -1,14 +1,16 @@
 # Changelog
 
-## v1.3.0 — 2026-06-01
+## v1.3.0 — 2026-06-02
 
 ### Added
-- CI `claude-review` now posts a single `## Review Summary` comment on the PR alongside its inline comments — finding count plus a verbatim reminder that findings are fixed locally (`/code-review --fix`, then push), never by CI. Makes the post-PR fix step unmissable via GitHub's native notification.
-- `reference/AUTONOMY.md` — new "Fixing review findings (human action)" section documenting both fix loops (local pre-PR, CI post-PR) and the principle that reviewers point while the human fixes; CI never commits.
-- `reference/HANDBOOK.md` — new "`/review` vs `/code-review` — and choosing an effort level" section: clarifies the two reviewers and gives a level-by-level recommendation table (`low`/`medium`/`high`/`max`/`ultra`) matched to change risk.
+- `/apply-ci-review` — new Fix-loop command: pulls the CI `claude-review` comments from the PR and applies the fixes **locally**, then runs `/validate`. Stops before commit (no auto-commit); the human commits and pushes. The non-redundant fix path in `review-only` / `full`.
+- CI `claude-review` now posts a single `## Review Summary` comment on the PR alongside its inline comments — finding count plus a verbatim reminder that findings are fixed locally, never by CI.
+- `reference/AUTONOMY.md` — at-a-glance mode-comparison matrix (off / review-only / full) covering CI jobs, who reviews/fixes/merges, cost, risk, and suitability; plus notes on no-API-key behaviour and draft-PR exclusion. New "Fixing review findings (the Fix Loop)" section covering both fix entry paths (local pre-PR, CI post-PR).
+- `reference/HANDBOOK.md` — "`/review` vs `/code-review` — and choosing an effort level" section (effort recommendation table); `/apply-ci-review` added to the command table with standalone guidance.
 
 ### Changed
-- `reference/WORKFLOW.md` — added step "4c. Fix review findings (human step)" with a pointer to AUTONOMY.md.
+- `reference/WORKFLOW.md` — rewritten as the canonical map around four phases: **Setup** (once) · **PIV Loop** · **Fix Loop** · **autonomy axis**. The Fix Loop (review → fix → validate → commit → push → repeat) is now a first-class section with a reviewer / fix-path decision tree and an `off` vs `review-only` side-by-side.
+- `reference/` docs de-duplicated to single-source each concept: glossary + logical flow → HANDBOOK; 10x / parallel development → CONCEPTS; command flow → WORKFLOW; autonomy modes → AUTONOMY. Removed duplicated representations — AUTONOMY's intro mode-table (the matrix covers it), WORKFLOW's autonomy re-explanation (folded into the Fix-loop mode contrast), the CONCEPTS logical-flow stub, the HANDBOOK parallel-dev block, and the WORKTREES VS Code + repeated port explanations.
 
 ## v1.2.0 — 2026-06-01
 

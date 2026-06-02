@@ -6,25 +6,9 @@ The four frameworks behind this workflow. Read once to understand why things are
 
 ## 1. The Logical Flow
 
-Every coding session fits into one of four phases:
+Every initiative moves through four phases: **ideate → story → build → evolve**. Ideate and story happen once per initiative; the build phase (the PIV loop) repeats per story; evolution feeds learnings back into the system so a mistake never repeats.
 
-```
-IDEATE → STORY → PIV LOOP → SYSTEM EVOLUTION
-```
-
-**Glossary:**
-- **IDEATE** — structured brain dump with the agent. Raw ideas, no structure yet. AI asks clarifying questions.
-- **STORY** — a scoped unit of work with acceptance criteria. Saved to `.work/stories/`; optionally synced to a tracker.
-- **PIV** — Plan → Implement → Validate. The three phases of every development iteration.
-
-| Phase | What happens | Commands |
-|-------|-------------|---------|
-| **IDEATE** | Brain dump with the agent. Raw ideas, no structure. AI asks clarifying questions. | (conversation) |
-| **STORY** | Write a PRD, break it into stories. Stories are the spec — tool-agnostic. | `/ideate`, `/create-stories` |
-| **PIV LOOP** | Per story: Plan → Implement → Validate → Merge. | `/worktree`, `/plan-feature`, `/implement`, `/validate`, `/ship` |
-| **SYSTEM EVOLUTION** | Every bug is an opportunity. Fix the system, not just the symptom. | `/reflect`, update `CLAUDE.md`, commands, `reference/` |
-
-IDEATE and STORY happen once per initiative. The PIV Loop runs for every story.
+The concrete command flow for each phase lives in `WORKFLOW.md` (the canonical map); term definitions (IDEATE, STORY, PIV, PRD) in `HANDBOOK.md`.
 
 ---
 

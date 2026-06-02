@@ -12,11 +12,7 @@ You can change this value at any time, commit, and the next PR run picks up the 
 
 ## The three modes
 
-| Mode | What runs | API calls | Secrets needed |
-|------|-----------|-----------|----------------|
-| `off` (default) | `test` (lint + types + tests from `project.yml`) | None | None |
-| `review-only` | `+ claude-review` (inline PR comments) `+ claude-checklist` (PR comment) | Per-PR Claude API calls | `ANTHROPIC_API_KEY` |
-| `full` | `+ auto-merge` once all required checks pass | Per-PR Claude API calls | `ANTHROPIC_API_KEY` |
+Set by `autonomy_mode`; each mode is a superset of the previous. At-a-glance grid: *Mode comparison* below.
 
 ### `off` — the safe baseline
 
@@ -49,13 +45,49 @@ Without this gate, `auto-merge` will fire as soon as CI is green, regardless of 
 
 ---
 
-## Fixing review findings (human action)
+## Mode comparison (at a glance)
+
+|  | `off` | `review-only` | `full` |
+|---|---|---|---|
+| **— Setup —** | | | |
+| API key needed | no | yes | yes |
+| Recommended branch protection | require `test` | + `claude-review`, `claude-checklist` | + label `ready-for-merge` |
+| **— CI on GitHub —** | | | |
+| `test` (lint + types + tests) | ✓ | ✓ | ✓ |
+| `claude-review` (inline comments) | ✗ | ✓ | ✓ |
+| `claude-checklist` (PR comment) | ✗ | ✓ | ✓ |
+| `## Review Summary` (one summary comment) | ✗ | ✓ | ✓ |
+| `auto-merge` | ✗ | ✗ | ✓ |
+| Claude re-review on each push | ✗ (only `test`) | ✓ | ✓ |
+| **— Always present (mode-independent) —** | | | |
+| `## Manual Test Plan` in PR body (from `/ship`) | ✓ | ✓ | ✓ |
+| `/ship` local 3-subagent review | ✓ optional | ✓ optional | ✓ optional |
+| Local `/code-review` / `/review` | ✓ | ✓ | ✓ |
+| **— Who does what —** | | | |
+| Who reviews | you, locally | you locally **+ CI** | you locally **+ CI** |
+| Who fixes | you (local) | you (local) | you (local) |
+| Who merges | you | you | **CI automatically** |
+| Human merge gate | ✓ | ✓ | ✗ (unless label gate) |
+| How you learn of findings | in chat | chat **+ GitHub notification** | chat + GitHub notification |
+| **— Practicalities —** | | | |
+| Cost / PR | $0 | ~$0.03 | ~$0.03 |
+| Review output lives | chat only | chat **+ auditable on GitHub** | chat + GitHub |
+| Main risk | no second pair of eyes | findings may be missed (merge stays manual) | **unreviewed merge on green CI** |
+| Suitable for | solo, hand-written logic | audit trail, teams, CI second opinion | bot PRs, low-stakes, **only with label gate** |
+
+Notes:
+- **Mode set without `ANTHROPIC_API_KEY`** → the Claude jobs fail (red), they do not skip → you effectively get `off` plus red checks that may block branch protection. Keep the key and the mode together.
+- **Draft PRs trigger CI in no mode** — the workflow fires only on `opened`, `synchronize`, and `ready_for_review`.
+
+---
+
+## Fixing review findings (the Fix Loop)
 
 **The reviewers point; the human fixes; CI never commits.** Neither the local review commands (`/review`, `/code-review`) nor the CI `claude-review` job changes code — they surface findings. Applying a fix is always a deliberate human step. The only sanctioned auto-commit anywhere in the workflow is `/auto-implement` (a pre-approved plan on a `feat/*` branch).
 
-There are two distinct fix loops depending on *when* you review:
+This is the **Fix Loop** (`WORKFLOW.md`) seen from the autonomy angle — two entry paths depending on *when* you review:
 
-### Loop 1 — before the PR (local, synchronous)
+### Before the PR (local, synchronous)
 
 ```
 /code-review --fix   →   findings shown + applied in your working tree   →   /commit → /ship
@@ -63,15 +95,15 @@ There are two distinct fix loops depending on *when* you review:
 
 You are live in the session. Findings appear in the chat, fixes land in your working tree immediately, no GitHub round-trip. The starter's own `/review` only **finds** — the fix application comes from the built-in `/code-review --fix`.
 
-### Loop 2 — after the PR (CI, asynchronous)
+### After the PR (CI, asynchronous — `review-only` / `full`)
 
 ```
 PR open  →  CI claude-review runs  →  inline comments + one `## Review Summary` comment on GitHub
-         →  GitHub notifies you (PR author)  →  you fix locally (`/code-review --fix`)  →  push
+         →  GitHub notifies you (PR author)  →  /apply-ci-review  →  /commit → push
          →  the push (synchronize) re-triggers CI  →  re-review
 ```
 
-You find out there is something to fix via GitHub's native notification — as the PR author you are notified of every review comment (bell / email / the PR's comment count). The `## Review Summary` comment makes the to-do unmissable: it states the finding count and repeats the instruction to fix locally and push.
+You find out there is something to fix via GitHub's native notification — as the PR author you are notified of every review comment (bell / email / the PR's comment count). The `## Review Summary` comment makes the to-do unmissable: it states the finding count and repeats the instruction to fix locally and push. `/apply-ci-review` pulls those comments and applies the fixes locally — the non-redundant path, since the CI already reviewed; use `/code-review --fix` instead if you want a fresh, deeper pass.
 
 **Known behaviour:** every push (`synchronize`) re-runs `claude-review`, so a new `## Review Summary` comment is posted per iteration. This is accepted — it doubles as a per-round record. The starter does **not** update a single comment in place (that would need a comment lookup + edit and isn't worth the complexity).
 
