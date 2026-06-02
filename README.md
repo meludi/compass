@@ -251,6 +251,7 @@ Commands read this file at runtime — change a value once, all commands pick it
 
 ```
 .claude/
+├── VERSION                # Starter version (e.g. 1.5.0) — travels with the copy so you know what you have
 ├── CLAUDE-template.md     # Template for your project conventions — /setup generates CLAUDE.md from this
 ├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
 ├── commands/              # All slash commands

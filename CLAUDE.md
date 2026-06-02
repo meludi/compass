@@ -21,7 +21,8 @@ Conventional Commit format — drives versioning:
 | `docs:`, `chore:`, `refactor:` | none | No |
 
 - No Co-Authored-By attribution
-- Tag on the last commit of the release (after CHANGELOG update), then push:
+- On a release (`feat:`/`fix:`/breaking): update `.claude/VERSION` to the new `X.Y.Z` **together with** the CHANGELOG entry, in the same commit — `.claude/VERSION` ships with the copied `.claude/`, so it is how a user knows which starter version they have.
+- Tag on the last commit of the release (after CHANGELOG + `.claude/VERSION` update), then push:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
