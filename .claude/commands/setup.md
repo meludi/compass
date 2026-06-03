@@ -83,7 +83,9 @@ Commands (from package.json — verify they run):
 
 ### Step 3 — Generate `.claude/CLAUDE.md`
 
-Read `.claude/compass/templates/CLAUDE-template.md`. Generate `CLAUDE.md` in two phases:
+Read `.claude/compass/templates/CLAUDE-template.md`. Generate `CLAUDE.md` in two phases.
+
+**Keep verbatim:** the `@compass/AGENTS.md` import line near the top — it loads the compass workflow guidance + framework doc index. Do **not** inline those framework docs into `CLAUDE.md`; the only on-demand table in `CLAUDE.md` is the project-specific "Project Context" one.
 
 **Fill immediately** (from `compass.yml` + codebase scan):
 - Project description — from `description` field

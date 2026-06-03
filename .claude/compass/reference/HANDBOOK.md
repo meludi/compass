@@ -76,9 +76,9 @@ BUG → ? → + RULE
 4. Add a test that would have caught it
 
 **Context was missing:**
-1. Write the missing context as a doc in `.claude/compass/reference/`
-2. Add it to the On-Demand Context table in `CLAUDE.md`
-3. `/plan-feature` loads the table — the agent picks it up next session
+1. Write the missing context as a **project** doc (e.g. in `docs/`)
+2. Add it to the "Project Context" table in `CLAUDE.md` (framework docs are starter-owned — indexed in `@compass/AGENTS.md`, not here)
+3. `/plan-feature` and `/context` pull from that table — the agent picks it up next session
 
 **`CLAUDE.md` is a living document** — update it after significant features as the project evolves.
 
@@ -275,6 +275,8 @@ Refactor in small steps and re-run tests after each — behavior must not change
 - **One reader** — `.claude/compass/scripts/read-config.sh` (`read_config <key>`) is the only parser; `worktree.sh` sources it and CI calls it. It reads **flat** `key: value` only (by design — zero runtime dependencies). Don't nest fields; add new ones flat and to the schema.
 
 Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/setup`/`/setup-stack`; re-run `/setup` to re-sync if scripts change.
+
+**Guidance split (CLAUDE.md vs AGENTS.md).** The generated `CLAUDE.md` imports `@compass/AGENTS.md` at the top. `compass/AGENTS.md` is **starter-owned** (replaced on update) and carries the workflow orientation + the framework on-demand doc index. `CLAUDE.md` stays **user-owned** — project facts plus a "Project Context" table for your own docs. Keep framework pointers in AGENTS.md, project pointers in CLAUDE.md.
 
 ---
 

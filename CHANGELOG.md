@@ -9,6 +9,9 @@
 
 This consolidation is a stepping stone toward distributing the starter as a Claude Code plugin (planned separately).
 
+### Added
+- **`.claude/compass/AGENTS.md`** — starter-owned workflow guidance + the framework on-demand doc index, imported by the generated `CLAUDE.md` via `@compass/AGENTS.md`. The On-Demand Context table is split: framework docs live in `AGENTS.md` (starter-owned, replaced on update), project-specific docs in the `CLAUDE.md` "Project Context" table (user-owned). Keeps starter guidance out of the user's `CLAUDE.md` so updates never clobber project notes. `/setup`, `/context`, and `/reflect` updated accordingly.
+
 ## v1.8.0 — 2026-06-02
 
 ### Added

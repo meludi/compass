@@ -27,9 +27,9 @@ Argument is **optional** — bare `/context` just reloads rules + git state.
 
 ### 1. Project rules
 
-- `.claude/CLAUDE.md` — conventions, stack, patterns
+- `.claude/CLAUDE.md` — conventions, stack, patterns (it imports `@compass/AGENTS.md`, which carries the workflow guidance + framework doc index)
 - `.claude/compass.yml` — commands, repo, base branch
-- Reference docs from the CLAUDE.md "On-Demand Context" table — pull selectively based on the task at hand
+- On-demand docs, pulled selectively for the task: **framework/workflow** docs from the `compass/AGENTS.md` index, **project-specific** docs from the `CLAUDE.md` "Project Context" table
 
 ### 2. Git state
 

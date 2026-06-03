@@ -7,7 +7,10 @@
 
 # CLAUDE.md
 
+@compass/AGENTS.md
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+The `@compass/AGENTS.md` import above loads the compass workflow guidance + framework doc index.
 
 ## Project Overview
 
@@ -116,24 +119,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## On-Demand Context
+## Project Context (on-demand)
 
-<!-- Load these only when relevant — not every session. Add entries as the project grows. -->
+<!-- YOUR project's docs — load only when relevant. Grow this as the project does.
+     Framework/workflow docs (CONCEPTS, WORKFLOW, HANDBOOK, WORKTREES, AUTONOMY)
+     are indexed in the imported `@compass/AGENTS.md` — do not duplicate them here. -->
 
-| Topic                | File                                    |
-| -------------------- | --------------------------------------- |
-| Workflow concepts    | `.claude/compass/reference/CONCEPTS.md`         |
-| Command flow         | `.claude/compass/reference/WORKFLOW.md`         |
-| Reference / handbook | `.claude/compass/reference/HANDBOOK.md`         |
-| Test quality         | `.claude/compass/reference/HANDBOOK.md` → Test quality |
-| Refactor candidates  | `.claude/compass/reference/HANDBOOK.md` → Refactor candidates |
-| Worktrees            | `.claude/compass/reference/WORKTREES.md`        |
-| CI & autonomy        | `.claude/compass/reference/AUTONOMY.md`         |
-| {component area}     | `.claude/compass/reference/{component}.md`      |
+| Topic            | File                                |
+| ---------------- | ----------------------------------- |
+| {component area} | `docs/{component}.md` (your own docs) |
 
-<!-- Pattern: when a domain area becomes complex, extract its rules into a separate
-     reference doc and add it here. /context loads this table (called by /plan-feature
-     and /implement) — agents pull only what they need. -->
+<!-- Pattern: when a domain area becomes complex, extract its rules into a doc and
+     add it here. /context and /plan-feature pull from this table + the framework
+     index in @compass/AGENTS.md — agents load only what they need. -->
 
 ---
 

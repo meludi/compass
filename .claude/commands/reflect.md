@@ -52,7 +52,7 @@ Ask these questions one at a time:
 For each non-empty answer, propose a concrete change:
 - Deviation → update the relevant command in `.claude/commands/`
 - Repeated mistake → add a rule to `CLAUDE.md`
-- Missing context → create a doc in `.claude/compass/reference/`, add to On-Demand Context table
+- Missing context → create a **project** doc (e.g. in `docs/`) and add it to the `CLAUDE.md` "Project Context" table. (Framework/workflow docs live under `.claude/compass/` and are starter-owned — replaced on update; don't put project specifics there.)
 - New pattern → update Architecture or Code Patterns section in `CLAUDE.md`
 - Missing command → draft a new command, ask if the user wants to create it
 
