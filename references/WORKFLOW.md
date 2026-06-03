@@ -32,8 +32,6 @@ Run once when starting a project or a new initiative.
 
 Pick a story from `.work/stories/` (or your tracker), then run this loop once per story.
 
-> **Single task without an initiative?** (Bug fix, small addition, mid-initiative extra) — skip Ideate and create-stories entirely. Pass the description directly: `/compass:plan-feature "add dark mode toggle"`. No story file needed.
-
 | Step | Command | Does |
 |---|---|---|
 | 1 | `/compass:worktree <story-name>` | Isolated worktree on `feat/<name>` + a fresh Claude session; steps 2–4 run there. Detail: `WORKTREES.md`. |
@@ -42,7 +40,12 @@ Pick a story from `.work/stories/` (or your tracker), then run this loop once pe
 | 4 | `/compass:ship` | Commit → push → open PR, then offers the parallel review. _Folds in `/compass:commit`, `/compass:review`, `/compass:security-review`._ |
 | 5 | `/compass:reflect` | Captures learnings, evolves the system (commands, `CLAUDE.md`, `references/`). After a merge — or anytime the workflow needs a fix. |
 
-> **Auto Path:** when a plan is already reviewed and stable, replace steps 3–4 with `/compass:auto-implement <plan>` — runs implement → commit → push → PR-open with no intermediate confirmation. Hard-stops at PR-open; never merges. The only command that may auto-commit. Not for DB migrations, auth boundaries, or first use of a new pattern.
+**Shortcuts:**
+
+| Situation | Command | Replaces |
+|---|---|---|
+| Single task, no initiative (bug, small addition) | `/compass:plan-feature "description"` | Steps 2 with a free-text description — no story file, no Ideate needed |
+| Plan already reviewed and stable | `/compass:auto-implement <plan>` | Steps 3–4 — implement → commit → push → PR-open without confirmation. Hard-stops at PR-open; never merges. Not for DB migrations, auth changes, or first use of a new pattern. |
 
 ---
 
@@ -106,10 +109,12 @@ For typos, one-line bugfixes, CSS/copy tweaks, config values — a PRD/story/pla
 
 ## Other commands (folded or on-demand)
 
-- `/compass:context [spec]` — load rules, git state, optional spec, on-demand docs. Auto-runs as step 1 of `/compass:plan-feature` and `/compass:implement`; standalone on resume or stale context.
-- `/compass:validate` — lint + types + tests + browser smoke test. Folded into `/compass:implement`; standalone before `/compass:ship` or to debug a failing check.
-- `/compass:commit [--push]` — stage + commit, then asks whether to push (or `--push` skips the question). No PR. Folded into `/compass:ship`; standalone for WIP checkpoints or Fix-Loop rounds.
-- `/compass:security-review [path]` — security review of changed files. Auto-runs inside `/compass:ship` on risky diffs; standalone on demand.
+| Command | Auto-runs in | Standalone when |
+|---|---|---|
+| `/compass:context [spec]` | step 1 of `/compass:plan-feature` and `/compass:implement` | Resuming after time away, stale session, or before `/compass:reflect` |
+| `/compass:validate` | end of `/compass:implement` | Before `/compass:ship`, or to debug a failing check |
+| `/compass:commit [--push]` | `/compass:ship` | WIP checkpoint, or Fix-Loop publish step |
+| `/compass:security-review [path]` | `/compass:ship` on risky diffs | Any time you want a focused security pass |
 
 ---
 
