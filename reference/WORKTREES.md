@@ -11,9 +11,9 @@ Used by `/compass:worktree` — see `HANDBOOK.md` for the command reference.
 Think of it as: one Git repository, multiple working directories, each on its own branch.
 
 ```
-claude-workflow-starter/          → main branch
-claude-workflow-starter-mil-6-…/  → feat/mil-6-… branch
-claude-workflow-starter-mil-7-…/  → feat/mil-7-… branch
+my-project/              → main branch
+my-project-add-auth/     → feat/add-auth branch
+my-project-fix-login/    → feat/fix-login branch
 ```
 
 All three share the same `.git` folder under the hood.
@@ -24,7 +24,7 @@ All three share the same `.git` folder under the hood.
 
 | | Main | Worktree |
 |---|---|---|
-| Directory | `claude-workflow-starter/` | `claude-workflow-starter-<name>/` |
+| Directory | `my-project/` | `my-project-<name>/` |
 | Branch | `main` | `feat/<name>` |
 | Files | independent | independent |
 | `node_modules` | own copy | own copy (installed by `worktree.sh`) |
