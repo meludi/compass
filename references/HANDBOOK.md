@@ -57,7 +57,7 @@ BUG → ? → + RULE
 | ------------------------ | -------------------------------------------------- |
 | Agent deviated from plan | Update the relevant command in `.claude/commands/` |
 | Agent repeated a mistake | Add a rule to `CLAUDE.md`                          |
-| Context was missing      | Add a new on-demand context doc to `reference/`    |
+| Context was missing      | Add a new on-demand context doc to `references/`    |
 
 > Don't just fix the bug. Fix the system that allowed the bug.
 

@@ -9,7 +9,7 @@ on:
 #   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
 #   full         + auto-merge once all checks are green
 #
-# See the compass AUTONOMY reference (reference/AUTONOMY.md in the compass plugin)
+# See the compass AUTONOMY reference (references/AUTONOMY.md in the compass plugin)
 # for details, secrets, costs, and security notes.
 
 jobs:

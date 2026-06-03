@@ -104,7 +104,7 @@ Hand back to the user. The user takes over for manual testing and the merge deci
 
 If `autonomy_mode` in `.claude/compass.yml` is `review-only` or `full`, the CI workflow `.github/workflows/pr-validation.yml` will add inline review comments and a checklist on the PR. `/compass:auto-implement` itself does not interact with CI — it just opens the PR.
 
-See `${CLAUDE_PLUGIN_ROOT}/reference/AUTONOMY.md` for details.
+See `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` for details.
 
 ## Note on husky pre-commit hook
 

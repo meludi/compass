@@ -19,7 +19,7 @@ The concrete command flow for each phase lives in `WORKFLOW.md` (the canonical m
 | **Context Reset** | Plan and execute in separate conversations. Fresh start = sharp focus. | `/compass:worktree` opens a new Claude session per story |
 | **Command-ify Everything** | If you do it twice, make it a command. | All repeated actions are slash commands in `.claude/commands/` |
 | **Git Log as Memory** | Standardized commits communicate intent to future sessions. | `/compass:commit` enforces Conventional Commits (`feat:`, `fix:`, `refactor:`) |
-| **System Evolution** | Every bug → fix the system that allowed it. | `/compass:reflect` guides through updating `CLAUDE.md`, commands, `reference/` docs |
+| **System Evolution** | Every bug → fix the system that allowed it. | `/compass:reflect` guides through updating `CLAUDE.md`, commands, `references/` docs |
 
 ---
 
@@ -59,7 +59,7 @@ Four patterns that keep context lean and agents effective:
 |---------|-----------|----------------|
 | **PRD-First** | Document before you code. PRD (Product Requirements Document) = source of truth for every AI conversation. | `/compass:ideate` → `.work/prds/` |
 | **Stack Scaffolding** | Make framework and code-pattern choices once, up front, so every later session writes consistent code. | `/compass:setup-stack` scaffolds framework, fills `CLAUDE.md` Code Patterns, drops seed files |
-| **Modular Rules** | Split rules by concern. Load only what's relevant. | `CLAUDE.md` + `reference/` docs (load on demand) |
+| **Modular Rules** | Split rules by concern. Load only what's relevant. | `CLAUDE.md` + `references/` docs (load on demand) |
 | **Project Context** | Bootstrap context at session start. Never code before the agent has a mental model. | `/compass:context` loads project rules, git state, spec, and on-demand docs; `/compass:plan-feature` and `/compass:implement` call it as their first step |
 | **Subagents for Isolation** | Delegate research to subagents. Only summaries return — main context stays clean. | `/compass:plan-feature` spawns `codebase-explorer`; `/compass:ship` fans out 3 agents |
 

@@ -38,7 +38,7 @@ A **Claude Code plugin** — the repo root *is* the plugin root, installed (not 
 - Manifest: `.claude-plugin/plugin.json`; catalog: `.claude-plugin/marketplace.json`
 - Commands live in `commands/` → invoked as `/compass:<name>`
 - Agents in `agents/`, skills in `skills/`
-- Reference docs in `reference/`
+- Reference docs in `references/`
 - The worktree lifecycle script is `scripts/worktree.sh`; the shared config reader is `scripts/read-config.sh`
 - Always-on guidance is the `SessionStart` hook (`hooks/hooks.json` → `hooks/session-start.sh`) — a plugin `CLAUDE.md` is **not** loaded by Claude Code, so guidance must come via the hook
 - Bundled files referenced from commands/scripts use `${CLAUDE_PLUGIN_ROOT}/…`; user-project files use `${CLAUDE_PROJECT_DIR}/…` (or stay relative in command prose, where CWD is the project)

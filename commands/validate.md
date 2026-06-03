@@ -18,7 +18,7 @@ Read `.claude/compass.yml` for the commands, then run in order:
 
 1. `lint_cmd && format_cmd`
 2. `type_check_cmd` — skip if blank
-3. `test_cmd` — when a failure points at a weak test (passes despite broken behavior, or breaks on a pure refactor), judge it against `reference/HANDBOOK.md` → *Test quality*
+3. `test_cmd` — when a failure points at a weak test (passes despite broken behavior, or breaks on a pure refactor), judge it against `references/HANDBOOK.md` → *Test quality*
 4. Browser smoke test — only if `dev_port` is set and dev server is reachable
 
 ---

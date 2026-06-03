@@ -38,7 +38,7 @@ Pick a story from `.work/stories/` (or your tracker), then run this loop once pe
 | 2 | `/compass:plan-feature <story>` | Loads context, writes a plan to `.work/plans/`. **Plan only — no code.** Stops here on purpose: review the plan first. |
 | 3 | `/compass:implement <plan>` | Executes the plan task by task (type-check after each), then the full validation suite. _Folds in `/compass:validate` (→ agent-browser)._ |
 | 4 | `/compass:ship` | Commit → push → open PR, then offers the parallel review. _Folds in `/compass:commit`, `/compass:review`, `/compass:security-review`._ |
-| 5 | `/compass:reflect` | Captures learnings, evolves the system (commands, `CLAUDE.md`, `reference/`). After a merge — or anytime the workflow needs a fix. |
+| 5 | `/compass:reflect` | Captures learnings, evolves the system (commands, `CLAUDE.md`, `references/`). After a merge — or anytime the workflow needs a fix. |
 
 > **Auto Path:** when a plan is already reviewed and stable, replace steps 3–4 with `/compass:auto-implement <plan>` — runs implement → commit → push → PR-open with no intermediate confirmation. Hard-stops at PR-open; never merges. The only command that may auto-commit. Not for DB migrations, auth boundaries, or first use of a new pattern.
 

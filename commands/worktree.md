@@ -86,4 +86,4 @@ On success it removes the directory, prunes worktree metadata, and deletes the b
 - For parallel features: open a second terminal and run `/compass:worktree <other-name>`
 - Each worktree gets its own dev port printed after setup — start with `PORT=$(cat .worktree-port) {dev_cmd}`
 - To remove a worktree when done: `/compass:worktree <name> rm` (guarded) — see *Removing a worktree* above
-- See `${CLAUDE_PLUGIN_ROOT}/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.
+- See `${CLAUDE_PLUGIN_ROOT}/references/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.

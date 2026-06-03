@@ -41,7 +41,7 @@ For each task in the plan:
 **Implement** — two paths depending on the task:
 
 - **Logic-bearing task** (the task has a `Behavior` line in the plan — domain logic, data transforms, API handlers, hooks/functions with real logic): work **test-first**, one behavior at a time.
-  1. Write **one** failing test for the task's behavior (RED). Follow the test-quality rules in `reference/HANDBOOK.md` → *Test quality*.
+  1. Write **one** failing test for the task's behavior (RED). Follow the test-quality rules in `references/HANDBOOK.md` → *Test quality*.
   2. Write the **minimal** code to make it pass (GREEN).
   3. Do not write the whole task's tests up front — one behavior → one bit of code → repeat. (Writing all tests first tends to test imagined, not actual, behavior.)
 - **UI / glue / config task** (no `Behavior` line): follow the Mirror pattern from the plan directly; no forced test.
@@ -58,7 +58,7 @@ Then:
 - **PASS** → mark task `[x]` in the plan file, proceed
 - **FAIL** → fix immediately, re-run, confirm PASS before proceeding
 
-Never start the next task while the current task's gate is failing. Save broader cleanup/refactor for after the suite is green — use `/compass:code-review`; see `reference/HANDBOOK.md` → *Refactor candidates* for what to scan for (do not refactor while a test is red).
+Never start the next task while the current task's gate is failing. Save broader cleanup/refactor for after the suite is green — use `/compass:code-review`; see `references/HANDBOOK.md` → *Refactor candidates* for what to scan for (do not refactor while a test is red).
 
 ### 4. Full validation
 

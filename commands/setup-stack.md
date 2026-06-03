@@ -604,7 +604,7 @@ errors — no remote yet — report that the secret can't be checked and move on
   never handles the raw key.
 
 Full setup details (secrets, branch protection, costs, security
-considerations) live in `${CLAUDE_PLUGIN_ROOT}/reference/AUTONOMY.md`.
+considerations) live in `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md`.
 
 ---
 

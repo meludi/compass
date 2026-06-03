@@ -6,7 +6,7 @@ set -euo pipefail
 
 ROOT="${CLAUDE_PLUGIN_ROOT:-}"
 PROJECT="${CLAUDE_PROJECT_DIR:-$PWD}"
-REF="$ROOT/reference"
+REF="$ROOT/references"
 
 cat <<ORIENTATION
 # compass — workflow orientation

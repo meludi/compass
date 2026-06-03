@@ -29,7 +29,7 @@ Argument is **optional** — bare `/compass:context` just reloads rules + git st
 
 - `.claude/CLAUDE.md` — conventions, stack, patterns (the compass workflow guidance + framework doc index are injected separately by the plugin's SessionStart hook)
 - `.claude/compass.yml` — commands, repo, base branch
-- On-demand docs, pulled selectively for the task: **framework/workflow** docs from the SessionStart hook's index (`${CLAUDE_PLUGIN_ROOT}/reference/`), **project-specific** docs from the `CLAUDE.md` "Project Context" table
+- On-demand docs, pulled selectively for the task: **framework/workflow** docs from the SessionStart hook's index (`${CLAUDE_PLUGIN_ROOT}/references/`), **project-specific** docs from the `CLAUDE.md` "Project Context" table
 
 ### 2. Git state
 

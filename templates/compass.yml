@@ -43,7 +43,7 @@ tracker_create_issue_tool: mcp__linear-server__save_issue # /compass:create-stor
 tracker_get_team_tool: mcp__linear-server__get_team       # team/project lookup for issue creation
 
 # — CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
-# is installed. See the compass AUTONOMY reference (reference/AUTONOMY.md in the plugin).
+# is installed. See the compass AUTONOMY reference (references/AUTONOMY.md in the plugin).
 autonomy_mode: off          # off | review-only | full
 ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
                             # Secret per provider (gh secret set): ANTHROPIC_API_KEY /

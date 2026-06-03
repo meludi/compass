@@ -34,7 +34,7 @@ Use the `codebase-explorer` subagent to find:
 
 - Existing components, hooks, utilities that can be reused
 - Naming patterns and file structure conventions
-- Existing tests for similar features — note the patterns so planned behaviors follow `reference/HANDBOOK.md` → *Test quality* (behavior over implementation, public interface)
+- Existing tests for similar features — note the patterns so planned behaviors follow `references/HANDBOOK.md` → *Test quality* (behavior over implementation, public interface)
 
 If the feature requires an unknown library or pattern: spawn a web-search agent for isolated research. Only the summary returns to main context.
 

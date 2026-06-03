@@ -102,4 +102,4 @@ workflow `.github/workflows/pr-validation.yml` adds inline PR comments and a
 dynamic test checklist on PR open. In `full` mode, the PR auto-merges once all
 required checks pass.
 
-See `${CLAUDE_PLUGIN_ROOT}/reference/AUTONOMY.md` for full details.
+See `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` for full details.

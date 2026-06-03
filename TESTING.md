@@ -1,6 +1,6 @@
 # compass self-test
 
-End-to-end test of the workflow this plugin ships. It exercises all four flows from `${CLAUDE_PLUGIN_ROOT}/reference/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
+End-to-end test of the workflow this plugin ships. It exercises all four flows from `${CLAUDE_PLUGIN_ROOT}/references/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
 
 ```
 Stage 0 — Plugin check claude plugin details   (well-formed: ~18 cmds, 3 agents, 1 hook, 0 MCP servers)
@@ -53,7 +53,7 @@ For testing this branch, use **B**. Route **A** only works after the merge to `m
 - [ ] `gh` authenticated (`gh auth status`)
 - [ ] Node + your package manager installed
 - [ ] An `ANTHROPIC_API_KEY` available (needed for the `review-only` part of Loop 2; if `ci_review_provider` is `openai`/`gemini`, use that provider's key instead)
-- [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `${CLAUDE_PLUGIN_ROOT}/reference/AUTONOMY.md` → Cost estimate)
+- [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` → Cost estimate)
 
 ---
 

@@ -33,7 +33,7 @@ What do you want to reflect on?
 
 User describes the issue directly. Skip the questionnaire.
 
-1. Identify the target: CLAUDE.md rule, command in `.claude/commands/`, or reference doc in `${CLAUDE_PLUGIN_ROOT}/reference/`
+1. Identify the target: CLAUDE.md rule, command in `.claude/commands/`, or reference doc in `${CLAUDE_PLUGIN_ROOT}/references/`
 2. Propose the exact change
 3. Wait for confirmation, then apply + commit
 
@@ -64,7 +64,7 @@ Systematically go through each area. For each, read the current state and ask if
 
 1. **`CLAUDE.md`** — Project overview accurate? Patterns still correct? Key files up to date?
 2. **Commands** — Any command that felt off, too verbose, or missing a rule?
-3. **`reference/`** — Any topic that grew complex enough to deserve its own doc?
+3. **`references/`** — Any topic that grew complex enough to deserve its own doc?
 4. **`compass.yml`** — Commands still correct? DB file, prefix still right?
 5. **`.work/BACKLOG.md`** — Anything to add, close, or reprioritize?
 
