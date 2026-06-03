@@ -109,12 +109,12 @@ For typos, one-line bugfixes, CSS/copy tweaks, config values — a PRD/story/pla
 
 ## Other commands (folded or on-demand)
 
-| Command | Auto-runs in | Standalone when |
-|---|---|---|
-| `/compass:context [spec]` | step 1 of `/compass:plan-feature` and `/compass:implement` | Resuming after time away, stale session, or before `/compass:reflect` |
-| `/compass:validate` | end of `/compass:implement` | Before `/compass:ship`, or to debug a failing check |
-| `/compass:commit [--push]` | `/compass:ship` | WIP checkpoint, or Fix-Loop publish step |
-| `/compass:security-review [path]` | `/compass:ship` on risky diffs | Any time you want a focused security pass |
+| Command | Does | Auto-runs in | Standalone when |
+|---|---|---|---|
+| `/compass:context [story \| issue-id \| description]` | Loads project rules, git state, and optional spec into context | step 1 of `plan-feature` + `implement` | Resuming, stale session, before `reflect` |
+| `/compass:validate` | Runs lint, type-check, tests, browser smoke | end of `implement` | Before `ship`, or to debug a failing check |
+| `/compass:commit [--push]` | Stages + commits; asks whether to push | `ship` | WIP checkpoint, Fix-Loop publish step |
+| `/compass:security-review [file-or-directory]` | Security-focused review: injection, auth, data exposure, secrets — advisory, never edits | `ship` on risky diffs | Targeted audit of a specific file or directory |
 
 ---
 
