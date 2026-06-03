@@ -175,7 +175,7 @@ The PR from Loop 1 is open. This is the same loop in two modes; run both.
 
 ### Mode A — `autonomy_mode: off` (local)
 With `off` in `compass.yml`, intentionally leave/introduce a fixable issue, then:
-- [ ] `/code-review` (or `/code-review --fix`) surfaces it locally; you apply the fix
+- [ ] `/compass:code-review` (or `/compass:code-review --fix`) surfaces it locally; you apply the fix
 - [ ] `/compass:validate` green → `/compass:commit` → `git push`
 - [ ] On GitHub, only the **`test`** job runs (no Claude jobs); merge is yours
 - [ ] "Clean" is your own judgement — no CI review comments appear

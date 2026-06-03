@@ -70,7 +70,7 @@ Without this gate, `auto-merge` will fire as soon as CI is green, regardless of 
 | **— Always present (mode-independent) —** | | | |
 | `## Manual Test Plan` in PR body (from `/compass:ship`) | ✓ | ✓ | ✓ |
 | `/compass:ship` local 3-subagent review | ✓ optional | ✓ optional | ✓ optional |
-| Local `/code-review` / `/compass:review` | ✓ | ✓ | ✓ |
+| Local `/compass:code-review` / `/compass:review` | ✓ | ✓ | ✓ |
 | **— Who does what —** | | | |
 | Who reviews | you, locally | you locally **+ CI** | you locally **+ CI** |
 | Who fixes | you (local) | you (local) | you (local) |

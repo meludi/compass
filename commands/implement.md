@@ -58,7 +58,7 @@ Then:
 - **PASS** → mark task `[x]` in the plan file, proceed
 - **FAIL** → fix immediately, re-run, confirm PASS before proceeding
 
-Never start the next task while the current task's gate is failing. Save broader cleanup/refactor for after the suite is green — use the built-in `/code-review`; see `reference/HANDBOOK.md` → *Refactor candidates* for what to scan for (do not refactor while a test is red).
+Never start the next task while the current task's gate is failing. Save broader cleanup/refactor for after the suite is green — use `/compass:code-review`; see `reference/HANDBOOK.md` → *Refactor candidates* for what to scan for (do not refactor while a test is red).
 
 ### 4. Full validation
 

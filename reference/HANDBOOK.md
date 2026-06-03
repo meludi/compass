@@ -121,6 +121,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/compass:commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/compass:ship`) or User |
 | `/compass:ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
 | `/compass:review`          | `[PR-number]`                                 | PIV        | 3-subagent parallel review + security check + verdict; works with or without a PR | Opus    | —         | Auto (via `/compass:ship`) or User |
+| `/compass:code-review`     | `[low\|medium\|high\|max\|ultra] [--fix] [--comment] [PR]` | PIV | Deep bug hunt; tunable effort; `--fix` applies + auto-validates | Sonnet/Opus | — | User |
 | `/compass:apply-ci-review` | `[PR-number]`                                 | PIV (Fix)  | Apply the CI review's comments locally + validate — no commit    | Opus    | —         | User |
 | `/compass:security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/compass:review`) or User |
 | `/compass:reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
@@ -178,36 +179,19 @@ Always run `/clear` before `/compass:review` — the three subagents benefit fro
 2. No argument, PR exists for current branch → `gh pr diff` (inferred)
 3. No argument, no PR → `git diff {base_branch}...HEAD` (local fallback)
 
-### `/compass:review` vs `/code-review` — and choosing an effort level
+### `/compass:review` vs `/compass:code-review` — choosing a reviewer
 
-Two different reviewers with confusingly similar names:
+Two different reviewers with similar names:
 
-- **`/compass:review`** — this starter's command (`${CLAUDE_PLUGIN_ROOT}/commands/review.md`). Fans out 3 subagents tuned to *your* project: CLAUDE.md convention compliance, pattern reuse, test-coverage gaps. **Advisory only** — reports inline, never edits or commits. One fixed configuration.
-- **`/code-review`** — a built-in Claude Code skill (not in this repo). Generic deep bug hunt with a tunable **effort dial**, a verify stage to filter false positives, and `--fix` / `--comment` flags. `ultra` runs in the cloud.
-
-They overlap (both flag reuse/simplification) but are complementary: `/compass:review` for *your* conventions, `/code-review` for deep bugs + direct fixing. Higher effort = more tokens and time, but higher recall and fewer false positives. **Match the level to the risk** (and pass it explicitly — don't rely on the default):
-
-| Level | Cost | Use it for |
-|-------|------|-----------|
-| `low` / `medium` | cheap, fast | Trivial or small diffs; a quick pre-`/compass:ship` pass; few but high-confidence findings |
-| `high` | moderate | Normal feature work, non-trivial logic — broader coverage, may surface less-certain findings |
-| `max` | high | Risky changes where a missed bug is costly — widest local coverage, includes uncertain findings |
-| `ultra` | highest (cloud) | High-stakes diffs: DB migrations, auth, money logic, large refactors; a final pre-merge gate on critical PRs |
-
-```
-/code-review low              # quick local pass
-/code-review high --fix       # deep hunt + apply fixes (then re-run /compass:validate)
-/code-review ultra 42         # cloud review of PR #42
-```
-
-> After `/code-review --fix` changes code, run `/compass:validate` again — fixes can break lint/types/tests.
+- **`/compass:review`** — fans out 3 subagents tuned to *your* project: CLAUDE.md convention compliance, pattern reuse, test-coverage gaps. Advisory only — reports inline, never edits or commits.
+- **`/compass:code-review [level]`** — deep bug hunt with a tunable effort dial (`low`→`ultra`), a verify stage to filter false positives, and `--fix` / `--comment` flags. `ultra` runs in the cloud. After `--fix`, automatically runs `/compass:validate`. Full details and effort-level table: `${CLAUDE_PLUGIN_ROOT}/commands/code-review.md`.
 
 ### When to run `/compass:apply-ci-review`
 
 The Fix-loop entry point for the CI case (`review-only` / `full`). After the CI `claude-review` posts comments on your PR, `/compass:apply-ci-review` pulls them and applies the fixes **locally**, then runs `/compass:validate`. It stops before commit — you commit and push, and the push re-triggers the CI review.
 
-- Use it instead of a second local review: the CI already reviewed the diff, so `/code-review` would be redundant.
-- In `off` mode (no CI review) or before the PR exists, use `/code-review --fix` instead.
+- Use it instead of a second local review: the CI already reviewed the diff, so `/compass:code-review` would be redundant.
+- In `off` mode (no CI review) or before the PR exists, use `/compass:code-review --fix` instead.
 
 ### When to run `/compass:security-review` standalone
 
@@ -253,7 +237,7 @@ Write tests one behavior at a time alongside the code (see `/compass:implement` 
 
 ## Refactor candidates
 
-After a task's tests are **green** (never while red), scan for these and clean up — used by `/compass:implement` (post-green), `/compass:review`, and `/code-review`:
+After a task's tests are **green** (never while red), scan for these and clean up — used by `/compass:implement` (post-green), `/compass:review`, and `/compass:code-review`:
 
 | Smell | Remediation |
 |---|---|

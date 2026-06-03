@@ -50,8 +50,8 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 
 | Step | Command | Does |
 |---|---|---|
-| 1 — review | `/code-review` · `/compass:review` · or CI `claude-review` | Surface findings (bugs / conventions / coverage). Pick the reviewer below. |
-| 2 — fix | `/code-review --fix` · `/compass:apply-ci-review` · or by hand | Apply the fixes — always a deliberate human step. |
+| 1 — review | `/compass:code-review` · `/compass:review` · or CI `claude-review` | Surface findings (bugs / conventions / coverage). Pick the reviewer below. |
+| 2 — fix | `/compass:code-review --fix` · `/compass:apply-ci-review` · or by hand | Apply the fixes — always a deliberate human step. |
 | 3 — verify | `/compass:validate` | Re-run lint/types/tests (a fix can break them). |
 | 4 — publish | `/compass:commit` → `git push` | Commit is **local**; the **push** updates the PR and (in `review-only`/`full`) triggers an automatic CI re-review. |
 | 5 — merge | `gh pr merge --squash` → `/compass:worktree <name> rm` | Merge it yourself, then remove the worktree (guarded — refuses on unmerged/uncommitted work). |
@@ -60,7 +60,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 
 | Reviewer | Best for |
 |---|---|
-| `/code-review [low→ultra]` _(can `--fix`)_ | correctness / bugs; want fixes applied |
+| `/compass:code-review [low→ultra]` _(can `--fix`)_ | correctness / bugs; want fixes applied |
 | `/compass:review` _(3 subagents)_ | your `CLAUDE.md` conventions, reuse, test-coverage gaps |
 | CI `claude-review` | automatic on each push (`review-only`/`full`; needs an API key) |
 
@@ -69,7 +69,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 | | `off` | `review-only` |
 |---|---|---|
 | Who triggers the review | you, each round | CI, automatically on every push |
-| Fix entry | `/code-review --fix` | `/compass:apply-ci-review` |
+| Fix entry | `/compass:code-review --fix` | `/compass:apply-ci-review` |
 | Re-review after a fix | manual (run it again) | automatic on push |
 | "Clean" signal | your judgement | `## Review Summary` with no findings |
 | Findings live | in chat (ephemeral) | PR comments (audit trail) |

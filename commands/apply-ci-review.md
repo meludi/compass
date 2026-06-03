@@ -7,11 +7,11 @@ argument-hint: [PR-number]
 
 > **Model:** `/model opus` — applying review feedback needs careful editing.
 
-Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/code-review`.
+Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:code-review`.
 
 **Input**: `$ARGUMENTS` — PR number (optional).
 
-Use `/code-review --fix` instead when there is **no** CI review (mode `off`, or before the PR exists).
+Use `/compass:code-review --fix` instead when there is **no** CI review (mode `off`, or before the PR exists).
 
 ## PR source — how it's resolved
 
@@ -19,7 +19,7 @@ Use `/code-review --fix` instead when there is **no** CI review (mode `off`, or 
 |---|---|
 | `$ARGUMENTS` is a PR number | that PR |
 | No argument, PR exists for current branch | inferred via `gh pr view` |
-| No argument, no PR found | stop — nothing to apply (suggest `/code-review --fix`) |
+| No argument, no PR found | stop — nothing to apply (suggest `/compass:code-review --fix`) |
 
 Read `repo` from `.claude/compass.yml`.
 
