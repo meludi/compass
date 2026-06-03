@@ -51,6 +51,7 @@ Nothing is copied into your repo — the plugin is installed centrally. (To hack
 | **Level 2** | per story | `/compass:worktree` → `/compass:plan-feature` → `/compass:implement` → `/compass:ship` |
 | **Quick Path** | tiny fix (typo, 1-liner) | `/compass:worktree` → edit → `/compass:validate` → `/compass:ship` |
 
+- **Single task without an initiative?** (bug, small addition) — skip Ideate entirely: `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. No story file needed.
 - **Full command reference** (every command with arguments, model, and trigger): [`references/HANDBOOK.md`](references/HANDBOOK.md)
 - **Detailed command flow** (stages, loops, fix loop): [`references/WORKFLOW.md`](references/WORKFLOW.md)
 

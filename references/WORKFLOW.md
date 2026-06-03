@@ -32,6 +32,8 @@ Run once when starting a project or a new initiative.
 
 Pick a story from `.work/stories/` (or your tracker), then run this loop once per story.
 
+> **Single task without an initiative?** (Bug fix, small addition, mid-initiative extra) — skip Ideate and create-stories entirely. Pass the description directly: `/compass:plan-feature "add dark mode toggle"`. No story file needed.
+
 | Step | Command | Does |
 |---|---|---|
 | 1 | `/compass:worktree <story-name>` | Isolated worktree on `feat/<name>` + a fresh Claude session; steps 2–4 run there. Detail: `WORKTREES.md`. |
