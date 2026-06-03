@@ -235,4 +235,4 @@ Ask the user for an issue/work-item ID to test with. If they don't have one hand
 
 ---
 
-For documentation links and API token setup per tracker, see `README.md` → "Alternative issue trackers".
+Per-tracker credential sources and doc links are listed in Step 2 above; the `README.md` → "Configuration & integrations → Issue tracker" table lists the supported trackers at a glance.

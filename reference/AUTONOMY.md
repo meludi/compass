@@ -89,31 +89,12 @@ Notes:
 
 ---
 
-## Fixing review findings (the Fix Loop)
+## Fixing review findings
 
-**The reviewers point; the human fixes; CI never commits.** Neither the local review commands (`/compass:review`, `/code-review`) nor the CI `claude-review` job changes code — they surface findings. Applying a fix is always a deliberate human step. The only sanctioned auto-commit anywhere in the workflow is `/compass:auto-implement` (a pre-approved plan on a `feat/*` branch).
+The fix loop itself — review → fix → `/compass:validate` → `/compass:commit` → push → re-review → merge, in both `off` and `review-only` modes — lives in `WORKFLOW.md` → **"Loop 2 — Fix"**. In CI modes you consume the findings with `/compass:apply-ci-review`. Two autonomy-specific notes:
 
-This is the **Fix Loop** (`WORKFLOW.md`) seen from the autonomy angle — two entry paths depending on *when* you review:
-
-### Before the PR (local, synchronous)
-
-```
-/code-review --fix   →   findings shown + applied in your working tree   →   /compass:commit → /compass:ship
-```
-
-You are live in the session. Findings appear in the chat, fixes land in your working tree immediately, no GitHub round-trip. The starter's own `/compass:review` only **finds** — the fix application comes from the built-in `/code-review --fix`.
-
-### After the PR (CI, asynchronous — `review-only` / `full`)
-
-```
-PR open  →  CI claude-review runs  →  inline comments + one `## Review Summary` comment on GitHub
-         →  GitHub notifies you (PR author)  →  /compass:apply-ci-review  →  /compass:commit → push
-         →  the push (synchronize) re-triggers CI  →  re-review
-```
-
-You find out there is something to fix via GitHub's native notification — as the PR author you are notified of every review comment (bell / email / the PR's comment count). The `## Review Summary` comment makes the to-do unmissable: it states the finding count and repeats the instruction to fix locally and push. `/compass:apply-ci-review` pulls those comments and applies the fixes locally — the non-redundant path, since the CI already reviewed; use `/code-review --fix` instead if you want a fresh, deeper pass.
-
-**Known behaviour:** every push (`synchronize`) re-runs `claude-review`, so a new `## Review Summary` comment is posted per iteration. This is accepted — it doubles as a per-round record. The starter does **not** update a single comment in place (that would need a comment lookup + edit and isn't worth the complexity).
+- **CI never commits.** `claude-review` only surfaces findings; applying a fix is always a deliberate human step. The single sanctioned auto-commit anywhere is `/compass:auto-implement` (a pre-approved plan on a `feat/*` branch).
+- **A new comment per push.** Every push (`synchronize`) re-runs `claude-review`, so a fresh `## Review Summary` comment is posted each iteration — comments are **not** edited in place. This is intentional: it doubles as a per-round record.
 
 ---
 
@@ -204,11 +185,11 @@ If you run `/compass:auto-implement` (see below) with this hook installed, the h
 
 ---
 
-## Relationship to other commands
+## How `autonomy_mode` interacts with the commands
 
-- `/compass:ship` — local commit + push + PR + 3-subagent chat review. Always runs the chat review regardless of `autonomy_mode`. Commit step is gated by user confirmation.
-- `/compass:auto-implement` — runs a pre-approved plan from `.work/plans/` all the way to PR-open without intermediate confirmation. The only local command that may auto-commit. Never merges. Pre-flight checks (feat/* branch, worktree, plan exists) gate it. Works on top of any `autonomy_mode`: if `review-only` is on, the PR it opens still gets the CI review jobs.
-- `/compass:validate` — local lint + types + tests + browser smoke test. Mirrors what the `test` CI job runs.
-- `/compass:security-review` — local security-focused review. Auto-runs inside `/compass:ship` on risky diffs. The CI `claude-review` includes security as one of five focus areas; for deeper audits, run `/compass:security-review` locally.
+`autonomy_mode` is CI-only — it changes nothing about how the local commands behave (see `HANDBOOK.md` for what each command does). Two interactions worth knowing:
 
-The local commands and CI workflow are designed to complement, not replace, each other.
+- `/compass:ship` always runs its local 3-subagent review **regardless of `autonomy_mode`**; the CI review (in `review-only`/`full`) is an additional, auditable pass on the PR.
+- `/compass:auto-implement` composes with any mode and **never merges** — the PR it opens still gets the CI review jobs when the mode is on.
+
+Security is one of the five focus areas of the CI `claude-review`; for a deeper audit, run `/compass:security-review` locally.
