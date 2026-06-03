@@ -20,10 +20,11 @@ Run once when starting a project or a new initiative.
 | Step | Command | Does |
 |---|---|---|
 | 1 | `/compass:setup` | Configures the project — generates `.claude/compass.yml` + `.claude/CLAUDE.md`. Run first. |
-| 1b | `/compass:setup-tracker` _(optional)_ | Switch issue tracker. Linear works out of the box — only for Jira / Azure DevOps. |
+| 1b | `/compass:onboard` _(brownfield)_ | Scans the existing codebase and fills `CLAUDE.md` with real patterns (architecture, code style, testing). Skip for greenfield. |
+| 1c | `/compass:setup-stack` _(greenfield only)_ | Scaffold framework from the PRD, fill `CLAUDE.md` Code Patterns, drop seed files. Skip for brownfield. |
+| 1d | `/compass:setup-tracker` _(optional)_ | Switch issue tracker. Linear works out of the box — only for Jira / Azure DevOps. |
 | 2 | `/compass:ideate "<initiative>"` | Brain dump → PRD (scope check, approaches, self-review) → `.work/prds/`. |
-| 3 | `/compass:setup-stack` _(greenfield only)_ | Scaffold framework from the PRD, fill `CLAUDE.md` Code Patterns, drop seed files. Skip for brownfield. |
-| 4 | `/compass:create-stories <prd>` | Break the PRD into stories → `.work/stories/` (+ tracker issues if configured). Each story = one PIV iteration. |
+| 3 | `/compass:create-stories <prd>` | Break the PRD into stories → `.work/stories/` (+ tracker issues if configured). Each story = one PIV iteration. |
 
 ---
 

@@ -107,6 +107,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | Command            | Argument                                      | Level      | When to use                                                       | Model   | Plan Mode | Trigger |
 | ------------------ | --------------------------------------------- | ---------- | ----------------------------------------------------------------- | ------- | --------- | ------- |
 | `/compass:setup`           | —                                             | Once       | Configure project — generates `compass.yml` + `CLAUDE.md`         | Sonnet  | —         | User |
+| `/compass:onboard`         | `[--refresh]`                                 | Once       | Brownfield: scan existing codebase and fill `CLAUDE.md` patterns  | Opus    | —         | User |
 | `/compass:ideate`          | `<initiative name>`                           | Initiative | Brain dump → approaches → PRD → self-review (full flow)           | Opus    | **Yes**   | User |
 | `/compass:setup-stack`     | `[path to .work/prds/*.prd.md]`               | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet  | —         | User |
 | `/compass:setup-tracker`   | —                                             | Once       | Switch issue tracker (Linear / Jira / Azure DevOps)               | Sonnet  | —         | User |

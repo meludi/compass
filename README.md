@@ -35,7 +35,9 @@ Then configure your project (run from the project root in Claude Code):
 - `.claude/CLAUDE.md` — project conventions (a living document)
 - `.mcp.json` — issue-tracker MCP, only if you opt into a tracker
 
-Greenfield project? After `/compass:ideate`, run `/compass:setup-stack <prd>` to scaffold the stack.
+**Greenfield project?** After `/compass:ideate`, run `/compass:setup-stack <prd>` to scaffold the stack.
+
+**Existing project?** Run `/compass:onboard` to scan the codebase and fill `CLAUDE.md` with real patterns (architecture, code style, testing) instead of TODO stubs.
 
 Nothing is copied into your repo — the plugin is installed centrally. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
 
