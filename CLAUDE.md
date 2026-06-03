@@ -1,4 +1,4 @@
-# CLAUDE.md — claude-workflow-starter
+# CLAUDE.md — compass
 
 Rules for maintaining this repository.
 
@@ -15,14 +15,16 @@ Conventional Commit format — drives versioning:
 
 | Commit type | Version bump | Tag? |
 |---|---|---|
-| `feat:` | Minor (`1.2.0` → `1.3.0`) | Yes |
-| `fix:` | Patch (`1.2.0` → `1.2.1`) | Yes |
-| `feat!:` / `BREAKING CHANGE:` | Major (`1.2.0` → `2.0.0`) | Yes |
+| `feat:` | Minor (`0.2.0` → `0.3.0`) | Yes |
+| `fix:` | Patch (`0.2.0` → `0.2.1`) | Yes |
+| `feat!:` / `BREAKING CHANGE:` | Minor while pre-1.0 (`0.x`) | Yes |
 | `docs:`, `chore:`, `refactor:` | none | No |
 
+We restarted at `0.x` for the plugin migration; `1.0.0` is the first stable release. While on `0.x`, breaking changes bump the minor.
+
 - No Co-Authored-By attribution
-- On a release (`feat:`/`fix:`/breaking): update `.claude/compass/VERSION` to the new `X.Y.Z` **together with** the CHANGELOG entry, in the same commit — `.claude/compass/VERSION` ships with the copied `.claude/`, so it is how a user knows which starter version they have.
-- Tag on the last commit of the release (after CHANGELOG + `.claude/compass/VERSION` update), then push:
+- The version lives in **`.claude-plugin/plugin.json`** (`version` field) — that is what `/plugin` and the marketplace show. On a release (`feat:`/`fix:`/breaking), bump `plugin.json` `version` **together with** the CHANGELOG entry, in the same commit. There is no standalone `VERSION` file.
+- Tag on the last commit of the release (after CHANGELOG + `plugin.json` bump), then push:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
@@ -31,9 +33,13 @@ git push origin vX.Y.Z
 
 ## What this repo is
 
-A starter kit — `.claude/` is copied into user projects. Every change here is a change that ships to users.
+A **Claude Code plugin** — the repo root *is* the plugin root, installed (not copied) into user projects via the marketplace. Every change here ships to users on plugin update.
 
-- Commands live in `.claude/commands/`
-- Reference docs live in `.claude/compass/reference/`
-- The worktree lifecycle script is `.claude/compass/scripts/worktree.sh`
-- `CHANGELOG.md` tracks versions of the starter itself, not user projects
+- Manifest: `.claude-plugin/plugin.json`; catalog: `.claude-plugin/marketplace.json`
+- Commands live in `commands/` → invoked as `/compass:<name>`
+- Agents in `agents/`, skills in `skills/`
+- Reference docs in `reference/`
+- The worktree lifecycle script is `scripts/worktree.sh`; the shared config reader is `scripts/read-config.sh`
+- Always-on guidance is the `SessionStart` hook (`hooks/hooks.json` → `hooks/session-start.sh`) — a plugin `CLAUDE.md` is **not** loaded by Claude Code, so guidance must come via the hook
+- Bundled files referenced from commands/scripts use `${CLAUDE_PLUGIN_ROOT}/…`; user-project files use `${CLAUDE_PROJECT_DIR}/…` (or stay relative in command prose, where CWD is the project)
+- `CHANGELOG.md` tracks versions of the plugin itself, not user projects

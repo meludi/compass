@@ -1,16 +1,21 @@
 # Changelog
 
-## v2.0.0 — 2026-06-03
+## v0.1.0 — 2026-06-03 — first plugin release
 
-### Changed
-- **BREAKING — starter machinery consolidated into `.claude/compass/`.** `reference/`, `scripts/` (worktree.sh, read-config.sh), `templates/` (incl. the moved `CLAUDE-template.md`), `project.schema.json`, and `VERSION` now live under `.claude/compass/`. The Claude Code integration dirs (`commands/`, `agents/`, `skills/`, `settings*.json`) and the generated `CLAUDE.md` stay at `.claude/` (fixed/auto-loaded paths). All internal references updated.
-- **BREAKING — `project.yml` renamed to `compass.yml`** and kept at `.claude/` (user-owned config, pairs with the `compass/` engine). The `$schema` reference now points to `./compass/project.schema.json`; the shared reader and CI default to `.claude/compass.yml`.
-- **Updating an existing copy:** re-copy `.claude/compass/`, rename `.claude/project.yml` → `.claude/compass.yml`. The workflow, commands, and behavior are otherwise unchanged.
-
-This consolidation is a stepping stone toward distributing the starter as a Claude Code plugin (planned separately).
+The starter is now a **Claude Code plugin** (`meludi/compass`), installed via the marketplace instead of copying `.claude/` into each project. Versioning restarts at `0.x` (`1.0.0` at first stable release); the prior `1.x` history below is the copy-model era. **This is a one-way migration** — the copy-`.claude/` workflow is retired.
 
 ### Added
-- **`.claude/compass/AGENTS.md`** — starter-owned workflow guidance + the framework on-demand doc index, imported by the generated `CLAUDE.md` via `@compass/AGENTS.md`. The On-Demand Context table is split: framework docs live in `AGENTS.md` (starter-owned, replaced on update), project-specific docs in the `CLAUDE.md` "Project Context" table (user-owned). Keeps starter guidance out of the user's `CLAUDE.md` so updates never clobber project notes. `/setup`, `/context`, and `/reflect` updated accordingly.
+- **Plugin packaging** — `.claude-plugin/plugin.json` (manifest, `version`) and `.claude-plugin/marketplace.json` (catalog). Install with `/plugin marketplace add meludi/compass` then `/plugin install compass@compass`; develop locally with `claude --plugin-dir .`.
+- **Namespaced commands** — every command is now invoked as `/compass:<name>` (e.g. `/compass:plan-feature`, `/compass:implement`, `/compass:ship`). All cross-references updated.
+- **Always-on guidance via SessionStart hook** — `hooks/hooks.json` + `hooks/session-start.sh` inject a short orientation (PIV loop, on-demand framework docs, project config/conventions) at session start. This replaces the `@compass/AGENTS.md` import (a plugin `CLAUDE.md` is not loaded by Claude Code), which is removed.
+
+### Changed
+- **BREAKING — repo root is the plugin root.** `commands/`, `agents/`, `skills/`, `reference/`, `scripts/`, `templates/`, and `project.schema.json` moved from `.claude/` (and `.claude/compass/`) to the repo root. Bundled-file references use `${CLAUDE_PLUGIN_ROOT}/…`; project-side files use `${CLAUDE_PROJECT_DIR}/…`. The `.claude/` directory no longer ships.
+- **BREAKING — versioning** is the semver `version` in `plugin.json` plus git tags (`vX.Y.Z`). The standalone `VERSION` file is dropped.
+- Folds in the prior consolidation work: machinery gathered under one tree, `project.yml` renamed to `compass.yml` (user-owned config at `.claude/compass.yml` in the project), a single shared config reader (`scripts/read-config.sh`), and schema-backed `compass.yml`.
+
+### Removed
+- `VERSION` file and `compass/AGENTS.md` — superseded by `plugin.json` `version` and the SessionStart hook, respectively.
 
 ## v1.8.0 — 2026-06-02
 
