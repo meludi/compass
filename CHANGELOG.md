@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0 — 2026-06-03
+
+### Changed
+- **BREAKING — starter machinery consolidated into `.claude/compass/`.** `reference/`, `scripts/` (worktree.sh, read-config.sh), `templates/` (incl. the moved `CLAUDE-template.md`), `project.schema.json`, and `VERSION` now live under `.claude/compass/`. The Claude Code integration dirs (`commands/`, `agents/`, `skills/`, `settings*.json`) and the generated `CLAUDE.md` stay at `.claude/` (fixed/auto-loaded paths). All internal references updated.
+- **BREAKING — `project.yml` renamed to `compass.yml`** and kept at `.claude/` (user-owned config, pairs with the `compass/` engine). The `$schema` reference now points to `./compass/project.schema.json`; the shared reader and CI default to `.claude/compass.yml`.
+- **Updating an existing copy:** re-copy `.claude/compass/`, rename `.claude/project.yml` → `.claude/compass.yml`. The workflow, commands, and behavior are otherwise unchanged.
+
+This consolidation is a stepping stone toward distributing the starter as a Claude Code plugin (planned separately).
+
 ## v1.8.0 — 2026-06-02
 
 ### Added

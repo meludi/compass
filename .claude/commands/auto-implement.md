@@ -25,8 +25,8 @@ For everything else, stay with `/implement` → `/ship`.
 
 ## Pre-flight checks (any failure → abort, no commit, no push)
 
-1. **Branch guard** — `git branch --show-current` must match `feat/*`. Refuse on `base_branch` (from `.claude/project.yml`), `main`, or any non-`feat/*` branch.
-2. **Worktree guard** — the working directory must match the `worktree_prefix` pattern from `.claude/project.yml`. Refuse if running in the main project directory.
+1. **Branch guard** — `git branch --show-current` must match `feat/*`. Refuse on `base_branch` (from `.claude/compass.yml`), `main`, or any non-`feat/*` branch.
+2. **Worktree guard** — the working directory must match the `worktree_prefix` pattern from `.claude/compass.yml`. Refuse if running in the main project directory.
 3. **Plan exists** — the path argument resolves to a readable file under `.work/plans/`.
 4. **Working tree** — `git status --porcelain` either empty, or only contains files within this plan's declared scope. If unrelated changes exist: abort and ask the user to clean up first.
 
@@ -37,7 +37,7 @@ Report which check failed and stop. Do not proceed to Phase 1.
 Execute Steps 1–5 from `commands/implement.md`:
 
 1. Load context (`commands/context.md` Steps 1–5).
-2. Load plan, read `.claude/project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`, `base_branch`, `worktree_prefix`, `repo`, `src_dir`.
+2. Load plan, read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`, `base_branch`, `worktree_prefix`, `repo`, `src_dir`.
 3. Execute tasks one by one with per-task `type_check_cmd` after each. On type-check failure: fix, re-run, confirm PASS before continuing.
 4. After all tasks: full validation suite — lint, type check, tests, browser smoke test (same suite as `/validate`).
 5. Write the implementation report to `.work/reports/<feature>-report.md`.
@@ -55,7 +55,7 @@ Execute Steps 1–5 from `commands/implement.md`:
 ## Phase 3 — Push + open PR
 
 1. `git push -u origin <current-branch>`. Never `--force`.
-2. Read `base_branch` and `repo` from `.claude/project.yml`, then:
+2. Read `base_branch` and `repo` from `.claude/compass.yml`, then:
 
 ```bash
 gh pr create --base {base_branch} \
@@ -102,13 +102,13 @@ Hand back to the user. The user takes over for manual testing and the merge deci
 
 ## Note on CI
 
-If `autonomy_mode` in `.claude/project.yml` is `review-only` or `full`, the CI workflow `.github/workflows/pr-validation.yml` will add inline review comments and a checklist on the PR. `/auto-implement` itself does not interact with CI — it just opens the PR.
+If `autonomy_mode` in `.claude/compass.yml` is `review-only` or `full`, the CI workflow `.github/workflows/pr-validation.yml` will add inline review comments and a checklist on the PR. `/auto-implement` itself does not interact with CI — it just opens the PR.
 
-See `.claude/reference/AUTONOMY.md` for details.
+See `.claude/compass/reference/AUTONOMY.md` for details.
 
 ## Note on husky pre-commit hook
 
-If `.claude/templates/husky-pre-commit.sh` has been installed as `.husky/pre-commit`, it runs on the auto-commit in Phase 2:
+If `.claude/compass/templates/husky-pre-commit.sh` has been installed as `.husky/pre-commit`, it runs on the auto-commit in Phase 2:
 
 - The hook runs `npm test` first. If tests fail, the hook exits non-zero and the auto-commit aborts before push — a useful safety net even though Phase 1 already ran the full validation suite.
 - The hook then asks Claude to review the staged diff in `--print` mode. Findings are printed to the terminal; they do **not** block the commit.

@@ -5,7 +5,7 @@
 #
 #   npm install --save-dev husky
 #   npx husky init
-#   cp .claude/templates/husky-pre-commit.sh .husky/pre-commit
+#   cp .claude/compass/templates/husky-pre-commit.sh .husky/pre-commit
 #   chmod +x .husky/pre-commit
 #
 # Behaviour: runs tests locally, then asks Claude to review the staged diff.

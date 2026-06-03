@@ -16,7 +16,7 @@ Creates a new Git worktree on `feat/<name>` and opens a fresh Claude Code sessio
 Parse `$ARGUMENTS`: if the last token is `rm`, this is a **removal** — see *Removing a worktree* below. Otherwise **create + open**:
 
 ```bash
-bash .claude/scripts/worktree.sh <name> open
+bash .claude/compass/scripts/worktree.sh <name> open
 ```
 
 The script handles branch, install, `.env.local` symlink, DB copy, and port assignment. Manual equivalent:
@@ -31,7 +31,7 @@ claude .
 ## Result
 
 - Branch: `feat/<name>`
-- Directory: `{worktree_prefix}<name>` (from `.claude/project.yml`)
+- Directory: `{worktree_prefix}<name>` (from `.claude/compass.yml`)
 - New Claude session opens inside the worktree
 
 ## After the session opens
@@ -64,7 +64,7 @@ code .work/plans/<feature-name>.plan.md
 When the PR is merged, clean up from the **main project directory**:
 
 ```bash
-bash .claude/scripts/worktree.sh <name> rm
+bash .claude/compass/scripts/worktree.sh <name> rm
 ```
 
 Removal is **guarded** — it refuses and changes nothing if:
@@ -75,7 +75,7 @@ Removal is **guarded** — it refuses and changes nothing if:
 If a guard trips, surface the reason to the user and **ask before** re-running with `--force` — never force automatically:
 
 ```bash
-bash .claude/scripts/worktree.sh <name> rm --force
+bash .claude/compass/scripts/worktree.sh <name> rm --force
 ```
 
 On success it removes the directory, prunes worktree metadata, and deletes the branch (safe `git branch -d`; `-D` only under `--force`).
@@ -86,4 +86,4 @@ On success it removes the directory, prunes worktree metadata, and deletes the b
 - For parallel features: open a second terminal and run `/worktree <other-name>`
 - Each worktree gets its own dev port printed after setup — start with `PORT=$(cat .worktree-port) {dev_cmd}`
 - To remove a worktree when done: `/worktree <name> rm` (guarded) — see *Removing a worktree* above
-- See `.claude/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.
+- See `.claude/compass/reference/WORKTREES.md` for the mental model, lifecycle, and VS Code patterns.

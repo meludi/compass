@@ -122,14 +122,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Topic                | File                                    |
 | -------------------- | --------------------------------------- |
-| Workflow concepts    | `.claude/reference/CONCEPTS.md`         |
-| Command flow         | `.claude/reference/WORKFLOW.md`         |
-| Reference / handbook | `.claude/reference/HANDBOOK.md`         |
-| Test quality         | `.claude/reference/HANDBOOK.md` → Test quality |
-| Refactor candidates  | `.claude/reference/HANDBOOK.md` → Refactor candidates |
-| Worktrees            | `.claude/reference/WORKTREES.md`        |
-| CI & autonomy        | `.claude/reference/AUTONOMY.md`         |
-| {component area}     | `.claude/reference/{component}.md`      |
+| Workflow concepts    | `.claude/compass/reference/CONCEPTS.md`         |
+| Command flow         | `.claude/compass/reference/WORKFLOW.md`         |
+| Reference / handbook | `.claude/compass/reference/HANDBOOK.md`         |
+| Test quality         | `.claude/compass/reference/HANDBOOK.md` → Test quality |
+| Refactor candidates  | `.claude/compass/reference/HANDBOOK.md` → Refactor candidates |
+| Worktrees            | `.claude/compass/reference/WORKTREES.md`        |
+| CI & autonomy        | `.claude/compass/reference/AUTONOMY.md`         |
+| {component area}     | `.claude/compass/reference/{component}.md`      |
 
 <!-- Pattern: when a domain area becomes complex, extract its rules into a separate
      reference doc and add it here. /context loads this table (called by /plan-feature

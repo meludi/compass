@@ -116,11 +116,11 @@ agent-browser install   # downloads Chrome
 The starter ships `.github/workflows/pr-validation.yml`. Default mode is
 `off` — pure CI (lint + types + tests), no API calls. Opt in to inline Claude
 PR reviews, auto-generated test checklists, and auto-merge by setting
-`autonomy_mode` in `.claude/project.yml`.
+`autonomy_mode` in `.claude/compass.yml`.
 
 **Using an LLM for CI review needs an API key as a GitHub secret.** Whenever
 `autonomy_mode` is `review-only` or `full`, the review runs in GitHub Actions —
-so the key lives as a **repository secret**, not in `project.yml` or a local
+so the key lives as a **repository secret**, not in `compass.yml` or a local
 `.env`. Pick the provider with `ci_review_provider`, then set the matching
 secret:
 
@@ -133,7 +133,7 @@ gh secret set GEMINI_API_KEY      # ci_review_provider: gemini
 If the mode is on but the secret is missing, the review job fails (red) instead
 of skipping. `/setup-stack` checks for the secret and warns; it never sets it.
 
-Full details, secrets, costs, and security notes: `.claude/reference/AUTONOMY.md`.
+Full details, secrets, costs, and security notes: `.claude/compass/reference/AUTONOMY.md`.
 
 ---
 
@@ -172,7 +172,7 @@ Open your project in Claude Code and run:
 
 This will ask you a few questions (package manager, commands, repo, branch, DB file) and generate:
 
-- `.claude/project.yml` — your project config
+- `.claude/compass.yml` — your project config
 - `.claude/CLAUDE.md` — your project conventions (generated from `CLAUDE-template.md`, living document)
 
 `CLAUDE.md` is generated once by `/setup` and updated by you as the project evolves.
@@ -201,9 +201,9 @@ LEVEL 2 (per story):            /worktree → /plan-feature → /implement → /
 - **Linear is optional** — stories live in `.work/stories/`; Linear sync is available but not required
 - **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/worktree → edit → /validate → /ship` (decline the review) — see WORKFLOW.md
 
-Command flow: `.claude/reference/WORKFLOW.md`
-Reference (models, command table, troubleshooting): `.claude/reference/HANDBOOK.md`
-Concepts (the why): `.claude/reference/CONCEPTS.md`
+Command flow: `.claude/compass/reference/WORKFLOW.md`
+Reference (models, command table, troubleshooting): `.claude/compass/reference/HANDBOOK.md`
+Concepts (the why): `.claude/compass/reference/CONCEPTS.md`
 
 ---
 
@@ -225,7 +225,7 @@ Commands write plans, PRDs, stories, and reports to `.work/` — created automat
 
 ## Project config
 
-All project-specific values live in `.claude/project.yml`:
+All project-specific values live in `.claude/compass.yml`:
 
 ```yaml
 name: my-project
@@ -245,10 +245,10 @@ db_file: myapp.db          # optional — copied per worktree for isolation
 
 Commands read this file at runtime — change a value once, all commands pick it up.
 
-It is schema-backed: `.claude/project.schema.json` drives editor autocomplete + inline
+It is schema-backed: `.claude/compass/project.schema.json` drives editor autocomplete + inline
 validation (via the `# yaml-language-server: $schema=` line at the top of the file),
 and `/setup` validates against it — a mistyped key or bad value is reported, not
-silently ignored. A single reader (`.claude/scripts/read-config.sh`) parses it for
+silently ignored. A single reader (`.claude/compass/scripts/read-config.sh`) parses it for
 both `worktree.sh` and CI. Keep fields flat (no nesting).
 
 ---
@@ -257,24 +257,26 @@ both `worktree.sh` and CI. Keep fields flat (no nesting).
 
 ```
 .claude/
-├── VERSION                # Starter version (e.g. 1.5.0) — travels with the copy so you know what you have
-├── CLAUDE-template.md     # Template for your project conventions — /setup generates CLAUDE.md from this
-├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
-├── commands/              # All slash commands
-├── project.yml            # Project config — commands, repo, branch
-├── project.schema.json    # JSON Schema for project.yml — editor + /setup validation
-├── reference/
-│   ├── AUTONOMY.md        # CI autonomy layer — inline reviews, auto-merge, costs, security
-│   ├── CONCEPTS.md        # The four frameworks behind this workflow
-│   ├── WORKFLOW.md        # The command flow — Level 1, Level 2, Quick Path
-│   ├── HANDBOOK.md        # Reference — models, command table, troubleshooting
-│   └── WORKTREES.md       # Git worktree mental model and lifecycle
-├── scripts/
-│   ├── worktree.sh        # Worktree lifecycle script (create, open, remove)
-│   └── read-config.sh     # Single reader for project.yml (used by worktree.sh + CI)
-├── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
-└── templates/
-    └── husky-pre-commit.sh  # Pre-commit hook template — copied by /setup if Husky is detected
+├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer  (fixed path)
+├── commands/              # All slash commands  (fixed path)
+├── skills/agent-browser/  # Skill definition for automated browser testing  (fixed path)
+├── compass.yml            # Your project config — commands, repo, branch (edit this)
+├── CLAUDE.md              # Your project conventions — generated by /setup (lives here)
+└── compass/               # Starter machinery (the engine — replace as a unit on update)
+    ├── VERSION            # Starter version — travels with the copy so you know what you have
+    ├── project.schema.json  # JSON Schema for compass.yml — editor + /setup validation
+    ├── reference/
+    │   ├── AUTONOMY.md    # CI autonomy layer — inline reviews, auto-merge, costs, security
+    │   ├── CONCEPTS.md    # The four frameworks behind this workflow
+    │   ├── WORKFLOW.md    # The command flow — Level 1, Level 2, Quick Path
+    │   ├── HANDBOOK.md    # Reference — models, command table, troubleshooting
+    │   └── WORKTREES.md   # Git worktree mental model and lifecycle
+    ├── scripts/
+    │   ├── worktree.sh    # Worktree lifecycle script (create, open, remove)
+    │   └── read-config.sh # Single reader for compass.yml (used by worktree.sh + CI)
+    └── templates/
+        ├── CLAUDE-template.md   # /setup generates your CLAUDE.md from this
+        └── husky-pre-commit.sh  # Pre-commit hook template — copied by /setup if Husky is detected
 .github/
 └── workflows/
     └── pr-validation.yml  # CI workflow — lint, types, tests; opt-in Claude PR review + auto-merge

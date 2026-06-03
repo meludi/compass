@@ -51,7 +51,7 @@ So a fully autonomous dev server per worktree is automatic only for **JS + a fil
 
 ### Hooks
 
-`worktree_setup_cmd` runs after install (in the new worktree); `worktree_teardown_cmd` runs before removal. Both get `WT_NAME`, `WT_DIR`, `WT_BRANCH`, `WT_PORT` exported. Example (Postgres, in `.claude/project.yml`):
+`worktree_setup_cmd` runs after install (in the new worktree); `worktree_teardown_cmd` runs before removal. Both get `WT_NAME`, `WT_DIR`, `WT_BRANCH`, `WT_PORT` exported. Example (Postgres, in `.claude/compass.yml`):
 
 ```yaml
 install_cmd: "uv sync"
@@ -61,11 +61,11 @@ worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
 
 Your app must load `.env.worktree` (or whatever file the hook writes) — the starter does not inject it. For anything non-trivial, point a hook at a script file.
 
-> **Security:** hooks run arbitrary shell from `project.yml` at the same trust level as `dev_cmd` — only run worktrees from configs you trust.
+> **Security:** hooks run arbitrary shell from `compass.yml` at the same trust level as `dev_cmd` — only run worktrees from configs you trust.
 
 ### Recipes
 
-Copy-paste `project.yml` fragments. Each assumes the relevant client (`mongosh`, `createdb`/`dropdb`, `docker`) is installed locally and that **`.env.worktree` is gitignored**. The dev command sources `.env.worktree` because `.env.local` is shared.
+Copy-paste `compass.yml` fragments. Each assumes the relevant client (`mongosh`, `createdb`/`dropdb`, `docker`) is installed locally and that **`.env.worktree` is gitignored**. The dev command sources `.env.worktree` because `.env.local` is shared.
 
 **Payload CMS + MongoDB** — Mongo creates a db on first write, so just point at a unique name:
 
@@ -129,7 +129,7 @@ dev_cmd: bash -lc 'PORT=$(cat .worktree-port) go run ./cmd/server'
 
 ## Dev Server per Worktree
 
-Each worktree gets a unique port assigned automatically when created (`dev_port + N` from `.claude/project.yml`). The assigned port is saved to `.worktree-port` and printed by `worktree.sh`.
+Each worktree gets a unique port assigned automatically when created (`dev_port + N` from `.claude/compass.yml`). The assigned port is saved to `.worktree-port` and printed by `worktree.sh`.
 
 ```
 main project   → port 3000  (dev_port)
@@ -140,7 +140,7 @@ second worktree→ port 3002  (dev_port + 2)
 Start the dev server from inside the worktree:
 
 ```bash
-PORT=$(cat .worktree-port) npm run dev    # or whatever dev_cmd is in project.yml
+PORT=$(cat .worktree-port) npm run dev    # or whatever dev_cmd is in compass.yml
 ```
 
 All three dev servers run simultaneously without conflicts.
@@ -170,7 +170,7 @@ cd /path/to/worktree && claude .
 
 | Command | What it does |
 |---|---|
-| `bash .claude/scripts/worktree.sh <name> open` | Create worktree, install deps, open Claude |
-| `bash .claude/scripts/worktree.sh <name> rm` | Guarded removal: dir + branch + prune. Refuses on uncommitted/unmerged work — add `-f`/`--force` to override |
+| `bash .claude/compass/scripts/worktree.sh <name> open` | Create worktree, install deps, open Claude |
+| `bash .claude/compass/scripts/worktree.sh <name> rm` | Guarded removal: dir + branch + prune. Refuses on uncommitted/unmerged work — add `-f`/`--force` to override |
 | `git worktree list` | List all active worktrees |
 | `git worktree prune` | Clean up stale metadata (fixes Git GUI errors) |

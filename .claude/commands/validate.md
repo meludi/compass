@@ -14,7 +14,7 @@ Run all validation checks and report results.
 
 ## Checks to Run
 
-Read `.claude/project.yml` for the commands, then run in order:
+Read `.claude/compass.yml` for the commands, then run in order:
 
 1. `lint_cmd && format_cmd`
 2. `type_check_cmd` — skip if blank
@@ -34,7 +34,7 @@ Read `.claude/project.yml` for the commands, then run in order:
 
 ## Browser Smoke Test
 
-Only run if `dev_port` is set in `project.yml`. Check if the dev server is reachable:
+Only run if `dev_port` is set in `compass.yml`. Check if the dev server is reachable:
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" http://localhost:{dev_port}

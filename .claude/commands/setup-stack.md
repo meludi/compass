@@ -18,7 +18,7 @@ Set up the tech stack for a new greenfield project. Run **once**, directly after
 6. Asks 4 style decisions → records them in CLAUDE.md
 7. Creates canonical seed files + a visible welcome screen + a first smoke test
 8. Updates CLAUDE.md Code Patterns section
-9. Updates `project.yml` with actual commands
+9. Updates `compass.yml` with actual commands
 10. Verifies with lint + type check + smoke test, then boots the app to confirm it runs
 
 **Input:** `$ARGUMENTS` — optional path to `.work/prds/*.prd.md`
@@ -98,7 +98,7 @@ If "7 — Other": ask for the full scaffold command (e.g. `npx create-t3-app@lat
 
 ## Step 3 — Package Manager
 
-Read `package_manager` from `.claude/project.yml`.
+Read `package_manager` from `.claude/compass.yml`.
 
 Ask:
 ```
@@ -311,7 +311,7 @@ For non-Tailwind projects: omit `cn()`, keep `formatDate()` only.
 
 **File 3 — Welcome screen (the visible entry point):**
 
-This file is both the Mirror-source pattern example **and** a screen the user can actually see (frontend) or hit (backend) when the app runs in Step 12. Use the project `name` from `.claude/project.yml` in the heading. Wire it into the app entry point so it shows on first run (replace the scaffold's default placeholder page).
+This file is both the Mirror-source pattern example **and** a screen the user can actually see (frontend) or hit (backend) when the app runs in Step 12. Use the project `name` from `.claude/compass.yml` in the heading. Wire it into the app entry point so it shows on first run (replace the scaffold's default placeholder page).
 
 | Framework | File | Content |
 |-----------|------|---------|
@@ -490,11 +490,11 @@ Show the full intended changes as a diff before writing. Ask: "Write to CLAUDE.m
 
 ---
 
-## Step 10 — Update project.yml
+## Step 10 — Update compass.yml
 
-Read `package.json` `scripts` section. Map to `project.yml` fields:
+Read `package.json` `scripts` section. Map to `compass.yml` fields:
 
-| project.yml field | package.json script name(s) |
+| compass.yml field | package.json script name(s) |
 |-------------------|-----------------------------|
 | `dev_cmd` | `dev` |
 | `test_cmd` | `test` |
@@ -509,7 +509,7 @@ If a script name is non-standard (not in the list above): show all detected scri
 Show planned updates before applying:
 
 ```
-project.yml updates:
+compass.yml updates:
   dev_cmd:        {old}  →  {new}
   test_cmd:       {old}  →  {new}
   lint_cmd:       {old}  →  {new}
@@ -541,7 +541,7 @@ The starter ships a PR-validation workflow with three modes:
 If **no**: skip to Step 12.
 
 If **yes**: ask which mode the project should start in. Default `off`. Update
-`autonomy_mode` in `.claude/project.yml` to the chosen value.
+`autonomy_mode` in `.claude/compass.yml` to the chosen value.
 
 For `review-only` or `full`, also ask which LLM runs the CI review and write
 `ci_review_provider` (default `claude`):
@@ -582,7 +582,7 @@ errors — no remote yet — report that the secret can't be checked and move on
   never handles the raw key.
 
 Full setup details (secrets, branch protection, costs, security
-considerations) live in `.claude/reference/AUTONOMY.md`.
+considerations) live in `.claude/compass/reference/AUTONOMY.md`.
 
 ---
 
@@ -624,7 +624,7 @@ Setup complete.
                {welcome screen}
                {smoke test}
   CLAUDE.md:   Code Patterns section filled
-  project.yml: Commands updated
+  compass.yml: Commands updated
   Lint:        ✓
   Types:       ✓
   Smoke test:  ✓

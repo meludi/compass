@@ -1,6 +1,6 @@
 # CI & Autonomy
 
-The starter ships with `.github/workflows/pr-validation.yml`. Its behaviour is controlled by a single field in `.claude/project.yml`:
+The starter ships with `.github/workflows/pr-validation.yml`. Its behaviour is controlled by a single field in `.claude/compass.yml`:
 
 ```yaml
 autonomy_mode: off          # off | review-only | full
@@ -150,7 +150,7 @@ In GitHub → Settings → Branches, add a rule for your `base_branch`:
 
 ### 3. Switching modes
 
-Just edit `.claude/project.yml` and commit:
+Just edit `.claude/compass.yml` and commit:
 
 ```yaml
 autonomy_mode: review-only
@@ -180,12 +180,12 @@ To save budget on draft PRs, the workflow only triggers on `opened`, `synchroniz
 
 ## Optional: pre-commit hook (review-only style)
 
-If you also want a local pre-commit check, a template hook lives at `.claude/templates/husky-pre-commit.sh`. **It is not installed automatically.** To use it:
+If you also want a local pre-commit check, a template hook lives at `.claude/compass/templates/husky-pre-commit.sh`. **It is not installed automatically.** To use it:
 
 ```bash
 npm install --save-dev husky
 npx husky init
-cp .claude/templates/husky-pre-commit.sh .husky/pre-commit
+cp .claude/compass/templates/husky-pre-commit.sh .husky/pre-commit
 chmod +x .husky/pre-commit
 ```
 

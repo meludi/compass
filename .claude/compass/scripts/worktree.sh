@@ -7,7 +7,7 @@
 #                                        refuses on uncommitted or unmerged work)
 #   worktree.sh feature-name rm -f    -> force removal (skips the guards)
 #
-# Reads from .claude/project.yml:
+# Reads from .claude/compass.yml:
 #   package_manager        — npm | pnpm | yarn | bun (used when install_cmd is blank)
 #   install_cmd            — custom install command for any stack; overrides package_manager
 #   db_file                — optional file DB to copy per worktree (e.g. myapp.db, SQLite)
@@ -36,13 +36,13 @@ PARENT="$(dirname "$ROOT")"
 TARGET="$PARENT/$(basename "$ROOT")-$NAME"
 BRANCH="feat/$NAME"
 
-# Read from .claude/project.yml via the shared reader (scripts/read-config.sh) so
+# Read from .claude/compass.yml via the shared reader (scripts/read-config.sh) so
 # the parsing rules live in one place (also used by CI). read_config strips a
 # trailing " # comment", trims whitespace, and removes one surrounding quote pair —
 # internal quotes are preserved so command values (install_cmd, hooks) survive intact.
-export PROJECT_YML="$ROOT/.claude/project.yml"
+export PROJECT_YML="$ROOT/.claude/compass.yml"
 # shellcheck source=read-config.sh
-source "$ROOT/.claude/scripts/read-config.sh"
+source "$ROOT/.claude/compass/scripts/read-config.sh"
 PM=$(read_config package_manager)
 INSTALL_CMD=$(read_config install_cmd)
 DB=$(read_config db_file)
@@ -56,7 +56,7 @@ DEV_PORT="${DEV_PORT:-3000}"
 DEV_CMD="${DEV_CMD:-npm run dev}"
 BASE="${BASE:-main}"
 
-# Run a project.yml hook (setup/teardown) with worktree env exported.
+# Run a compass.yml hook (setup/teardown) with worktree env exported.
 # Non-fatal: a failing hook warns but does not abort the script.
 run_hook() {
   local cmd="$1" label="$2" rc=0

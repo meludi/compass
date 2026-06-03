@@ -24,7 +24,7 @@ Execute the loading procedure from `commands/context.md` (Steps 1–5). Critical
 ### 2. Load plan
 
 - Read the plan file
-- Read `.claude/project.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
+- Read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
 - Extract: goal, files to change, tasks, acceptance criteria
 - Confirm branch is correct (`git branch --show-current`)
 
@@ -48,7 +48,7 @@ For each task in the plan:
 
 For both: after implementing, verify integration — imports resolve, callers/callees still work, data flows correctly across boundaries.
 
-**Validate:** run the task's gate (skip a command if blank in `.claude/project.yml`):
+**Validate:** run the task's gate (skip a command if blank in `.claude/compass.yml`):
 
 - Logic task → the new **test passes** *and* `type_check_cmd` passes.
 - UI/glue task → `type_check_cmd` passes.

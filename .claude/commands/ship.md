@@ -34,11 +34,11 @@ Run `/commit` — shows state, proposes message, waits for confirmation, commits
 git push -u origin <current-branch>
 ```
 
-Never push to `base_branch` (from `.claude/project.yml`) directly.
+Never push to `base_branch` (from `.claude/compass.yml`) directly.
 
 ### 4. Open PR
 
-Read `base_branch` from `.claude/project.yml`, then:
+Read `base_branch` from `.claude/compass.yml`, then:
 
 ```bash
 gh pr create --base {base_branch} \
@@ -97,9 +97,9 @@ Note: for yes — run /clear first so the subagents start with a clean context.
 
 ## Note on CI / auto-merge
 
-If `autonomy_mode` in `.claude/project.yml` is `review-only` or `full`, the CI
+If `autonomy_mode` in `.claude/compass.yml` is `review-only` or `full`, the CI
 workflow `.github/workflows/pr-validation.yml` adds inline PR comments and a
 dynamic test checklist on PR open. In `full` mode, the PR auto-merges once all
 required checks pass.
 
-See `.claude/reference/AUTONOMY.md` for full details.
+See `.claude/compass/reference/AUTONOMY.md` for full details.

@@ -33,7 +33,7 @@ What do you want to reflect on?
 
 User describes the issue directly. Skip the questionnaire.
 
-1. Identify the target: CLAUDE.md rule, command in `.claude/commands/`, or reference doc in `.claude/reference/`
+1. Identify the target: CLAUDE.md rule, command in `.claude/commands/`, or reference doc in `.claude/compass/reference/`
 2. Propose the exact change
 3. Wait for confirmation, then apply + commit
 
@@ -52,7 +52,7 @@ Ask these questions one at a time:
 For each non-empty answer, propose a concrete change:
 - Deviation → update the relevant command in `.claude/commands/`
 - Repeated mistake → add a rule to `CLAUDE.md`
-- Missing context → create a doc in `.claude/reference/`, add to On-Demand Context table
+- Missing context → create a doc in `.claude/compass/reference/`, add to On-Demand Context table
 - New pattern → update Architecture or Code Patterns section in `CLAUDE.md`
 - Missing command → draft a new command, ask if the user wants to create it
 
@@ -65,7 +65,7 @@ Systematically go through each area. For each, read the current state and ask if
 1. **`CLAUDE.md`** — Project overview accurate? Patterns still correct? Key files up to date?
 2. **Commands** — Any command that felt off, too verbose, or missing a rule?
 3. **`reference/`** — Any topic that grew complex enough to deserve its own doc?
-4. **`project.yml`** — Commands still correct? DB file, prefix still right?
+4. **`compass.yml`** — Commands still correct? DB file, prefix still right?
 5. **`.work/BACKLOG.md`** — Anything to add, close, or reprioritize?
 
 ---

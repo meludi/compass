@@ -33,7 +33,7 @@ Wait until the user signals they are ready.
 
 Before the conversation starts, read silently:
 - `.claude/CLAUDE.md` — conventions, stack, patterns
-- `.claude/project.yml` — commands, repo, base branch
+- `.claude/compass.yml` — commands, repo, base branch
 - Recent commits: `git log --oneline -10`
 - Existing PRDs in `.work/prds/` — are there related specs?
 

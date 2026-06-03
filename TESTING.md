@@ -1,6 +1,6 @@
 # Starter self-test
 
-End-to-end test of the workflow this starter ships. It exercises all four flows from `.claude/reference/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
+End-to-end test of the workflow this starter ships. It exercises all four flows from `.claude/compass/reference/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
 
 ```
 Stage 0 — Setup        /setup → [/setup-tracker] → /ideate → [/setup-stack] → /create-stories
@@ -12,7 +12,7 @@ Quick Path             /worktree → edit → /validate → /ship
 
 **How to use:** work top to bottom, tick each box after it passes. Keep a `reflect-notes.md` open and log every deviation as a one-liner — feed it to `/reflect` (Scope 3) at the end. This file is for the starter maintainer; it is **not** copied into user projects (it lives at the repo root, outside `.claude/`).
 
-> Commands are written stack-agnostically as `{test_cmd}` / `{lint_cmd}` / `{type_check_cmd}` / `{dev_cmd}` — substitute your sandbox's `project.yml` values. **Browser-smoke** (`agent-browser`, folded into `/validate` and `/implement`) needs a web app with a running dev server; on a non-web sandbox it skips gracefully (⏭) — that's expected.
+> Commands are written stack-agnostically as `{test_cmd}` / `{lint_cmd}` / `{type_check_cmd}` / `{dev_cmd}` — substitute your sandbox's `compass.yml` values. **Browser-smoke** (`agent-browser`, folded into `/validate` and `/implement`) needs a web app with a running dev server; on a non-web sandbox it skips gracefully (⏭) — that's expected.
 
 ---
 
@@ -21,7 +21,7 @@ Quick Path             /worktree → edit → /validate → /ship
 - [ ] `gh` authenticated (`gh auth status`)
 - [ ] Node + your package manager installed
 - [ ] An `ANTHROPIC_API_KEY` available (needed for the `review-only` part of Loop 2; if `ci_review_provider` is `openai`/`gemini`, use that provider's key instead)
-- [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `.claude/reference/AUTONOMY.md` → Cost estimate)
+- [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `.claude/compass/reference/AUTONOMY.md` → Cost estimate)
 
 ---
 
@@ -44,7 +44,7 @@ A fresh repo so the test never touches a real project.
    cp -R <starter>/.github .github
    cp <starter>/.mcp.json .mcp.json
    ```
-3. **Configure** — `/setup` (twice: fill `project.yml`, then generate `CLAUDE.md`). Set `base_branch: main`.
+3. **Configure** — `/setup` (twice: fill `compass.yml`, then generate `CLAUDE.md`). Set `base_branch: main`.
 4. **CI secret + protection**
    ```bash
    gh secret set ANTHROPIC_API_KEY
@@ -52,7 +52,7 @@ A fresh repo so the test never touches a real project.
    GitHub → Settings → Branches → require the `test` status check on `main` (and `claude-review` + `claude-checklist` once you switch to `review-only`).
 
 - [ ] Sandbox repo exists on GitHub, `main` pushed
-- [ ] `.claude/`, `.github/`, `.mcp.json` present; `/setup` produced `project.yml` + `CLAUDE.md`
+- [ ] `.claude/`, `.github/`, `.mcp.json` present; `/setup` produced `compass.yml` + `CLAUDE.md`
 - [ ] `ANTHROPIC_API_KEY` secret set; branch protection requires `test`
 
 ---
@@ -60,7 +60,7 @@ A fresh repo so the test never touches a real project.
 ## Stage 0 — Setup (once per initiative)
 
 ### `/setup`
-- [ ] Phase 1 writes `project.yml` with all inline comments; stops
+- [ ] Phase 1 writes `compass.yml` with all inline comments; stops
 - [ ] After filling `name`/`repo`, Phase 2 validates (catches a bad `package_manager`/`dev_port`) and generates `CLAUDE.md` (code-pattern sections marked `TODO: update after first feature`)
 
 ### `/setup-tracker` _(optional)_
@@ -115,7 +115,7 @@ Suggested feature (small, one PIV pass): **"a `version` helper that returns the 
 The PR from Loop 1 is open. This is the same loop in two modes; run both.
 
 ### Mode A — `autonomy_mode: off` (local)
-With `off` in `project.yml`, intentionally leave/introduce a fixable issue, then:
+With `off` in `compass.yml`, intentionally leave/introduce a fixable issue, then:
 - [ ] `/code-review` (or `/code-review --fix`) surfaces it locally; you apply the fix
 - [ ] `/validate` green → `/commit` → `git push`
 - [ ] On GitHub, only the **`test`** job runs (no Claude jobs); merge is yours
@@ -177,8 +177,8 @@ Local commands cost normal session tokens. The only CI/API cost is Loop 2 Mode B
 
 ```bash
 # worktrees (guarded; --force if you mean it)
-bash .claude/scripts/worktree.sh self-test-piv rm
-bash .claude/scripts/worktree.sh self-test-quick rm
+bash .claude/compass/scripts/worktree.sh self-test-piv rm
+bash .claude/compass/scripts/worktree.sh self-test-quick rm
 
 # close test PRs instead of merging
 gh pr list --search "head:feat/self-test" --state open

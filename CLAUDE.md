@@ -21,8 +21,8 @@ Conventional Commit format — drives versioning:
 | `docs:`, `chore:`, `refactor:` | none | No |
 
 - No Co-Authored-By attribution
-- On a release (`feat:`/`fix:`/breaking): update `.claude/VERSION` to the new `X.Y.Z` **together with** the CHANGELOG entry, in the same commit — `.claude/VERSION` ships with the copied `.claude/`, so it is how a user knows which starter version they have.
-- Tag on the last commit of the release (after CHANGELOG + `.claude/VERSION` update), then push:
+- On a release (`feat:`/`fix:`/breaking): update `.claude/compass/VERSION` to the new `X.Y.Z` **together with** the CHANGELOG entry, in the same commit — `.claude/compass/VERSION` ships with the copied `.claude/`, so it is how a user knows which starter version they have.
+- Tag on the last commit of the release (after CHANGELOG + `.claude/compass/VERSION` update), then push:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
@@ -34,6 +34,6 @@ git push origin vX.Y.Z
 A starter kit — `.claude/` is copied into user projects. Every change here is a change that ships to users.
 
 - Commands live in `.claude/commands/`
-- Reference docs live in `.claude/reference/`
-- The worktree lifecycle script is `.claude/scripts/worktree.sh`
+- Reference docs live in `.claude/compass/reference/`
+- The worktree lifecycle script is `.claude/compass/scripts/worktree.sh`
 - `CHANGELOG.md` tracks versions of the starter itself, not user projects

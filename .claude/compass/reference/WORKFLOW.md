@@ -19,7 +19,7 @@ Run once when starting a project or a new initiative.
 
 | Step | Command | Does |
 |---|---|---|
-| 1 | `/setup` | Configures the project — generates `.claude/project.yml` + `.claude/CLAUDE.md`. Run first. |
+| 1 | `/setup` | Configures the project — generates `.claude/compass.yml` + `.claude/CLAUDE.md`. Run first. |
 | 1b | `/setup-tracker` _(optional)_ | Switch issue tracker. Linear works out of the box — only for Jira / Azure DevOps. |
 | 2 | `/ideate "<initiative>"` | Brain dump → PRD (scope check, approaches, self-review) → `.work/prds/`. |
 | 3 | `/setup-stack` _(greenfield only)_ | Scaffold framework from the PRD, fill `CLAUDE.md` Code Patterns, drop seed files. Skip for brownfield. |
@@ -109,7 +109,7 @@ Review is automatic on each push; you consume it with `/apply-ci-review`. The "c
 
 ## Axis — `autonomy_mode`
 
-A cross-cutting setting (`.claude/project.yml`), not a step — it decides how Loop 2 runs (see *The same loop, two modes* above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/apply-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
+A cross-cutting setting (`.claude/compass.yml`), not a step — it decides how Loop 2 runs (see *The same loop, two modes* above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/apply-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
 
 Comparison matrix, cost, and security notes: `AUTONOMY.md`.
 

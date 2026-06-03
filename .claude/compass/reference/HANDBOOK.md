@@ -76,7 +76,7 @@ BUG → ? → + RULE
 4. Add a test that would have caught it
 
 **Context was missing:**
-1. Write the missing context as a doc in `.claude/reference/`
+1. Write the missing context as a doc in `.claude/compass/reference/`
 2. Add it to the On-Demand Context table in `CLAUDE.md`
 3. `/plan-feature` loads the table — the agent picks it up next session
 
@@ -106,7 +106,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 
 | Command            | Argument                                      | Level      | When to use                                                       | Model   | Plan Mode | Trigger |
 | ------------------ | --------------------------------------------- | ---------- | ----------------------------------------------------------------- | ------- | --------- | ------- |
-| `/setup`           | —                                             | Once       | Configure project — generates `project.yml` + `CLAUDE.md`         | Sonnet  | —         | User |
+| `/setup`           | —                                             | Once       | Configure project — generates `compass.yml` + `CLAUDE.md`         | Sonnet  | —         | User |
 | `/ideate`          | `<initiative name>`                           | Initiative | Brain dump → approaches → PRD → self-review (full flow)           | Opus    | **Yes**   | User |
 | `/setup-stack`     | `[path to .work/prds/*.prd.md]`               | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet  | —         | User |
 | `/setup-tracker`   | —                                             | Once       | Switch issue tracker (Linear / Jira / Azure DevOps)               | Sonnet  | —         | User |
@@ -269,10 +269,10 @@ Refactor in small steps and re-run tests after each — behavior must not change
 
 ## Project config & validation
 
-`.claude/project.yml` is the single source of project config. Two things keep it robust:
+`.claude/compass.yml` is the single source of project config. Two things keep it robust:
 
-- **Schema** — `.claude/project.schema.json` defines required keys, enums, and types. The `# yaml-language-server: $schema=` line at the top of `project.yml` gives autocomplete + inline validation in editors with the YAML extension, and `/setup` validates against it (a mistyped key or bad enum is reported, not silently defaulted).
-- **One reader** — `.claude/scripts/read-config.sh` (`read_config <key>`) is the only parser; `worktree.sh` sources it and CI calls it. It reads **flat** `key: value` only (by design — zero runtime dependencies). Don't nest fields; add new ones flat and to the schema.
+- **Schema** — `.claude/compass/project.schema.json` defines required keys, enums, and types. The `# yaml-language-server: $schema=` line at the top of `compass.yml` gives autocomplete + inline validation in editors with the YAML extension, and `/setup` validates against it (a mistyped key or bad enum is reported, not silently defaulted).
+- **One reader** — `.claude/compass/scripts/read-config.sh` (`read_config <key>`) is the only parser; `worktree.sh` sources it and CI calls it. It reads **flat** `key: value` only (by design — zero runtime dependencies). Don't nest fields; add new ones flat and to the schema.
 
 Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/setup`/`/setup-stack`; re-run `/setup` to re-sync if scripts change.
 
@@ -284,11 +284,11 @@ Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
 | Dev server port conflict in worktree | Run `PORT=$(cat .worktree-port) <dev_cmd>` — each worktree has its own port in `.worktree-port`. |
 | DB state missing in worktree       | `/worktree` copies DB at creation time. If main DB has new data, copy again manually.  |
-| Type errors after implement        | Run `type_check_cmd` (from `.claude/project.yml`) and fix before committing.           |
+| Type errors after implement        | Run `type_check_cmd` (from `.claude/compass.yml`) and fix before committing.           |
 | Tracker issue not created          | Check the API key in `.claude/settings.local.json` and `enabledMcpjsonServers`.        |
 | Fork won't push `base_branch`      | Use `git push origin <base_branch>` from the terminal instead.                         |
 | Claude session feels slow/confused | Start a fresh session and run `/context` to reload the mental model.                   |
-| CI jobs not running as expected    | Check `autonomy_mode` and `ci_review_provider` in `.claude/project.yml` and that the matching secret (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`) is set. See `AUTONOMY.md`. |
+| CI jobs not running as expected    | Check `autonomy_mode` and `ci_review_provider` in `.claude/compass.yml` and that the matching secret (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`) is set. See `AUTONOMY.md`. |
 
 ---
 
@@ -306,7 +306,7 @@ repo, set the deployment branch to `base_branch`, copy the webhook URL, and add
 it as a GitHub webhook (Settings → Webhooks → Push event).
 
 **Netlify** — connect the repo at <https://app.netlify.com>, pick `base_branch`,
-set build command and publish directory from `project.yml`. Deploy Previews per
+set build command and publish directory from `compass.yml`. Deploy Previews per
 PR are enabled by default.
 
 For any of these: keep production secrets in the host's environment variables,

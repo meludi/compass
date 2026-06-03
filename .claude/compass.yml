@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=./project.schema.json
+# yaml-language-server: $schema=./compass/project.schema.json
 # Project configuration — fill in your values, or run /setup.
-# Schema: .claude/project.schema.json (editor autocomplete + /setup validation).
+# Schema: .claude/compass/project.schema.json (editor autocomplete + /setup validation).
 
 # — Identity —
 name: ""                # e.g. my-project
@@ -33,7 +33,7 @@ worktree_setup_cmd: ""     # runs after install (create DB/schema, write per-wor
 worktree_teardown_cmd: ""  # runs before removal (drop the per-worktree DB/schema)
 
 # — CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
-# is installed. See .claude/reference/AUTONOMY.md.
+# is installed. See .claude/compass/reference/AUTONOMY.md.
 autonomy_mode: off          # off | review-only | full
 ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
                             # Secret per provider (gh secret set): ANTHROPIC_API_KEY /

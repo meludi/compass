@@ -4,15 +4,15 @@ on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
 
-# Behaviour is gated by `autonomy_mode` in .claude/project.yml:
+# Behaviour is gated by `autonomy_mode` in .claude/compass.yml:
 #   off          (default) — runs only `test` (lint + types + tests)
 #   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
 #   full         + auto-merge once all checks are green
 #
-# See .claude/reference/AUTONOMY.md for details, secrets, costs, and security notes.
+# See .claude/compass/reference/AUTONOMY.md for details, secrets, costs, and security notes.
 
 jobs:
-  # Read autonomy_mode and project commands from .claude/project.yml so the rest
+  # Read autonomy_mode and project commands from .claude/compass.yml so the rest
   # of the workflow has a single source of truth.
   config:
     runs-on: ubuntu-latest
@@ -28,7 +28,7 @@ jobs:
       - id: read
         run: |
           # Shared reader (scripts/read-config.sh) — same parser worktree.sh uses.
-          read_field() { bash .claude/scripts/read-config.sh "$1"; }
+          read_field() { bash .claude/compass/scripts/read-config.sh "$1"; }
           MODE=$(read_field autonomy_mode)
           [ -z "$MODE" ] && MODE="off"
           PROVIDER=$(read_field ci_review_provider)

@@ -21,7 +21,7 @@ Use `/code-review --fix` instead when there is **no** CI review (mode `off`, or 
 | No argument, PR exists for current branch | inferred via `gh pr view` |
 | No argument, no PR found | stop — nothing to apply (suggest `/code-review --fix`) |
 
-Read `repo` from `.claude/project.yml`.
+Read `repo` from `.claude/compass.yml`.
 
 ## Steps
 

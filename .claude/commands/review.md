@@ -22,7 +22,7 @@ Can be triggered from `/ship` (step 5) or run standalone at any time.
 | No argument, PR exists for current branch | `gh pr diff` (inferred) |
 | No argument, no PR found | `git diff {base_branch}...HEAD` |
 
-Read `base_branch` from `.claude/project.yml` for the local fallback.
+Read `base_branch` from `.claude/compass.yml` for the local fallback.
 
 > **Note (local diff):** Without a PR, the agents have no PR title or description as context — they only see the raw diff. Results are still accurate, but slightly less contextualized.
 
@@ -38,7 +38,7 @@ Read `base_branch` from `.claude/project.yml` for the local fallback.
 
 ### 1. Resolve the diff source
 
-Follow the table above. Read `repo`, `src_dir`, and `base_branch` from `.claude/project.yml`.
+Follow the table above. Read `repo`, `src_dir`, and `base_branch` from `.claude/compass.yml`.
 
 For PR mode:
 ```bash
