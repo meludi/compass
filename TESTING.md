@@ -1,18 +1,50 @@
-# Starter self-test
+# compass self-test
 
-End-to-end test of the workflow this starter ships. It exercises all four flows from `${CLAUDE_PLUGIN_ROOT}/reference/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
+End-to-end test of the workflow this plugin ships. It exercises all four flows from `${CLAUDE_PLUGIN_ROOT}/reference/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
 
 ```
-Stage 0 — Setup        /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
+Stage 0 — Plugin check claude plugin details   (well-formed: ~18 cmds, 3 agents, 1 hook, 0 MCP servers)
+Stage 1 — Setup        /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
 Loop 1 — PIV           /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship → /compass:reflect
 Loop 2 — Fix           review → fix → /compass:validate → /compass:commit → push   (mode off: local · review-only: CI)
 Quick Path             /compass:worktree → edit → /compass:validate → /compass:ship
 + worktree lifecycle   /compass:worktree <name> rm   (guarded)
 ```
 
-**How to use:** work top to bottom, tick each box after it passes. Keep a `reflect-notes.md` open and log every deviation as a one-liner — feed it to `/compass:reflect` (Scope 3) at the end. This file is for the starter maintainer; it is **not** copied into user projects (it lives at the repo root, outside `.claude/`).
+**How to use:** work top to bottom, tick each box after it passes. Keep a `reflect-notes.md` open and log every deviation as a one-liner — feed it to `/compass:reflect` (Scope 3) at the end. This file is for the compass maintainer. It ships with the plugin (it lives at the repo root) but is **not** a loaded component — zero runtime cost.
 
 > Commands are written stack-agnostically as `{test_cmd}` / `{lint_cmd}` / `{type_check_cmd}` / `{dev_cmd}` — substitute your sandbox's `compass.yml` values. **Browser-smoke** (`agent-browser`, folded into `/compass:validate` and `/compass:implement`) needs a web app with a running dev server; on a non-web sandbox it skips gracefully (⏭) — that's expected.
+
+---
+
+## Installing compass
+
+`<compass>` below = the path to your clone of this repo, e.g. `/Users/meludi/Work/projects/works/compass`.
+
+**A — From the marketplace** (once the plugin is merged to the repo's default branch `main`):
+
+```
+/plugin marketplace add meludi/compass
+/plugin install compass@compass
+```
+
+Restart Claude Code if prompted. Later updates: `/plugin update compass`.
+
+**B — From a local clone** (to test *this* branch before it's published — what you do now):
+
+- Session-only, simplest — load it just for one session, nothing installed globally:
+  ```bash
+  claude --plugin-dir <compass>
+  ```
+- Or install it from the local path like a marketplace (persists until you remove it):
+  ```bash
+  claude plugin marketplace add <compass>
+  claude plugin install compass@compass
+  # undo when done:
+  claude plugin uninstall compass && claude plugin marketplace remove compass
+  ```
+
+For testing this branch, use **B**. Route **A** only works after the merge to `main`.
 
 ---
 
@@ -25,6 +57,34 @@ Quick Path             /compass:worktree → edit → /compass:validate → /com
 
 ---
 
+## Stage 0 — Plugin loads & is well-formed
+
+Before the sandbox, confirm Claude Code accepts the plugin. Register this clone as a
+local marketplace, install it, and inspect the component inventory (let `<compass>` be
+this clone's path):
+
+```bash
+claude plugin marketplace add <compass>
+claude plugin install compass@compass
+claude plugin details compass
+```
+
+Good if you see:
+- `compass <version>` with its description line
+- `Skills (~18)`, `Agents (3)`, `Hooks (1) SessionStart`, and **`MCP servers (0)`**
+  — the `0` matters: the plugin must **not** force a tracker MCP server on every install
+
+Clean up afterwards (so your global config is unchanged):
+
+```bash
+claude plugin uninstall compass
+claude plugin marketplace remove compass
+```
+
+- [ ] Inventory correct; **0 MCP servers**; SessionStart hook present
+
+---
+
 ## Sandbox bootstrap
 
 A fresh repo so the test never touches a real project.
@@ -34,9 +94,9 @@ A fresh repo so the test never touches a real project.
 1. **Create the project + repo**
    ```bash
    # example: minimal Next.js
-   npx create-next-app@latest starter-sandbox --ts --eslint --app --no-tailwind --no-src-dir --use-npm
-   cd starter-sandbox
-   gh repo create starter-sandbox --private --source=. --remote=origin --push
+   npx create-next-app@latest compass-sandbox --ts --eslint --app --no-tailwind --no-src-dir --use-npm
+   cd compass-sandbox
+   gh repo create compass-sandbox --private --source=. --remote=origin --push
    ```
 2. **Load the plugin** — launch Claude in the sandbox with compass loaded from your clone (nothing is copied in):
    ```bash
@@ -56,7 +116,7 @@ A fresh repo so the test never touches a real project.
 
 ---
 
-## Stage 0 — Setup (once per initiative)
+## Stage 1 — Setup (once per initiative)
 
 ### `/compass:setup`
 - [ ] Phase 1 writes `compass.yml` with all inline comments; stops
@@ -184,5 +244,5 @@ gh pr list --search "head:feat/self-test" --state open
 gh pr close <number>
 
 # the whole sandbox
-gh repo delete <owner>/starter-sandbox --yes   # or just delete the local dir
+gh repo delete <owner>/compass-sandbox --yes   # or just delete the local dir
 ```
