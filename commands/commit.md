@@ -1,12 +1,15 @@
 ---
-description: Stage and commit changes with a Conventional Commit message
+description: Stage and commit changes with a Conventional Commit message. Pass --push to also push immediately after.
+argument-hint: "[--push]"
 ---
 
 # /compass:commit — Stage and Commit
 
 > **Model:** `/model haiku` — saves tokens, this command only runs git operations.
 
-Create a commit for current changes. No push.
+Create a commit for current changes. Stays local by default; after committing always asks whether to push.
+
+`--push` — skip the question and push immediately after the commit.
 
 ## Steps
 
@@ -37,6 +40,13 @@ Use `feat:`, `fix:`, `refactor:`, `chore:`, or `docs:` as appropriate.
 git add <files>
 git commit -m "<confirmed message>"
 ```
+
+### 4. Push?
+
+- **`--push` was passed** → run `git push` immediately. Report the result.
+- **No `--push`** → ask: `Push to origin now? (yes / no)`. On yes: `git push`. On no: done.
+
+Pushing updates the open PR (if any) and — in `review-only`/`full` mode — triggers a CI re-review.
 
 ## Rules
 

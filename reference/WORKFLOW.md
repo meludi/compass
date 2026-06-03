@@ -5,7 +5,7 @@ The map of how work flows through this starter: **one setup, two loops, one axis
 ```
 STAGE 0 — Setup (once per initiative)   /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
 LOOP 1 — PIV (per story)                /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship → /compass:reflect
-LOOP 2 — Fix (until the PR is clean)    review → fix → /compass:validate → /compass:commit → push → (repeat) → merge → cleanup
+LOOP 2 — Fix (until the PR is clean)    review → fix → /compass:validate → /compass:commit [--push] → (repeat) → merge → cleanup
 AXIS — autonomy_mode                    off = Loop 2 stays local · review-only = CI re-reviews each push
 ```
 
@@ -53,7 +53,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 | 1 — review | `/compass:code-review` · `/compass:review` · or CI `claude-review` | Surface findings (bugs / conventions / coverage). Pick the reviewer below. |
 | 2 — fix | `/compass:code-review --fix` · `/compass:apply-ci-review` · or by hand | Apply the fixes — always a deliberate human step. |
 | 3 — verify | `/compass:validate` | Re-run lint/types/tests (a fix can break them). |
-| 4 — publish | `/compass:commit` → `git push` | Commit is **local**; the **push** updates the PR and (in `review-only`/`full`) triggers an automatic CI re-review. |
+| 4 — publish | `/compass:commit [--push]` | Commit, then push (asked automatically, or pass `--push` to skip the question). The push updates the PR and triggers CI re-review in `review-only`/`full`. |
 | 5 — merge | `gh pr merge --squash` → `/compass:worktree <name> rm` | Merge it yourself, then remove the worktree (guarded — refuses on unmerged/uncommitted work). |
 
 **Which reviewer?**
@@ -100,7 +100,7 @@ For typos, one-line bugfixes, CSS/copy tweaks, config values — a PRD/story/pla
 
 - `/compass:context [spec]` — load rules, git state, optional spec, on-demand docs. Auto-runs as step 1 of `/compass:plan-feature` and `/compass:implement`; standalone on resume or stale context.
 - `/compass:validate` — lint + types + tests + browser smoke test. Folded into `/compass:implement`; standalone before `/compass:ship` or to debug a failing check.
-- `/compass:commit` — stage + commit locally, no push/PR. Folded into `/compass:ship`; standalone for WIP checkpoints.
+- `/compass:commit [--push]` — stage + commit, then asks whether to push (or `--push` skips the question). No PR. Folded into `/compass:ship`; standalone for WIP checkpoints or Fix-Loop rounds.
 - `/compass:security-review [path]` — security review of changed files. Auto-runs inside `/compass:ship` on risky diffs; standalone on demand.
 
 ---

@@ -118,7 +118,7 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 | `/compass:implement`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
 | `/compass:auto-implement`  | `<path to .work/plans/*.plan.md>`             | PIV        | Run a confirmed plan to PR-open without confirmation — implement + commit + push + PR. Never merges. | Sonnet  | —         | User |
 | `/compass:validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
-| `/compass:commit`          | —                                             | PIV        | Stage and commit locally — no push, no PR                         | Haiku   | —         | Auto (via `/compass:ship`) or User |
+| `/compass:commit`          | `[--push]`                                    | PIV        | Stage and commit; asks whether to push (`--push` skips the question) — no PR | Haiku   | —         | Auto (via `/compass:ship`) or User |
 | `/compass:ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
 | `/compass:review`          | `[PR-number]`                                 | PIV        | 3-subagent parallel review + security check + verdict; works with or without a PR | Opus    | —         | Auto (via `/compass:ship`) or User |
 | `/compass:code-review`     | `[low\|medium\|high\|max\|ultra] [--fix] [--comment] [PR]` | PIV | Deep bug hunt; tunable effort; `--fix` applies + auto-validates | Sonnet/Opus | — | User |
