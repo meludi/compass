@@ -6,6 +6,7 @@ The starter is now a **Claude Code plugin** (`meludi/compass`), installed via th
 
 ### Added
 - **Plugin packaging** — `.claude-plugin/plugin.json` (manifest, `version`) and `.claude-plugin/marketplace.json` (catalog). Install with `/plugin marketplace add meludi/compass` then `/plugin install compass@compass`; develop locally with `claude --plugin-dir .`.
+- **MIT license** + manifest metadata — `LICENSE` file and `plugin.json` `repository`, `homepage`, `license`, `keywords`, `displayName`, `$schema`, and `author.url`.
 - **Namespaced commands** — every command is now invoked as `/compass:<name>` (e.g. `/compass:plan-feature`, `/compass:implement`, `/compass:ship`). All cross-references updated.
 - **Always-on guidance via SessionStart hook** — `hooks/hooks.json` + `hooks/session-start.sh` inject a short orientation (PIV loop, on-demand framework docs, project config/conventions) at session start. This replaces the `@compass/AGENTS.md` import (a plugin `CLAUDE.md` is not loaded by Claude Code), which is removed.
 - **`/compass:setup` generates the project files** from plugin templates — `.claude/compass.yml` (from `templates/compass.yml`), a copy of the schema at `.claude/compass.schema.json` (so the editor `$schema` line resolves; refreshed by re-running setup), `.claude/CLAUDE.md`, and a project `.mcp.json` for tracker sync. Nothing is copied wholesale anymore.
