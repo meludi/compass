@@ -41,7 +41,7 @@ git status --short
 
 ### 3. Spec — if an argument was given
 
-- An **issue ID** (e.g. `PROJ-42`) → fetch with `mcp__linear-server__get_issue`. Extract title, description, acceptance criteria, status.
+- An **issue ID** (e.g. `PROJ-42`) → fetch with the MCP tool named in `tracker_get_issue_tool` (from `.claude/compass.yml`; Linear default `mcp__linear-server__get_issue`). Extract title, description, acceptance criteria, status. If `tracker: none` or that field is blank, there is no tracker — treat the argument as a feature description instead.
 - A **`.work/stories/*.md` path** → read the file. Extract title, acceptance criteria, technical notes.
 - A **plain feature description** (and no tracker configured) → the description itself is the spec.
 

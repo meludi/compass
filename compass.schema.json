@@ -75,6 +75,23 @@
       "default": "claude",
       "description": "Which LLM runs the CI review. Secret per provider: ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY."
     },
+    "tracker": {
+      "enum": ["none", "linear", "jira-official", "jira-community", "azure"],
+      "default": "linear",
+      "description": "Active issue tracker. 'none' = stories live only in .work/stories/. Set by /compass:setup-tracker."
+    },
+    "tracker_get_issue_tool": {
+      "type": "string",
+      "description": "MCP tool to fetch an issue by ID, e.g. mcp__linear-server__get_issue. Used by /compass:context. Blank or tracker=none means no issue loading."
+    },
+    "tracker_create_issue_tool": {
+      "type": "string",
+      "description": "MCP tool to create an issue, e.g. mcp__linear-server__save_issue. Used by /compass:create-stories."
+    },
+    "tracker_get_team_tool": {
+      "type": "string",
+      "description": "MCP tool to fetch the team/project for issue creation, e.g. mcp__linear-server__get_team. Some trackers (Azure DevOps) use a project name instead — leave blank."
+    },
     "description": {
       "type": "string",
       "description": "One paragraph — what this project does. Filled by /setup."

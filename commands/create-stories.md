@@ -40,16 +40,20 @@ Save all stories to `.work/stories/{prd-name}-stories.md` before creating them i
 
 ### 4. Create issues in the tracker via MCP
 
-For each story, use `mcp__linear-server__save_issue` to create the issue.
+Read `tracker`, `tracker_create_issue_tool`, and `tracker_get_team_tool` from `.claude/compass.yml`.
+
+If `tracker: none` (or `tracker_create_issue_tool` is blank): **skip this step** — the stories saved in Step 3 are the spec. Tell the user no tracker is configured and they can run `/compass:setup-tracker` to enable issue sync.
+
+Otherwise, for each story call the MCP tool named in `tracker_create_issue_tool` (Linear default `mcp__linear-server__save_issue`) to create the issue.
 
 Required fields:
 
 - `title`
 - `description` (markdown: user story + acceptance criteria + technical notes)
-- `teamId` (get from `mcp__linear-server__get_team` if not known)
+- `teamId` / project — get from the MCP tool named in `tracker_get_team_tool` if not known (some trackers, e.g. Azure DevOps, use a project name from config instead)
 - `priority` (1=Urgent, 2=High, 3=Medium, 4=Low)
 
-After creating: report each issue with its tracker ID and URL.
+Field names vary by tracker — map to the target tracker's create-issue schema. After creating: report each issue with its tracker ID and URL.
 
 ### 5. Output
 

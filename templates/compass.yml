@@ -33,6 +33,15 @@ db_file: ""             # Optional: e.g. myapp.db — copied per worktree (file/
 worktree_setup_cmd: ""     # runs after install (create DB/schema, write per-worktree env)
 worktree_teardown_cmd: ""  # runs before removal (drop the per-worktree DB/schema)
 
+# — Issue tracker — set by /compass:setup-tracker. Defaults to Linear.
+# tracker=none → stories live only in .work/stories/ (no MCP issue sync).
+# The *_tool fields are the MCP tool names /compass:context and
+# /compass:create-stories call — switching tracker rewrites these (+ .mcp.json).
+tracker: linear
+tracker_get_issue_tool: mcp__linear-server__get_issue     # /compass:context loads an issue with this
+tracker_create_issue_tool: mcp__linear-server__save_issue # /compass:create-stories creates issues with this
+tracker_get_team_tool: mcp__linear-server__get_team       # team/project lookup for issue creation
+
 # — CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
 # is installed. See the compass AUTONOMY reference (reference/AUTONOMY.md in the plugin).
 autonomy_mode: off          # off | review-only | full

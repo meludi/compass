@@ -66,7 +66,9 @@ Connecting Linear to GitHub is not required for this workflow — PRs are create
 ### Alternative issue trackers (optional)
 
 The workflow is not tied to Linear. Any issue tracker with an MCP server works.
-Run `/compass:setup-tracker` to switch — it updates the 3 files that reference Linear.
+Run `/compass:setup-tracker` to switch — the commands read the tracker's MCP tool
+names from `.claude/compass.yml`, so switching just rewrites project config (no
+command files are touched).
 
 | Tracker | Auth | MCP server | API keys / tokens |
 |---------|------|-----------|-------------------|
@@ -76,10 +78,10 @@ Run `/compass:setup-tracker` to switch — it updates the 3 files that reference
 | [Azure DevOps — remote MCP](https://learn.microsoft.com/azure/devops/mcp-server) | OAuth via Entra ID (no key) | [mcp.dev.azure.com/{org}](https://learn.microsoft.com/azure/devops/mcp-server) | — |
 | [Azure DevOps — local MCP](https://github.com/microsoft/azure-devops-mcp) | PAT | [github.com/microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) | dev.azure.com → User Settings → Personal Access Tokens |
 
-What `/compass:setup-tracker` changes:
+What `/compass:setup-tracker` changes (all project-side):
 - `.mcp.json` — MCP server config + auth
-- `commands/context.md` — tool name for loading an issue (called by `/compass:plan-feature` and `/compass:implement`)
-- `commands/create-stories.md` — tool name for creating issues
+- `.claude/compass.yml` — `tracker` + the `tracker_*_tool` fields that `/compass:context` and `/compass:create-stories` call
+- `.claude/settings.local.json` — env vars + enabled MCP server
 
 ---
 

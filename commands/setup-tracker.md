@@ -1,12 +1,12 @@
 ---
-description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, context.md, create-stories.md
+description: Switch the issue tracker (Linear, Jira, Azure DevOps) — updates .mcp.json, compass.yml, settings.local.json
 ---
 
 # /compass:setup-tracker — Configure Issue Tracker
 
 > **Model:** `/model sonnet` — balanced model for this command.
 
-Switch between issue trackers. Updates the 3 files that reference Linear so the whole workflow points to the new tracker.
+Switch between issue trackers. The commands (`/compass:context`, `/compass:create-stories`) read the tracker's MCP tool names from `.claude/compass.yml` — they are generic. So switching trackers updates three **project** files, none of them command files: `.mcp.json` (MCP server + auth), `.claude/compass.yml` (the `tracker_*` fields), and `.claude/settings.local.json` (env + enabled server).
 
 ---
 
@@ -63,16 +63,16 @@ Based on selection:
 
 ## Step 3 — Show planned changes (diff-style)
 
-Before applying, show exactly what will change across the 3 files:
+Before applying, show exactly what will change across the 3 project files:
 
 ```
 Files to update:
-  .mcp.json                        — MCP server config + auth
-  .claude/commands/context.md      — tool name for loading an issue (called by /compass:plan-feature, /compass:implement)
-  .claude/commands/create-stories.md — tool name for creating issues
+  .mcp.json                     — MCP server config + auth
+  .claude/compass.yml           — tracker + tracker_*_tool fields (read by /compass:context, /compass:create-stories)
+  .claude/settings.local.json   — env vars + enabledMcpjsonServers
 ```
 
-Show the key values being set (server URL, tool names, env vars).
+Show the key values being set (server URL, tracker name, MCP tool names, env vars).
 Ask: "Apply these changes? (yes/no)"
 
 ---
@@ -157,51 +157,20 @@ After confirmation, update all 3 files:
 
 ---
 
-### `.claude/commands/context.md` — update the spec-loading step
+### `.claude/compass.yml` — set the tracker fields
 
-Description texts in `context.md` are already tracker-neutral ("issue ID", not "Linear issue ID") — do not change them.
+`/compass:context` and `/compass:create-stories` read these fields and call whatever
+MCP tools they name — no command file is edited. Set all four per the chosen tracker:
 
-Update these three things:
+| Tracker | `tracker` | `tracker_get_issue_tool` | `tracker_create_issue_tool` | `tracker_get_team_tool` |
+|---------|-----------|--------------------------|-----------------------------|-------------------------|
+| Linear | `linear` | `mcp__linear-server__get_issue` | `mcp__linear-server__save_issue` | `mcp__linear-server__get_team` |
+| Jira (official) | `jira-official` | `mcp__atlassian__getJiraIssue` | `mcp__atlassian__createJiraIssue` | `mcp__atlassian__getJiraProjects` |
+| Jira (community) | `jira-community` | `mcp__jira__jira_get_issue` | `mcp__jira__jira_create_issue` | `mcp__jira__jira_get_projects` |
+| Azure DevOps (remote or local) | `azure` | `mcp__azure-devops__wit_work_item` | `mcp__azure-devops__wit_work_item_write` | _(blank — use the project name)_ |
 
-**1. MCP tool name** (Step 3, the issue-ID branch):
-
-| Tracker | Tool |
-|---------|------|
-| Linear | `mcp__linear-server__get_issue` |
-| Jira (official) | `mcp__atlassian__getJiraIssue` |
-| Jira (community) | `mcp__jira__jira_get_issue` |
-| Azure DevOps (remote or local) | `mcp__azure-devops__wit_work_item` |
-
-**2. `argument-hint` frontmatter** — set per tracker:
-
-| Tracker | argument-hint |
-|---------|--------------|
-| Linear / Jira | `<path to .work/stories/*.md \| issue-id \| feature description>` |
-| Jira (with Confluence URL configured) | `<path to .work/stories/*.md \| issue-id \| confluence-page-url \| feature description>` |
-| Azure DevOps | `<path to .work/stories/*.md \| work-item-id \| feature description>` |
-
-**3. For Jira + Confluence only** — add a Confluence option to the Spec list in Step 1:
-
-```
-A **Confluence page URL** → fetch with `mcp__atlassian__getConfluencePage` (official)
-or `mcp__jira__confluence_get_page` (community). Extract page title and body — use as
-additional session context.
-```
-
----
-
-### `.claude/commands/create-stories.md` — update "Create in tracker" step
-
-Replace the Linear MCP tools with the correct tracker tools:
-
-| Tracker | Create issue | Get team/project |
-|---------|-------------|-----------------|
-| Linear | `mcp__linear-server__save_issue` | `mcp__linear-server__get_team` |
-| Jira (official) | `mcp__atlassian__createJiraIssue` | `mcp__atlassian__getJiraProjects` |
-| Jira (community) | `mcp__jira__jira_create_issue` | `mcp__jira__jira_get_projects` |
-| Azure DevOps | `mcp__azure-devops__wit_work_item_write` | (use project name from config) |
-
-Update required fields section to match the tracker's schema.
+Edit the existing `tracker_*` keys in place (they ship with Linear defaults). Do not
+add or remove keys — the schema (`compass.schema.json`) rejects unknown ones.
 
 ---
 
