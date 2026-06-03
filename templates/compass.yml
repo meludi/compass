@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=./compass.schema.json
+# Project configuration — fill in your values, or run /compass:setup.
+# Schema: .claude/compass.schema.json (copied here by /compass:setup for editor
+# autocomplete + validation). Re-run /compass:setup to refresh it after a plugin update.
+
+# — Identity —
+name: ""                # e.g. my-project
+repo: ""                # GitHub slug, e.g. owner/my-project
+base_branch: main       # Branch PRs are opened against
+
+# — Commands — (left blank? /compass:setup fills these from package.json scripts)
+package_manager: npm    # npm | pnpm | yarn | bun
+install_cmd: ""         # Optional — custom install for any stack, e.g. uv sync. Blank = use package_manager
+dev_cmd: npm run dev    # Start dev server
+dev_port: 3000          # Dev server port
+test_cmd: npm test
+lint_cmd: npm run lint
+format_cmd: npm run format
+type_check_cmd: ""      # Optional, e.g. npm run typecheck — leave blank if not used
+src_dir: src/           # Source directory
+
+# — Worktrees —
+worktree_prefix: ""     # e.g. ../my-project- — worktrees are placed as siblings of the main
+                        # project dir (../), not inside it — avoids IDE confusion and nested git issues
+db_file: ""             # Optional: e.g. myapp.db — copied per worktree (file/SQLite DBs only)
+
+# Per-worktree isolation hooks (optional) — run in the new worktree with
+# WT_NAME, WT_DIR, WT_BRANCH, WT_PORT exported. Use for server DBs that can't be
+# file-copied (Postgres/MySQL/…). Point at a script for anything non-trivial.
+# Example (Postgres):
+#   worktree_setup_cmd: createdb "myapp_$WT_NAME"
+#   worktree_teardown_cmd: dropdb --if-exists "myapp_$WT_NAME"
+worktree_setup_cmd: ""     # runs after install (create DB/schema, write per-worktree env)
+worktree_teardown_cmd: ""  # runs before removal (drop the per-worktree DB/schema)
+
+# — Issue tracker — set by /compass:setup-tracker. Defaults to Linear.
+# tracker=none → stories live only in .work/stories/ (no MCP issue sync).
+# The *_tool fields are the MCP tool names /compass:context and
+# /compass:create-stories call — switching tracker rewrites these (+ .mcp.json).
+tracker: linear
+tracker_get_issue_tool: mcp__linear-server__get_issue     # /compass:context loads an issue with this
+tracker_create_issue_tool: mcp__linear-server__save_issue # /compass:create-stories creates issues with this
+tracker_get_team_tool: mcp__linear-server__get_team       # team/project lookup for issue creation
+
+# — CI / autonomy — only used if the CI workflow (.github/workflows/pr-validation.yml)
+# is installed. See the compass AUTONOMY reference (reference/AUTONOMY.md in the plugin).
+autonomy_mode: off          # off | review-only | full
+ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
+                            # Secret per provider (gh secret set): ANTHROPIC_API_KEY /
+                            # OPENAI_API_KEY / GEMINI_API_KEY. See AUTONOMY.md.

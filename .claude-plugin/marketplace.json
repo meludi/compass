@@ -1,0 +1,13 @@
+{
+  "name": "compass",
+  "owner": {
+    "name": "Milad Al-Ani"
+  },
+  "plugins": [
+    {
+      "name": "compass",
+      "source": "./",
+      "description": "Structured PIV workflow (Plan -> Implement -> Validate) for Claude Code: namespaced /compass:* commands, parallel subagent review, worktree isolation, and optional issue-tracker sync. Stack-agnostic, configured in one file."
+    }
+  ]
+}

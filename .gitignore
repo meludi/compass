@@ -1,5 +1,7 @@
 .DS_Store
 .claude/settings.local.json
-.work/reports
-.work/screenshots
+# This repo is the compass plugin, not a compass-managed project. Keep
+# project-side artifacts out of the plugin so they never ship to users:
+.work/
+.mcp.json
 .worktree-port

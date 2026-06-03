@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "compass",
+  "displayName": "Compass",
+  "version": "0.1.0",
+  "description": "Structured PIV workflow (Plan -> Implement -> Validate) for Claude Code: namespaced /compass:* commands, parallel subagent review, worktree isolation, and optional issue-tracker sync. Stack-agnostic, configured in one file.",
+  "author": {
+    "name": "Milad Al-Ani",
+    "url": "https://github.com/meludi"
+  },
+  "homepage": "https://github.com/meludi/compass",
+  "repository": "https://github.com/meludi/compass",
+  "license": "MIT",
+  "keywords": ["workflow", "piv", "code-review", "worktree", "tdd", "issue-tracker"]
+}

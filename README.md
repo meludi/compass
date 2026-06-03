@@ -1,6 +1,6 @@
-# claude-workflow-starter
+# compass
 
-A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Plan → Implement → Validate) with parallel subagent code review, automated E2E testing, and optional issue-tracker sync — stack-agnostic, configured in one file.
+A Claude Code **plugin** that brings a structured PIV Loop (Plan → Implement → Validate) to any project — with parallel subagent code review, automated E2E testing, and optional issue-tracker sync. Stack-agnostic, configured in one file. Commands are namespaced `/compass:<name>`.
 
 ---
 
@@ -12,8 +12,8 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 |------|---------|---------|
 | [Claude Code](https://claude.ai/code) | AI coding assistant — runs all slash commands | `npm install -g @anthropic-ai/claude-code` |
 | [Git](https://git-scm.com) | Version control + worktrees | pre-installed on most systems |
-| [GitHub CLI](https://cli.github.com) (`gh`) | Creating PRs and fetching diffs for `/ship` | `brew install gh` → `gh auth login` |
-| [agent-browser](https://agent-browser.dev) | Browser smoke testing via `/validate` | `brew install agent-browser` or `npm install -g agent-browser` → `agent-browser install` |
+| [GitHub CLI](https://cli.github.com) (`gh`) | Creating PRs and fetching diffs for `/compass:ship` | `brew install gh` → `gh auth login` |
+| [agent-browser](https://agent-browser.dev) | Browser smoke testing via `/compass:validate` | `brew install agent-browser` or `npm install -g agent-browser` → `agent-browser install` |
 
 ### Optional
 
@@ -28,7 +28,7 @@ A drop-in Claude Code workflow for any project. Brings a structured PIV Loop (Pl
 
 [Linear](https://linear.app) is not required — stories work fine in `.work/stories/` without it.
 
-The Linear MCP server is already configured in `.mcp.json` (included in this repo) — it starts automatically when Claude Code runs. You only need to provide your API key:
+The Linear MCP server is configured in your project's `.mcp.json` — it starts automatically when Claude Code runs. You only need to provide your API key:
 
 1. Get your Linear API key: [linear.app](https://linear.app) → Settings → API → Personal API keys
 2. Add to `.claude/settings.local.json` (gitignored — create if it doesn't exist):
@@ -43,8 +43,8 @@ The Linear MCP server is already configured in `.mcp.json` (included in this rep
 ```
 
 With this in place:
-- `/create-stories` saves stories to `.work/stories/` **and** creates Linear issues
-- `/plan-feature PROJ-42` loads the Linear issue as the session spec
+- `/compass:create-stories` saves stories to `.work/stories/` **and** creates Linear issues
+- `/compass:plan-feature PROJ-42` loads the Linear issue as the session spec
 
 ---
 
@@ -66,7 +66,9 @@ Connecting Linear to GitHub is not required for this workflow — PRs are create
 ### Alternative issue trackers (optional)
 
 The workflow is not tied to Linear. Any issue tracker with an MCP server works.
-Run `/setup-tracker` to switch — it updates the 3 files that reference Linear.
+Run `/compass:setup-tracker` to switch — the commands read the tracker's MCP tool
+names from `.claude/compass.yml`, so switching just rewrites project config (no
+command files are touched).
 
 | Tracker | Auth | MCP server | API keys / tokens |
 |---------|------|-----------|-------------------|
@@ -76,24 +78,20 @@ Run `/setup-tracker` to switch — it updates the 3 files that reference Linear.
 | [Azure DevOps — remote MCP](https://learn.microsoft.com/azure/devops/mcp-server) | OAuth via Entra ID (no key) | [mcp.dev.azure.com/{org}](https://learn.microsoft.com/azure/devops/mcp-server) | — |
 | [Azure DevOps — local MCP](https://github.com/microsoft/azure-devops-mcp) | PAT | [github.com/microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) | dev.azure.com → User Settings → Personal Access Tokens |
 
-What `/setup-tracker` changes:
+What `/compass:setup-tracker` changes (all project-side):
 - `.mcp.json` — MCP server config + auth
-- `commands/context.md` — tool name for loading an issue (called by `/plan-feature` and `/implement`)
-- `commands/create-stories.md` — tool name for creating issues
+- `.claude/compass.yml` — `tracker` + the `tracker_*_tool` fields that `/compass:context` and `/compass:create-stories` call
+- `.claude/settings.local.json` — env vars + enabled MCP server
 
 ---
 
 ### agent-browser setup (optional)
 
-[agent-browser.dev](https://agent-browser.dev) — used by `/validate` for browser smoke testing before opening a PR.
+[agent-browser.dev](https://agent-browser.dev) — used by `/compass:validate` for browser smoke testing before opening a PR.
 
 Two installs required: the skill (tells Claude how to use the CLI) and the CLI itself (the actual binary).
 
-**1. Install the skill** (already included in this repo — no action needed):
-
-```
-.claude/skills/agent-browser/   ← already present
-```
+**1. Install the skill** — ships with the compass plugin (no action needed); available as `/compass:agent-browser`.
 
 **2. Install the CLI + browser:**
 
@@ -107,20 +105,21 @@ npm install -g agent-browser
 agent-browser install   # downloads Chrome
 ```
 
-`/validate` will detect automatically whether the CLI is available and the dev server is running — it skips the browser step silently if either is missing.
+`/compass:validate` will detect automatically whether the CLI is available and the dev server is running — it skips the browser step silently if either is missing.
 
 ---
 
 ### CI & autonomy (optional)
 
-The starter ships `.github/workflows/pr-validation.yml`. Default mode is
-`off` — pure CI (lint + types + tests), no API calls. Opt in to inline Claude
-PR reviews, auto-generated test checklists, and auto-merge by setting
-`autonomy_mode` in `.claude/project.yml`.
+`/compass:setup-stack` installs `.github/workflows/pr-validation.yml` into your
+project (copied from the plugin; self-contained, so it runs in CI without the
+plugin present). Default mode is `off` — pure CI (lint + types + tests), no API
+calls. Opt in to inline Claude PR reviews, auto-generated test checklists, and
+auto-merge by setting `autonomy_mode` in `.claude/compass.yml`.
 
 **Using an LLM for CI review needs an API key as a GitHub secret.** Whenever
 `autonomy_mode` is `review-only` or `full`, the review runs in GitHub Actions —
-so the key lives as a **repository secret**, not in `project.yml` or a local
+so the key lives as a **repository secret**, not in `compass.yml` or a local
 `.env`. Pick the provider with `ci_review_provider`, then set the matching
 secret:
 
@@ -131,9 +130,9 @@ gh secret set GEMINI_API_KEY      # ci_review_provider: gemini
 ```
 
 If the mode is on but the secret is missing, the review job fails (red) instead
-of skipping. `/setup-stack` checks for the secret and warns; it never sets it.
+of skipping. `/compass:setup-stack` checks for the secret and warns; it never sets it.
 
-Full details, secrets, costs, and security notes: `.claude/reference/AUTONOMY.md`.
+Full details, secrets, costs, and security notes: `${CLAUDE_PLUGIN_ROOT}/reference/AUTONOMY.md`.
 
 ---
 
@@ -152,35 +151,36 @@ deploy-target-agnostic on purpose.
 
 ## Setup
 
-**1. Clone and copy into your project**
+**1. Install the plugin**
 
-```bash
-git clone https://github.com/meludi/claude-workflow-starter
-cp -r claude-workflow-starter/.claude your-project/
-cp -r claude-workflow-starter/.work your-project/
-cp claude-workflow-starter/.mcp.json your-project/
-cp claude-workflow-starter/.gitignore your-project/  # or merge manually
 ```
+/plugin marketplace add meludi/compass
+/plugin install compass@compass
+```
+
+The `/compass:*` commands, agents, skills, and the SessionStart orientation hook are now available in every project — nothing is copied into your repo. (For local development of compass itself: `claude --plugin-dir .` from a clone.)
 
 **2. Configure**
 
 Open your project in Claude Code and run:
 
 ```
-/setup
+/compass:setup
 ```
 
-This will ask you a few questions (package manager, commands, repo, branch, DB file) and generate:
+This will ask you a few questions (package manager, commands, repo, branch, DB file) and generate, from the plugin templates:
 
-- `.claude/project.yml` — your project config
+- `.claude/compass.yml` — your project config
+- `.claude/compass.schema.json` — a copy of the schema so the `$schema` line resolves in your editor (re-run `/compass:setup` to refresh after a plugin update)
 - `.claude/CLAUDE.md` — your project conventions (generated from `CLAUDE-template.md`, living document)
+- `.mcp.json` — Linear tracker MCP by default, if you use issue-tracker sync (swap via `/compass:setup-tracker`)
 
-`CLAUDE.md` is generated once by `/setup` and updated by you as the project evolves.
+`CLAUDE.md` is generated once by `/compass:setup` and updated by you as the project evolves.
 
-**For greenfield projects** — directly after `/ideate`, run:
+**For greenfield projects** — directly after `/compass:ideate`, run:
 
 ```
-/setup-stack .work/prds/your-prd.prd.md
+/compass:setup-stack .work/prds/your-prd.prd.md
 ```
 
 This scaffolds the framework, asks 4 style questions, creates canonical seed files, and fills the Code Patterns section of `CLAUDE.md`. Skip for brownfield projects — existing code already provides the patterns.
@@ -192,18 +192,18 @@ This scaffolds the framework, asks 4 style questions, creates canonical seed fil
 Two-level workflow:
 
 ```
-LEVEL 1 (once per initiative):  /ideate (brain dump → PRD → self-review) → /setup-stack (greenfield) → /create-stories → stories in .work/stories/
-LEVEL 2 (per story):            /worktree → /plan-feature → /implement → /ship
+LEVEL 1 (once per initiative):  /compass:ideate (brain dump → PRD → self-review) → /compass:setup-stack (greenfield) → /compass:create-stories → stories in .work/stories/
+LEVEL 2 (per story):            /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship
 ```
 
 - **IDEATE** — brain dump with the agent, no structure yet
 - **PIV** — Plan → Implement → Validate, the three phases of every story
 - **Linear is optional** — stories live in `.work/stories/`; Linear sync is available but not required
-- **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/worktree → edit → /validate → /ship` (decline the review) — see WORKFLOW.md
+- **Quick Path** — for typos, 1-line fixes, and CSS tweaks, skip PRD/stories/plan: `/compass:worktree → edit → /compass:validate → /compass:ship` (decline the review) — see WORKFLOW.md
 
-Command flow: `.claude/reference/WORKFLOW.md`
-Reference (models, command table, troubleshooting): `.claude/reference/HANDBOOK.md`
-Concepts (the why): `.claude/reference/CONCEPTS.md`
+Command flow: `${CLAUDE_PLUGIN_ROOT}/reference/WORKFLOW.md`
+Reference (models, command table, troubleshooting): `${CLAUDE_PLUGIN_ROOT}/reference/HANDBOOK.md`
+Concepts (the why): `${CLAUDE_PLUGIN_ROOT}/reference/CONCEPTS.md`
 
 ---
 
@@ -213,9 +213,9 @@ Commands write plans, PRDs, stories, and reports to `.work/` — created automat
 
 ```
 .work/
-├── prds/        # specs from /ideate                 → committed
-├── stories/     # stories from /create-stories       → committed
-├── plans/       # plans from /plan-feature           → committed
+├── prds/        # specs from /compass:ideate                 → committed
+├── stories/     # stories from /compass:create-stories       → committed
+├── plans/       # plans from /compass:plan-feature           → committed
 ├── reports/     # build reports                      → gitignored
 ├── screenshots/ # browser screenshots                → gitignored
 └── BACKLOG.md   # local backlog (no tracker)         → committed
@@ -225,7 +225,7 @@ Commands write plans, PRDs, stories, and reports to `.work/` — created automat
 
 ## Project config
 
-All project-specific values live in `.claude/project.yml`:
+All project-specific values live in `.claude/compass.yml`:
 
 ```yaml
 name: my-project
@@ -245,38 +245,52 @@ db_file: myapp.db          # optional — copied per worktree for isolation
 
 Commands read this file at runtime — change a value once, all commands pick it up.
 
-It is schema-backed: `.claude/project.schema.json` drives editor autocomplete + inline
+It is schema-backed: `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` drives editor autocomplete + inline
 validation (via the `# yaml-language-server: $schema=` line at the top of the file),
-and `/setup` validates against it — a mistyped key or bad value is reported, not
-silently ignored. A single reader (`.claude/scripts/read-config.sh`) parses it for
+and `/compass:setup` validates against it — a mistyped key or bad value is reported, not
+silently ignored. A single reader (`${CLAUDE_PLUGIN_ROOT}/scripts/read-config.sh`) parses it for
 both `worktree.sh` and CI. Keep fields flat (no nesting).
 
 ---
 
 ## What's included
 
+**The plugin** (installed centrally, never copied into your repo — repo root is the plugin root):
+
+```
+.claude-plugin/
+├── plugin.json           # Plugin manifest — name, version, description
+└── marketplace.json      # Marketplace catalog entry
+commands/                 # All slash commands → invoked as /compass:<name>
+agents/                   # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
+skills/agent-browser/     # Skill for automated browser testing → /compass:agent-browser
+hooks/
+├── hooks.json            # SessionStart hook registration
+└── session-start.sh      # Always-on orientation (PIV loop + on-demand doc index)
+reference/
+├── AUTONOMY.md           # CI autonomy layer — inline reviews, auto-merge, costs, security
+├── CONCEPTS.md           # The four frameworks behind this workflow
+├── WORKFLOW.md           # The command flow — Level 1, Level 2, Quick Path
+├── HANDBOOK.md           # Reference — models, command table, troubleshooting
+└── WORKTREES.md          # Git worktree mental model and lifecycle
+scripts/
+├── worktree.sh           # Worktree lifecycle script (create, open, remove)
+└── read-config.sh        # Single reader for compass.yml (used by worktree.sh + CI)
+templates/
+├── CLAUDE-template.md    # /compass:setup generates your CLAUDE.md from this
+└── husky-pre-commit.sh   # Pre-commit hook template — installed by /compass:setup if Husky is detected
+compass.schema.json       # JSON Schema for compass.yml — editor + /compass:setup validation
+```
+
+**Your project** (generated by `/compass:setup` / `/compass:setup-stack` — the only compass files in your repo):
+
 ```
 .claude/
-├── VERSION                # Starter version (e.g. 1.5.0) — travels with the copy so you know what you have
-├── CLAUDE-template.md     # Template for your project conventions — /setup generates CLAUDE.md from this
-├── agents/                # Subagents: code-reviewer, codebase-explorer, pr-test-analyzer
-├── commands/              # All slash commands
-├── project.yml            # Project config — commands, repo, branch
-├── project.schema.json    # JSON Schema for project.yml — editor + /setup validation
-├── reference/
-│   ├── AUTONOMY.md        # CI autonomy layer — inline reviews, auto-merge, costs, security
-│   ├── CONCEPTS.md        # The four frameworks behind this workflow
-│   ├── WORKFLOW.md        # The command flow — Level 1, Level 2, Quick Path
-│   ├── HANDBOOK.md        # Reference — models, command table, troubleshooting
-│   └── WORKTREES.md       # Git worktree mental model and lifecycle
-├── scripts/
-│   ├── worktree.sh        # Worktree lifecycle script (create, open, remove)
-│   └── read-config.sh     # Single reader for project.yml (used by worktree.sh + CI)
-├── skills/agent-browser/  # Skill definition for automated browser testing (agent-browser CLI)
-└── templates/
-    └── husky-pre-commit.sh  # Pre-commit hook template — copied by /setup if Husky is detected
-.github/
-└── workflows/
-    └── pr-validation.yml  # CI workflow — lint, types, tests; opt-in Claude PR review + auto-merge
-.mcp.json                  # MCP server config (Linear by default; swap via /setup-tracker)
+├── compass.yml           # Your project config — commands, repo, branch (edit this)
+├── compass.schema.json   # Copy of the schema so the $schema line resolves in your editor
+└── CLAUDE.md             # Your project conventions — generated, then a living document
+.work/                    # Plans, PRDs, stories, reports (see "Working directory")
+.github/workflows/
+└── pr-validation.yml     # CI workflow — lint, types, tests; opt-in Claude PR review + auto-merge
+.mcp.json                 # MCP server config (Linear by default; swap via /compass:setup-tracker)
 ```
