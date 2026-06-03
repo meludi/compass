@@ -48,21 +48,27 @@ Pick a story from `.work/stories/` (or your tracker), then run this loop once pe
 
 A PR is open. The reviewer points, **you** fix, CI never commits — repeat until clean, then merge. Same loop whether the review is local or in CI; only the trigger differs.
 
-| Step | Command | Does |
+**Step 1 — review** (pick one):
+
+| Command | What it does | Use when |
 |---|---|---|
-| 1 — review | `/compass:code-review` · `/compass:review` · or CI `claude-review` | Surface findings (bugs / conventions / coverage). Pick the reviewer below. |
-| 2 — fix | `/compass:code-review --fix` · `/compass:apply-ci-review` · or by hand | Apply the fixes — always a deliberate human step. |
-| 3 — verify | `/compass:validate` | Re-run lint/types/tests (a fix can break them). |
-| 4 — publish | `/compass:commit [--push]` | Commit, then push (asked automatically, or pass `--push` to skip the question). The push updates the PR and triggers CI re-review in `review-only`/`full`. |
-| 5 — merge | `gh pr merge --squash` → `/compass:worktree <name> rm` | Merge it yourself, then remove the worktree (guarded — refuses on unmerged/uncommitted work). |
+| `/compass:code-review [low→ultra]` | Deep bug hunt; tunable effort; verify stage to filter false positives | Correctness / bugs; want to apply fixes directly |
+| `/compass:review` | 3 subagents in parallel: your CLAUDE.md conventions, pattern reuse, test-coverage gaps — advisory, no edits | Convention compliance, reuse check, coverage audit |
+| CI `claude-review` | Runs automatically on each push in `review-only`/`full`; posts inline comments + `## Review Summary` on the PR | Already running — nothing to invoke |
 
-**Which reviewer?**
+**Step 2 — fix** (pick one):
 
-| Reviewer | Best for |
-|---|---|
-| `/compass:code-review [low→ultra]` _(can `--fix`)_ | correctness / bugs; want fixes applied |
-| `/compass:review` _(3 subagents)_ | your `CLAUDE.md` conventions, reuse, test-coverage gaps |
-| CI `claude-review` | automatic on each push (`review-only`/`full`; needs an API key) |
+| Command | What it does | Use when |
+|---|---|---|
+| `/compass:code-review --fix` | Re-reviews the diff and applies fixes directly in your working tree | `off` mode, or before the PR exists — fresh local review + fix |
+| `/compass:apply-ci-review` | Pulls the CI `claude-review` comments from the open PR and applies them locally | `review-only`/`full` — act on the review that already ran, no redundant re-review |
+| Edit by hand | — | Small, obvious fixes |
+
+**Step 3 — verify:** `/compass:validate` — re-run lint/types/tests (a fix can break them).
+
+**Step 4 — publish:** `/compass:commit [--push]` — commit, then push (asked automatically, or pass `--push` to skip). The push updates the open PR and triggers CI re-review in `review-only`/`full`.
+
+**Step 5 — merge:** `gh pr merge --squash`, then `/compass:worktree <name> rm` (guarded — refuses on unmerged/uncommitted work).
 
 **Two modes** (set by `autonomy_mode` — see Axis below):
 
