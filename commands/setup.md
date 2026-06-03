@@ -1,35 +1,44 @@
 ---
-description: Set up claude-workflow-starter for a new project
+description: Set up compass for a new project
 ---
 
 # /compass:setup — Project Setup
 
 > **Model:** `/model sonnet` — balanced model for this command.
 
-Configure this Claude workflow for your project. Run once after copying the starter into your project. Runs in two phases — same command both times.
+Configure the compass workflow for your project. Run once after installing the plugin. Runs in two phases — same command both times.
 
 **What it does:**
-1. Phase 1 — writes `.claude/compass.yml` with defaults, asks you to fill it in
+1. Phase 1 — generates the project's `.claude/compass.yml` (+ schema copy) from the plugin templates, asks you to fill it in
 2. Phase 2 — validates `.claude/compass.yml`, generates `.claude/CLAUDE.md`
 
 ---
 
 ## Phase Detection
 
-Read `.claude/compass.yml`.
+Read `.claude/compass.yml` (create `.claude/` if it does not exist).
 
-- `name: ""` (empty) → **run Phase 1**
+- File missing **or** `name: ""` (empty) → **run Phase 1**
 - `name` has a value → **run Phase 2**
 
 ---
 
-## Phase 1 — Prepare the config
+## Phase 1 — Generate the config
 
-The canonical template is the **shipped `.claude/compass.yml`** — it carries the
-schema reference (`# yaml-language-server: $schema=./compass/project.schema.json`) and
-inline docs. **Do not rewrite or duplicate it** (no embedded copy lives here, on
-purpose). Edit it in place. If the file is somehow missing, restore it from the
-starter.
+Nothing is copied wholesale anymore — generate the project files from the plugin
+templates (they live in the installed plugin, referenced via `${CLAUDE_PLUGIN_ROOT}`):
+
+1. If `.claude/compass.yml` does not exist, copy `${CLAUDE_PLUGIN_ROOT}/templates/compass.yml`
+   → `.claude/compass.yml`. It carries the schema reference
+   (`# yaml-language-server: $schema=./compass.schema.json`) and inline docs.
+   **Do not** rewrite or embed a copy of it here — read it from the plugin.
+2. Copy `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` → `.claude/compass.schema.json`
+   (overwrite if present). The `$schema` line above resolves against this local copy,
+   so the editor gets autocomplete + validation without knowing the plugin cache path.
+   Re-running `/compass:setup` refreshes it after a plugin update.
+3. If the project has no `.mcp.json` and you want issue-tracker sync, copy
+   `${CLAUDE_PLUGIN_ROOT}/templates/mcp.json` → `.mcp.json` (Linear by default; run
+   `/compass:setup-tracker` to switch). Skip if the user does not use a tracker.
 
 **Pre-fill what can be detected** — leave the rest for the user:
 
@@ -54,7 +63,7 @@ Stop. Do not proceed to Phase 2.
 
 ### Step 1 — Validate against the schema
 
-Validate `.claude/compass.yml` against `${CLAUDE_PLUGIN_ROOT}/project.schema.json` — that file
+Validate `.claude/compass.yml` against `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` — that file
 is the single source of validation rules (required keys, enums, types, the
 `repo` `owner/repo` pattern, `dev_port` integer). Collect **all** violations
 before reporting; do not stop at the first.

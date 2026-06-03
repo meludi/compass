@@ -55,6 +55,21 @@ Continue? (yes/no)
 
 ---
 
+## Step 0 — Ensure project config exists
+
+Greenfield projects run this straight after `/compass:ideate`, so `.claude/compass.yml`
+may not exist yet. Generate it from the plugin templates if missing (same as
+`/compass:setup` Phase 1):
+
+1. If `.claude/compass.yml` is absent, copy `${CLAUDE_PLUGIN_ROOT}/templates/compass.yml`
+   → `.claude/compass.yml` (create `.claude/` first).
+2. Copy `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` → `.claude/compass.schema.json`
+   (overwrite — keeps the editor `$schema` reference current).
+
+Step 10 fills in the actual commands once the stack is scaffolded.
+
+---
+
 ## Step 1 — Read PRD for Tech Hints
 
 If `$ARGUMENTS` is a file path:
@@ -530,7 +545,7 @@ Ask:
 ```
 Install the CI workflow (.github/workflows/pr-validation.yml)?
 
-The starter ships a PR-validation workflow with three modes:
+compass ships a PR-validation workflow with three modes:
   off          — pure CI (lint + types + tests). No API calls. Default.
   review-only  — adds Claude inline PR review + auto-generated test checklist.
   full         — adds auto-merge once all checks are green.
@@ -553,9 +568,16 @@ Which model runs the CI review?
   gemini  — single summary comment.                    Secret: GEMINI_API_KEY
 ```
 
-The workflow file is already present in the starter at
-`.github/workflows/pr-validation.yml` — no copy step needed unless the user
-deleted it; if missing, restore from the starter.
+Copy the workflow from the plugin into the project (create the directory first):
+
+```bash
+mkdir -p .github/workflows
+cp "${CLAUDE_PLUGIN_ROOT}/templates/pr-validation.yml" .github/workflows/pr-validation.yml
+```
+
+The template is **self-contained** — its `config` job reads `.claude/compass.yml`
+with an inline reader, so CI works on the user repo even though the compass plugin
+is not installed in GitHub Actions.
 
 For `review-only` or `full`, **verify the matching secret is present** before
 finishing — otherwise the review job runs red on the first PR. Determine the

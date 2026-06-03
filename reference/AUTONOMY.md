@@ -1,6 +1,6 @@
 # CI & Autonomy
 
-The starter ships with `.github/workflows/pr-validation.yml`. Its behaviour is controlled by a single field in `.claude/compass.yml`:
+`/compass:setup-stack` installs `.github/workflows/pr-validation.yml` into your project (copied from the plugin template; self-contained, so it reads `.claude/compass.yml` and runs in CI without the plugin installed). Its behaviour is controlled by a single field in `.claude/compass.yml`:
 
 ```yaml
 autonomy_mode: off          # off | review-only | full

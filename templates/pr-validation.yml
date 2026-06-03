@@ -9,7 +9,8 @@ on:
 #   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
 #   full         + auto-merge once all checks are green
 #
-# See .claude/compass/reference/AUTONOMY.md for details, secrets, costs, and security notes.
+# See the compass AUTONOMY reference (reference/AUTONOMY.md in the compass plugin)
+# for details, secrets, costs, and security notes.
 
 jobs:
   # Read autonomy_mode and project commands from .claude/compass.yml so the rest
@@ -27,8 +28,15 @@ jobs:
       - uses: actions/checkout@v4
       - id: read
         run: |
-          # Shared reader (scripts/read-config.sh) — same parser worktree.sh uses.
-          read_field() { bash .claude/compass/scripts/read-config.sh "$1"; }
+          # Self-contained reader — CI checks out the user repo, where the compass
+          # plugin is NOT installed, so we inline the same flat-YAML parsing the
+          # plugin's read-config.sh uses (strip trailing "# comment", trim, unquote).
+          read_field() {
+            grep -m1 "^$1:" .claude/compass.yml 2>/dev/null \
+              | cut -d: -f2- \
+              | sed -E 's/[[:space:]]+#.*$//; s/^[[:space:]]+//; s/[[:space:]]+$//; s/^"(.*)"$/\1/; s/^'\''(.*)'\''$/\1/' \
+              || true
+          }
           MODE=$(read_field autonomy_mode)
           [ -z "$MODE" ] && MODE="off"
           PROVIDER=$(read_field ci_review_provider)

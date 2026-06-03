@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/meludi/compass/project.schema.json",
+  "$id": "https://github.com/meludi/compass/compass.schema.json",
   "title": "compass project config",
   "description": "Schema for .claude/compass.yml — the single source of project config. Validated by /setup; powers editor autocomplete via the yaml-language-server comment at the top of compass.yml.",
   "type": "object",
