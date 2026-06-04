@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Changed
+- **`references/COMMANDS.md` — `Uses` field per command** — each command entry now lists which other compass commands it invokes internally (explicit calls and inline procedure inclusions), making the dependency graph visible at a glance.
 - **`/compass:onboard` is now self-contained** — no longer requires a prior `/compass:setup` run. If `compass.yml` is missing (the normal case for any brownfield project), it bootstraps the config inline (Phase 1: copy template + auto-detect values, Phase 2: validate + generate `CLAUDE.md` if absent), then proceeds directly to the codebase scan. Running `/compass:setup` first is no longer necessary.
 
 ## v0.2.0 — 2026-06-04

@@ -17,6 +17,7 @@ Configures the project — generates `.claude/compass.yml`, `compass.schema.json
 | **Level** | Once |
 | **Recommended model** | Sonnet |
 | **Trigger** | User |
+|---|---|
 
 **Phase 1** (when `compass.yml` is missing or `name` is blank): generates config, pre-fills detected commands from `package.json`. Stops — fill in `name` and other blanks, then re-run.
 
@@ -35,6 +36,7 @@ Architecture, Code Patterns, Testing, Key Files.
 | **Recommended model** | Opus |
 | **Argument** | `[--refresh]` — optional |
 | **Trigger** | User |
+|---|---|
 
 **Without argument:** fills empty/TODO sections for the first time.
 
@@ -55,6 +57,7 @@ visible welcome screen, a first smoke test, the CI workflow, and CLAUDE.md Code 
 | **Recommended model** | Sonnet |
 | **Argument** | `[path to .work/prds/*.prd.md]` — optional |
 | **Trigger** | User |
+|---|---|
 
 **Without argument:** asks for framework and package manager interactively.
 
@@ -74,6 +77,7 @@ Switches the issue tracker. Rewrites `.mcp.json`, the `tracker_*_tool` fields in
 | **Level** | Once (optional) |
 | **Recommended model** | Sonnet |
 | **Trigger** | User |
+|---|---|
 
 Supported: Linear (preconfigured), Jira (Atlassian official), Jira (community),
 Azure DevOps (remote), Azure DevOps (local). See `README.md` for the full table.
@@ -94,6 +98,7 @@ approaches, writes a self-reviewed PRD to `.work/prds/`. No code written.
 | **Plan Mode** | Yes |
 | **Argument** | `<initiative name>` — required |
 | **Trigger** | User |
+|---|---|
 
 ---
 
@@ -108,6 +113,7 @@ if a tracker is configured (`tracker ≠ none` in `compass.yml`).
 | **Recommended model** | Sonnet |
 | **Argument** | `[path to .work/prds/*.prd.md]` — optional |
 | **Trigger** | User |
+|---|---|
 
 **Without argument:** uses the most recent PRD in `.work/prds/`, or the one already loaded in session.
 
@@ -130,6 +136,7 @@ fresh Claude session inside it. All PIV steps run in that session.
 | **Recommended model** | Haiku |
 | **Argument** | `<feature-name>` — required |
 | **Trigger** | User |
+|---|---|
 
 The feature name becomes the branch: `feat/<name>`. Use a short slug (e.g. `add-auth`). Detail on isolation, hooks, recipes: `WORKTREES.md`.
 
@@ -146,6 +153,7 @@ optionally a spec.
 | **Recommended model** | Sonnet |
 | **Argument** | `[story \| issue-id \| "description"]` — optional |
 | **Trigger** | Auto (step 1 of `plan-feature` + `implement`) or User |
+|---|---|
 
 **Without argument:** reloads project rules + git state only. No spec loaded.
 
@@ -170,6 +178,8 @@ Loads context, then writes a concrete implementation plan to `.work/plans/`.
 | **Plan Mode** | Yes |
 | **Argument** | `<story \| issue-id \| "description">` — required |
 | **Trigger** | User |
+| **Uses** | `/compass:context` (inline) |
+|---|---|
 
 If a complete plan already exists for this story, reports status and recommends `/compass:implement` instead of re-planning.
 
@@ -188,6 +198,8 @@ validation suite. Folds in `/compass:validate` (including browser smoke test).
 | **Recommended model** | Sonnet |
 | **Argument** | `<path to .work/plans/*.plan.md>` — required |
 | **Trigger** | User |
+| **Uses** | `/compass:context` (inline), `/compass:validate` (inline) |
+|---|---|
 
 For logic-bearing tasks: builds test-first (RED → GREEN). For UI/glue/config tasks: type-check gate only.
 
@@ -204,6 +216,8 @@ open PR. Hard-stops at PR-open; **never merges**.
 | **Recommended model** | Sonnet |
 | **Argument** | `<path to .work/plans/*.plan.md>` — required |
 | **Trigger** | User |
+| **Uses** | `/compass:context` (inline), `/compass:validate` (inline), `/compass:commit` (inline) |
+|---|---|
 
 Pre-flight checks gate it: `feat/*` branch, inside a worktree, `gh` installed, clean working tree, plan exists.
 
@@ -220,6 +234,7 @@ Runs lint → type-check → tests → browser smoke test. Mirrors the CI `test`
 | **Level** | PIV |
 | **Recommended model** | Sonnet |
 | **Trigger** | Auto (end of `implement`) or User |
+|---|---|
 
 **When to run standalone:** before `/compass:ship`, to debug a failing check, after a manual fix, or mid-implementation to confirm a previous task didn't break anything.
 
@@ -235,6 +250,7 @@ Stages and commits with a Conventional Commit message. Always shows state and dr
 | **Recommended model** | Haiku |
 | **Argument** | `[--push]` — optional |
 | **Trigger** | Auto (inside `ship`) or User |
+|---|---|
 
 **Without `--push`:** commits, then asks "Push to origin now?".
 
@@ -254,6 +270,8 @@ and offers the parallel code review. Pre-flight: checks `gh` is installed before
 | **Level** | PIV |
 | **Recommended model** | Opus |
 | **Trigger** | User |
+| **Uses** | `/compass:commit`, `/compass:review` |
+|---|---|
 
 Folds in: `/compass:commit`, `/compass:review`, `/compass:security-review` (on risky diffs).
 
@@ -272,6 +290,8 @@ test-coverage gaps. Advisory only; never edits or commits.
 | **Recommended model** | Opus |
 | **Argument** | `[PR-number]` — optional |
 | **Trigger** | Auto (inside `ship`) or User |
+| **Uses** | `/compass:security-review` (conditional — risky diffs only) |
+|---|---|
 
 **Without argument:** uses the current branch's PR (inferred) or falls back to `git diff {base_branch}...HEAD`.
 
@@ -294,6 +314,8 @@ compass-specific follow-up: after `--fix`, automatically runs `/compass:validate
 | **Recommended model** | Sonnet (low–high) / Opus cloud (ultra) |
 | **Argument** | `[low\|medium\|high\|max\|ultra] [--fix] [--comment] [PR-number]` — optional |
 | **Trigger** | User |
+| **Uses** | `/code-review` (built-in), `/compass:validate` (after `--fix`) |
+|---|---|
 
 **Without `--fix`:** advisory — findings shown, nothing applied.
 
@@ -321,6 +343,8 @@ locally, then runs `/compass:validate`. Stops before commit.
 | **Recommended model** | Opus |
 | **Argument** | `[PR-number]` — optional |
 | **Trigger** | User |
+| **Uses** | `/compass:validate` |
+|---|---|
 
 **Without argument:** infers the PR from the current branch.
 
@@ -341,6 +365,7 @@ edits. Defaults to staged changes if no argument given.
 | **Recommended model** | Opus |
 | **Argument** | `[file-or-directory]` — optional |
 | **Trigger** | Auto (inside `ship` on risky diffs) or User |
+|---|---|
 
 **Without argument:** reviews staged `git diff --cached`, or unstaged `git diff` if nothing is staged.
 
@@ -362,5 +387,6 @@ and reference docs based on what went wrong or right.
 | **Level** | Anytime |
 | **Recommended model** | Sonnet |
 | **Trigger** | User |
+|---|---|
 
 **When to run:** after a merge, after a frustrating session, after a bug, or periodically to keep `CLAUDE.md` and commands aligned with how the project has evolved.
