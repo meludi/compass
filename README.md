@@ -22,6 +22,8 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 /plugin install compass@compass
 ```
 
+Installs globally (`user` scope) by default — available in every project. To scope it to a single project, add `--scope local` (gitignored) or `--scope project` (shared via git) to both commands, e.g. `claude plugin install compass@compass --scope local`.
+
 Then configure your project (run from the project root in Claude Code):
 
 ```
