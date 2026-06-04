@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.0 — 2026-06-04
 
 ### Changed
 - **Review commands renamed and improved** — consistent `review-*` prefix for all review commands; `apply-ci-review` renamed to `fix-ci-review` (clarifies it applies CI findings rather than reviewing). `review-project` (was `review`) and `review-security` (was `security-review`) gain a `--fix` flag. All three `review-*` commands prompt to run `/clear` first for a clean context.
