@@ -55,7 +55,7 @@ BUG → ? → + RULE
 
 | When                     | What to fix                                        |
 | ------------------------ | -------------------------------------------------- |
-| Agent deviated from plan | Update the relevant command in `.claude/commands/` |
+| Agent deviated from plan | Update the relevant command in `commands/` (plugin root) |
 | Agent repeated a mistake | Add a rule to `CLAUDE.md`                          |
 | Context was missing      | Add a new on-demand context doc to `references/`    |
 
@@ -65,7 +65,7 @@ BUG → ? → + RULE
 
 **Agent deviated from a pattern:**
 1. Identify exactly what it did vs. what was expected (file, line, action)
-2. Open the relevant command in `.claude/commands/`
+2. Open the relevant command in `commands/` (plugin root)
 3. Add a concrete rule: "Always X. Never Y." with an example reference
 4. Commit: `docs: tighten plan-feature — require Mirror pattern reference per task`
 
@@ -104,121 +104,29 @@ Switch model with `/model opus`, `/model sonnet`, or `/model haiku`.
 
 ## Command Reference
 
-| Command            | Argument                                      | Level      | When to use                                                       | Model   | Plan Mode | Trigger |
-| ------------------ | --------------------------------------------- | ---------- | ----------------------------------------------------------------- | ------- | --------- | ------- |
-| `/compass:setup`           | —                                             | Once       | Configure project — generates `compass.yml` + `CLAUDE.md`         | Sonnet  | —         | User |
-| `/compass:onboard`         | `[--refresh]`                                 | Once       | Brownfield: scan existing codebase and fill `CLAUDE.md` patterns  | Opus    | —         | User |
-| `/compass:ideate`          | `<initiative name>`                           | Initiative | Brain dump → approaches → PRD → self-review (full flow)           | Opus    | **Yes**   | User |
-| `/compass:setup-stack`     | `[path to .work/prds/*.prd.md]`               | Once       | Scaffold stack, record style, create seed files (greenfield only) | Sonnet  | —         | User |
-| `/compass:setup-tracker`   | —                                             | Once       | Switch issue tracker (Linear / Jira / Azure DevOps)               | Sonnet  | —         | User |
-| `/compass:create-stories`  | `[path to .work/prds/*.prd.md]`               | Initiative | Break PRD into stories (`.work/stories/` + optionally a tracker)  | Sonnet  | —         | User |
-| `/compass:worktree`        | `<feature-name>`                              | PIV        | Create worktree + branch + open new Claude session                | Haiku   | —         | User |
-| `/compass:context`         | `[issue-id \| path to .work/stories/*.md \| feature description]` _(optional)_ | PIV | Refresh mental model — rules, git, spec, on-demand docs. Auto in plan/implement; standalone on resume or stale context | Sonnet  | —         | Auto (via `/compass:plan-feature`, `/compass:implement`) or User |
-| `/compass:plan-feature`    | `<path to .work/stories/*.md \| issue-id \| feature description>` | PIV | Load context, then design the changes — plan only                | Opus    | **Yes**   | User |
-| `/compass:implement`           | `<path to .work/plans/*.plan.md>`             | PIV        | Execute plan step by step, then full validation                  | Sonnet  | —         | User |
-| `/compass:auto-implement`  | `<path to .work/plans/*.plan.md>`             | PIV        | Run a confirmed plan to PR-open without confirmation — implement + commit + push + PR. Never merges. | Sonnet  | —         | User |
-| `/compass:validate`        | —                                             | PIV        | Run all checks — lint, types, tests, browser smoke test           | Sonnet  | —         | User |
-| `/compass:commit`          | `[--push]`                                    | PIV        | Stage and commit; asks whether to push (`--push` skips the question) — no PR | Haiku   | —         | Auto (via `/compass:ship`) or User |
-| `/compass:ship`            | —                                             | PIV        | Commit + push + open PR, then optional parallel review            | Opus    | —         | User |
-| `/compass:review`          | `[PR-number]`                                 | PIV        | 3-subagent parallel review + security check + verdict; works with or without a PR | Opus    | —         | Auto (via `/compass:ship`) or User |
-| `/compass:code-review`     | `[low\|medium\|high\|max\|ultra] [--fix] [--comment] [PR]` | PIV | Deep bug hunt; tunable effort; `--fix` applies + auto-validates | Sonnet/Opus | — | User |
-| `/compass:apply-ci-review` | `[PR-number]`                                 | PIV (Fix)  | Apply the CI review's comments locally + validate — no commit    | Opus    | —         | User |
-| `/compass:security-review` | `[file-or-directory]`                         | PIV        | Security review of changed files                                 | Opus    | —         | Auto (via `/compass:review`) or User |
-| `/compass:reflect`         | —                                             | Anytime    | Capture learnings, evolve system — after merge, bug, or session   | Sonnet  | —         | User |
-| `agent-browser`    | `<subcommand>` (CLI tool, not slash command)  | PIV        | Browser smoke test — part of `/compass:validate` and `/compass:implement`             | —       | —         | Auto or User |
+Full details — arguments, with/without behavior, when to run standalone: `COMMANDS.md`.
 
-### When to run `/compass:context` standalone
-
-`/compass:context` runs automatically as the first step of `/compass:plan-feature` and `/compass:implement`, so you rarely need to call it yourself. Run it explicitly when:
-
-- **Mid-story resume** — coming back to a worktree after time away. Run `/compass:context` to see a clean recap (branch, plan status, existing report) before deciding whether to `/compass:implement` or revise the plan.
-- **Stale session** — after a long conversation, when the agent starts missing things it should know. Bare `/compass:context` (no argument) reloads rules + git state without writing a plan.
-- **Before `/compass:reflect`** — gives `/compass:reflect` an up-to-date project state to analyze.
-- **Debugging missing context** — if the agent overlooked a pattern or rule, run `/compass:context` to verify what is actually in the working set.
-
-With no argument, `/compass:context` skips the spec-loading step and only refreshes project rules, git state, and existing plans/reports.
-
-### When to run `/compass:validate` standalone
-
-`/compass:validate` runs automatically as the final step of `/compass:implement` (full validation suite after all tasks). Run it explicitly when:
-
-- **Before `/compass:ship`** — sanity check that nothing has regressed after a manual edit or commit fix.
-- **Quick Path changes** (typo, copy tweak, config value) — used in place of `/compass:implement` to verify the change before shipping.
-- **Debugging a failing check** — re-run a specific lint/type/test cycle without re-running the implementation flow.
-- **Mid-implementation** — if you suspect a previous task broke something, run `/compass:validate` to confirm before continuing.
-
-### When to run `/compass:commit` standalone
-
-`/compass:commit` runs automatically as the first step of `/compass:ship` (commit + push + PR + review). Run it explicitly when:
-
-- **WIP checkpoint** — saving progress mid-story without pushing or opening a PR yet.
-- **Multiple commits per story** — when you want several focused commits before opening the PR via `/compass:ship`.
-- **Doc-only or trivial change** — when `/compass:ship`'s PR + review flow is overkill and you just want a tidy commit.
-- **Pre-`/compass:ship` cleanup** — committing a small fix before the actual ship step.
-
-### Commit checkpoints — when to commit
-
-Commit when the state is **consistent and describable in one sentence** — by logical unit, not by elapsed time. A passing task, a working scaffold, a green validation run are all natural checkpoints. Several commands end by surfacing such a checkpoint and suggesting `/compass:commit`.
-
-The suggestion is always a prompt, never an action: Claude proposes the commit, you confirm. **Nothing auto-commits** — the only sanctioned exception is `/compass:auto-implement` (a pre-approved plan on a `feat/*` branch).
-
-### When to run `/compass:review` standalone
-
-`/compass:review` triggers automatically when you answer "yes" inside `/compass:ship`. Run it explicitly when:
-
-- **Before `/compass:ship`** — review local changes early, before pushing. No PR needed; falls back to `git diff {base_branch}...HEAD`.
-- **Re-review** — after addressing feedback from a previous run, re-run to verify the findings are resolved.
-- **Manual push** — you pushed and opened the PR yourself (without `/compass:ship`), and now want the review.
-- **External PR** — reviewing a contributed PR or a branch you did not write. Pass the PR number: `/compass:review 42`.
-- **Clean-context review** — the conversation has grown long; run `/clear` first, then `/compass:review` for the sharpest results.
-
-Always run `/clear` before `/compass:review` — the three subagents benefit from a clean context window.
-
-**Diff source resolution:**
-1. PR number passed as argument → `gh pr diff <number>`
-2. No argument, PR exists for current branch → `gh pr diff` (inferred)
-3. No argument, no PR → `git diff {base_branch}...HEAD` (local fallback)
-
-### `/compass:review` vs `/compass:code-review` — choosing a reviewer
-
-Two different reviewers with similar names:
-
-- **`/compass:review`** — fans out 3 subagents tuned to *your* project: CLAUDE.md convention compliance, pattern reuse, test-coverage gaps. Advisory only — reports inline, never edits or commits.
-- **`/compass:code-review [level]`** — deep bug hunt with a tunable effort dial (`low`→`ultra`), a verify stage to filter false positives, and `--fix` / `--comment` flags. `ultra` runs in the cloud. After `--fix`, automatically runs `/compass:validate`. Full details and effort-level table: `${CLAUDE_PLUGIN_ROOT}/commands/code-review.md`.
-
-### When to run `/compass:apply-ci-review`
-
-The Fix-loop entry point for the CI case (`review-only` / `full`). After the CI `claude-review` posts comments on your PR, `/compass:apply-ci-review` pulls them and applies the fixes **locally**, then runs `/compass:validate`. It stops before commit — you commit and push, and the push re-triggers the CI review.
-
-- Use it instead of a second local review: the CI already reviewed the diff, so `/compass:code-review` would be redundant.
-- In `off` mode (no CI review) or before the PR exists, use `/compass:code-review --fix` instead.
-
-### When to run `/compass:security-review` standalone
-
-`/compass:security-review` auto-runs inside `/compass:ship` when the diff touches risky paths (API routes, DB queries, auth, forms). Run it explicitly when:
-
-- **Pre-emptive scan** — before `/compass:ship`, when you know you touched sensitive code and want feedback early.
-- **Specific files** — pass a file or directory path to audit it without involving the rest of a diff.
-- **External code** — reviewing a contributed PR, a third-party snippet, or vendored code.
-- **After a security advisory** — when an upstream CVE drops and you want to verify exposure.
-
-### When to run `agent-browser` standalone
-
-`agent-browser` runs automatically inside `/compass:validate` (and therefore `/compass:implement`) for the smoke test. Run it explicitly when:
-
-- **UI debugging** — manually inspect a page or component, open the snapshot, click around interactively.
-- **Screenshot capture** — grabbing a screenshot for documentation, a PR description, or a tracker issue.
-- **Cross-feature regression check** — verifying that a change in one area didn't break adjacent UI.
-- **Custom URL** — when the dev server isn't on the standard port or you want to test a non-local URL.
-
-### When to run `/compass:reflect`
-
-`/compass:reflect` is anytime-triggered — no auto path. Run it when:
-
-- **After a merge** — capture what deviated, what was missing, what should become a rule before the next story starts.
-- **After a frustrating session** — when you corrected the same thing twice, or the agent missed something obvious.
-- **After a bug** — fix both the bug AND the system that allowed it (`BUG → ? → + RULE`).
-- **Periodically** — a deep-review pass across `CLAUDE.md`, commands, and reference docs to keep them aligned with how the project has evolved.
+| Command | Level | Trigger |
+|---|---|---|
+| `/compass:setup` | Once | User |
+| `/compass:onboard` | Once | User |
+| `/compass:ideate` | Initiative | User |
+| `/compass:setup-stack` | Once | User |
+| `/compass:setup-tracker` | Once | User |
+| `/compass:create-stories` | Initiative | User |
+| `/compass:worktree` | PIV | User |
+| `/compass:context` | PIV | Auto or User |
+| `/compass:plan-feature` | PIV | User |
+| `/compass:implement` | PIV | User |
+| `/compass:auto-implement` | PIV | User |
+| `/compass:validate` | PIV | Auto or User |
+| `/compass:commit` | PIV | Auto or User |
+| `/compass:ship` | PIV | User |
+| `/compass:review` | PIV | Auto or User |
+| `/compass:code-review` | PIV | User |
+| `/compass:apply-ci-review` | PIV (Fix) | User |
+| `/compass:security-review` | PIV | Auto or User |
+| `/compass:reflect` | Anytime | User |
 
 ---
 

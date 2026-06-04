@@ -33,7 +33,7 @@ What do you want to reflect on?
 
 User describes the issue directly. Skip the questionnaire.
 
-1. Identify the target: CLAUDE.md rule, command in `.claude/commands/`, or reference doc in `${CLAUDE_PLUGIN_ROOT}/references/`
+1. Identify the target: CLAUDE.md rule, command in `commands/` (plugin root), or reference doc in `${CLAUDE_PLUGIN_ROOT}/references/`
 2. Propose the exact change
 3. Wait for confirmation, then apply + commit
 
@@ -50,7 +50,7 @@ Ask these questions one at a time:
 5. **Missing commands** — Was there a repeated action that should become a slash command?
 
 For each non-empty answer, propose a concrete change:
-- Deviation → update the relevant command in `.claude/commands/`
+- Deviation → update the relevant command in `commands/` (plugin root)
 - Repeated mistake → add a rule to `CLAUDE.md`
 - Missing context → create a **project** doc (e.g. in `docs/`) and add it to the `CLAUDE.md` "Project Context" table. (Framework/workflow docs live under `${CLAUDE_PLUGIN_ROOT}/` and are starter-owned — replaced on update; don't put project specifics there.)
 - New pattern → update Architecture or Code Patterns section in `CLAUDE.md`

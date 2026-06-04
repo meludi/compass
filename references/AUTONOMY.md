@@ -187,7 +187,7 @@ If you run `/compass:auto-implement` (see below) with this hook installed, the h
 
 ## How `autonomy_mode` interacts with the commands
 
-`autonomy_mode` is CI-only — it changes nothing about how the local commands behave (see `HANDBOOK.md` for what each command does). Two interactions worth knowing:
+`autonomy_mode` is CI-only — it changes nothing about how the local commands behave (see `COMMANDS.md` for what each command does). Two interactions worth knowing:
 
 - `/compass:ship` always runs its local 3-subagent review **regardless of `autonomy_mode`**; the CI review (in `review-only`/`full`) is an additional, auditable pass on the PR.
 - `/compass:auto-implement` composes with any mode and **never merges** — the PR it opens still gets the CI review jobs when the mode is on.

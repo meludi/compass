@@ -17,7 +17,7 @@ The concrete command flow for each phase lives in `WORKFLOW.md` (the canonical m
 | Rule | Principle | How this starter applies it |
 |------|-----------|---------------------------|
 | **Context Reset** | Plan and execute in separate conversations. Fresh start = sharp focus. | `/compass:worktree` opens a new Claude session per story |
-| **Command-ify Everything** | If you do it twice, make it a command. | All repeated actions are slash commands in `.claude/commands/` |
+| **Command-ify Everything** | If you do it twice, make it a command. | All repeated actions are slash commands in `commands/` (plugin root) |
 | **Git Log as Memory** | Standardized commits communicate intent to future sessions. | `/compass:commit` enforces Conventional Commits (`feat:`, `fix:`, `refactor:`) |
 | **System Evolution** | Every bug → fix the system that allowed it. | `/compass:reflect` guides through updating `CLAUDE.md`, commands, `references/` docs |
 
@@ -65,4 +65,4 @@ Four patterns that keep context lean and agents effective:
 
 ---
 
-For the day-to-day command flow see `WORKFLOW.md`; for the full command table and troubleshooting see `HANDBOOK.md`.
+For the day-to-day command flow see `WORKFLOW.md`; for every command in detail see `COMMANDS.md`; for troubleshooting see `HANDBOOK.md`.

@@ -2,7 +2,7 @@
 
 A worktree is a **feature branch with its own directory**. Not a clone, not a copy — Git shares the full history, but each worktree has an independent file checkout.
 
-Used by `/compass:worktree` — see `HANDBOOK.md` for the command reference.
+Used by `/compass:worktree` — see `COMMANDS.md` for the command reference.
 
 ---
 
