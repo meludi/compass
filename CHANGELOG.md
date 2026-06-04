@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.0 — 2026-06-04
+
+### Added
+- **`/compass:onboard`** — brownfield project onboarding: scans the existing codebase and fills `CLAUDE.md` (Architecture, Code Patterns, Testing, Key Files) instead of leaving TODO stubs. Supports `--refresh` to re-scan after codebase evolution.
+- **`/compass:code-review`** — namespaced wrapper around the built-in `/code-review` with compass-specific follow-up: after `--fix` applies changes, automatically runs `/compass:validate`. All bare `/code-review` references updated to `/compass:code-review` throughout.
+- **`references/COMMANDS.md`** — single source for every command: consistent schema per entry (description, metadata table with Level/Recommended model/Argument/Trigger, With/Without argument, When to run standalone). HANDBOOK and WORKFLOW now point here instead of duplicating command details.
+- **`/compass:commit --push` flag** — commit and push in one step; without the flag, `/compass:commit` asks whether to push after committing.
+- **`gh` pre-flight checks** in `/compass:ship`, `/compass:auto-implement`, `/compass:apply-ci-review`, `/compass:review`, and `/compass:setup-stack` — stops before committing if `gh` is not installed, with install instructions and a manual alternative.
+
+### Changed
+- **`reference/` renamed to `references/`** — all cross-references updated.
+- **WORKFLOW.md tables** — Stage 0, Loop 1, Loop 2, and Other commands tables now use `→ details` links to `COMMANDS.md` instead of inline descriptions. Loop 1 and Loop 2 are fully tabular (consistent with Stage 0).
+- **HANDBOOK.md Command Reference** — slimmed to 3 columns (Command / Level / Trigger); details moved to `COMMANDS.md`.
+- **README** — install section documents project-scoped install (`--scope local` / `--scope project` via shell CLI); Requirements table adds "If missing" column; GitHub-centric scope noted.
+- **GitHub-centric scope documented** — compass targets GitHub (`gh` + GitHub Actions); local PIV loop is host-agnostic; noted in README and HANDBOOK Troubleshooting.
+
 ## v0.1.0 — 2026-06-03 — first plugin release
 
 The starter is now a **Claude Code plugin** (`meludi/compass`), installed via the marketplace instead of copying `.claude/` into each project. Versioning restarts at `0.x` (`1.0.0` at first stable release); the prior `1.x` history below is the copy-model era. **This is a one-way migration** — the copy-`.claude/` workflow is retired.
