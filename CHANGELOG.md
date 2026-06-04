@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.1 — 2026-06-04
 
 ### Fixed
 - **`/compass:worktree` — graceful `claude` auto-open** — when invoked from within a Claude Code session, the `claude` launch no longer errors; instead it prints a note to open a new terminal manually.
