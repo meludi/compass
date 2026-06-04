@@ -91,13 +91,16 @@ Nothing is copied into your repo — the plugin is installed centrally. (To hack
 
 | Stage | When | Command flow |
 |-------|------|--------------|
-| **Level 1** | once per initiative | `/compass:ideate` → `/compass:create-stories` |
-| **Level 2** | per story | `/compass:worktree` → `/compass:plan-feature` → `/compass:implement` → `/compass:ship` |
+| **Stage 0 — Setup** | once per project / initiative | `/compass:setup` (or `/compass:onboard`) → `/compass:ideate` → `/compass:create-stories` |
+| **Loop 1 — PIV** | per story | `/compass:worktree` → `/compass:plan-feature` → `/compass:implement` → `/compass:ship` → `/compass:reflect` |
+| **Auto-implement** | plan reviewed + stable | `/compass:auto-implement <plan>` — automates Loop 1 steps 3–4 (implement + ship) (no confirmation at each step). Hard-stops at PR-open; never merges. |
+| **Loop 2 — Fix** | until PR is clean | review → fix → `/compass:validate` → `/compass:commit [--push]` → repeat → merge |
 | **Quick Path** | tiny fix (typo, 1-liner) | `/compass:worktree` → edit → `/compass:validate` → `/compass:ship` |
 
-- **Single task without an initiative?** (bug, small addition) — skip Ideate entirely: `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. No story file needed.
-- **Full command reference** (every command with arguments, with/without behavior, when to run): [`references/COMMANDS.md`](references/COMMANDS.md)
-- **Detailed command flow** (stages, loops, fix loop): [`references/WORKFLOW.md`](references/WORKFLOW.md)
+- **Single task without an initiative?** — `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. No story file needed.
+- **CI review?** — set `autonomy_mode: review-only` in `compass.yml`; CI reviews every push, `/compass:fix-ci-review` applies the findings locally.
+- **Full command reference:** [`references/COMMANDS.md`](references/COMMANDS.md)
+- **Detailed command flow:** [`references/WORKFLOW.md`](references/WORKFLOW.md)
 
 ---
 
