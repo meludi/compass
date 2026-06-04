@@ -588,8 +588,9 @@ secret name from `ci_review_provider` (`claude`→`ANTHROPIC_API_KEY`,
 gh secret list | grep -q "^<SECRET_NAME>" && echo "present" || echo "MISSING"
 ```
 
-(Requires `gh` authenticated and the repo to exist on GitHub. If `gh secret list`
-errors — no remote yet — report that the secret can't be checked and move on.)
+(Requires `gh` installed + authenticated and the repo to exist on GitHub. If `gh` is
+missing or `gh secret list` errors — not installed, or no remote yet — report that the
+secret can't be checked, suggest `brew install gh` if absent, and move on.)
 
 - **Present:** confirm and continue.
 - **MISSING:** warn that the chosen mode will fail red until the secret is set,

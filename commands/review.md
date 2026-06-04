@@ -26,6 +26,8 @@ Read `base_branch` from `.claude/compass.yml` for the local fallback.
 
 > **Note (local diff):** Without a PR, the agents have no PR title or description as context — they only see the raw diff. Results are still accurate, but slightly less contextualized.
 
+> **`gh` only needed for the PR paths.** If a PR number is given (or inferred) but `gh` is not installed (`command -v gh` fails), fall back to the local diff (`git diff {base_branch}...HEAD`) and note that the PR title/description couldn't be fetched. Install `gh` (`brew install gh`) for full PR context.
+
 ## When to run
 
 - After `/compass:ship` opens a PR and you answer "yes" to the review prompt

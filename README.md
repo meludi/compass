@@ -6,12 +6,14 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 
 ## Requirements
 
-| Tool | Purpose | Install |
-|------|---------|---------|
-| [Claude Code](https://claude.ai/code) | Runs all slash commands | `npm install -g @anthropic-ai/claude-code` |
-| [Git](https://git-scm.com) | Version control + worktrees | pre-installed on most systems |
-| [GitHub CLI](https://cli.github.com) (`gh`) | PRs and diffs for `/compass:ship` | `brew install gh` → `gh auth login` |
-| [agent-browser](https://agent-browser.dev) | Browser smoke test in `/compass:validate` (skipped if absent) | `brew install agent-browser` → `agent-browser install` |
+| Tool | Required? | If missing | Install |
+|------|-----------|------------|---------|
+| [Claude Code](https://claude.ai/code) | **Required** | Nothing runs — it executes every command | `npm install -g @anthropic-ai/claude-code` |
+| [Git](https://git-scm.com) | **Required** | No version control, worktrees, or commits | pre-installed on most systems |
+| [GitHub CLI](https://cli.github.com) (`gh`) | For PRs | Local PIV loop still works; `/compass:ship` can't push or open a PR | `brew install gh` → `gh auth login` |
+| [agent-browser](https://agent-browser.dev) | Optional | `/compass:validate` skips the browser smoke test | `brew install agent-browser` → `agent-browser install` |
+
+> compass is built for **GitHub** (`gh` + GitHub Actions). The local PIV loop (plan → implement → validate → commit) is host-agnostic; only `/compass:ship` (open a PR) and the CI autonomy layer require GitHub. On GitLab/Bitbucket: push works, open the MR/PR yourself.
 
 ---
 
@@ -22,7 +24,17 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 /plugin install compass@compass
 ```
 
-Installs globally (`user` scope) by default — available in every project. To scope it to a single project, add `--scope local` (gitignored) or `--scope project` (shared via git) to both commands, e.g. `claude plugin install compass@compass --scope local`.
+This installs compass **globally** — it becomes available in every project you open.
+
+**Want it in one project only?** Add a scope flag to **both** commands:
+
+- `--scope local` — this project only, private to you (`.claude/settings.local.json`, gitignored)
+- `--scope project` — this project only, shared with collaborators via git (`.claude/settings.json`)
+
+```
+/plugin marketplace add meludi/compass --scope local
+/plugin install compass@compass --scope local
+```
 
 Then configure your project (run from the project root in Claude Code):
 

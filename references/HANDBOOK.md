@@ -276,6 +276,9 @@ Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by
 | Fork won't push `base_branch`      | Use `git push origin <base_branch>` from the terminal instead.                         |
 | Claude session feels slow/confused | Start a fresh session and run `/compass:context` to reload the mental model.                   |
 | CI jobs not running as expected    | Check `autonomy_mode` and `ci_review_provider` in `.claude/compass.yml` and that the matching secret (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`) is set. See `AUTONOMY.md`. |
+| `command not found: gh`            | Install the GitHub CLI (`brew install gh` → `gh auth login`). `ship`, `auto-implement`, and `apply-ci-review` check for it up front. Or skip it: `/compass:commit --push` and open the PR yourself. |
+
+> **Git host.** compass targets **GitHub** — `gh` for PRs and GitHub Actions for the CI autonomy layer (`claude-code-action` is GitHub-only). The local PIV loop (plan → implement → validate → commit) is host-agnostic and works anywhere; on GitLab/Bitbucket, push works and you open the MR/PR yourself. There is no `glab`/`.gitlab-ci.yml` path by design.
 
 ---
 

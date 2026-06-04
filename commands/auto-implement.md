@@ -29,6 +29,7 @@ For everything else, stay with `/compass:implement` → `/compass:ship`.
 2. **Worktree guard** — the working directory must match the `worktree_prefix` pattern from `.claude/compass.yml`. Refuse if running in the main project directory.
 3. **Plan exists** — the path argument resolves to a readable file under `.work/plans/`.
 4. **Working tree** — `git status --porcelain` either empty, or only contains files within this plan's declared scope. If unrelated changes exist: abort and ask the user to clean up first.
+5. **`gh` available** — `command -v gh` must succeed. This command runs all the way to PR-open, so abort now (before implementing) if `gh` is missing: tell the user to install it (`brew install gh` → `gh auth login`), or use `/compass:implement` → `/compass:commit --push` and open the PR manually.
 
 Report which check failed and stop. Do not proceed to Phase 1.
 

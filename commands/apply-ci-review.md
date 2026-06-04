@@ -23,6 +23,16 @@ Use `/compass:code-review --fix` instead when there is **no** CI review (mode `o
 
 Read `repo` from `.claude/compass.yml`.
 
+## Pre-flight — `gh` available?
+
+```bash
+command -v gh >/dev/null 2>&1 || echo "MISSING"
+```
+
+This command reads PR comments via `gh`, so it can't run without it. If missing, stop:
+tell the user to install it (`brew install gh` → `gh auth login`), or use
+`/compass:code-review --fix` for a fresh local review instead.
+
 ## Steps
 
 ### 1. Fetch the review comments

@@ -16,6 +16,20 @@ After `/compass:implement` completes and all validation passes.
 
 ## Steps
 
+### 0. Pre-flight — `gh` available?
+
+```bash
+command -v gh >/dev/null 2>&1 || echo "MISSING"
+```
+
+If `gh` is missing, **stop before committing** and tell the user:
+
+> GitHub CLI (`gh`) is not installed, so `/compass:ship` can't open the PR. Install it
+> (`brew install gh` → `gh auth login`), or run `/compass:commit --push` and open the PR
+> yourself. The local loop (plan/implement/validate/commit) works without `gh`.
+
+Do not commit or push until `gh` is available or the user chooses the manual path.
+
 ### 1. Read the implementation report
 
 Find the most recent report in `.work/reports/` — extract what was built and which files changed.
