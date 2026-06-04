@@ -23,8 +23,8 @@
 # Isolation scope: dir + branch + port are universal. Dependency install needs
 # package_manager or install_cmd. State isolation: db_file copy handles a single
 # file DB (SQLite); server DBs (Postgres/MySQL/…) need worktree_setup_cmd/teardown_cmd.
-#   - .env.local is symlinked from main (shared config) — per-worktree env must be
-#     written by worktree_setup_cmd into a file your stack loads.
+#   - .env.local and .claude/settings.local.json are symlinked from main (shared
+#     config) — per-worktree env must be written by worktree_setup_cmd.
 #   - No manual file copying across worktrees — all changes via git commit on feature branch.
 
 set -euo pipefail
@@ -146,9 +146,13 @@ if [ ! -d "$TARGET" ]; then
 
   git -C "$ROOT" worktree add "$TARGET" -b "$BRANCH"
 
-  # .env.local: symlink from main (config, not state)
+  # .env.local + settings.local.json: symlink from main (config, not state)
   if [ -f "$ROOT/.env.local" ]; then
     ln -sf "$ROOT/.env.local" "$TARGET/.env.local"
+  fi
+  if [ -f "$ROOT/.claude/settings.local.json" ]; then
+    mkdir -p "$TARGET/.claude"
+    ln -sf "$ROOT/.claude/settings.local.json" "$TARGET/.claude/settings.local.json"
   fi
 
   echo "$WORKTREE_PORT" > "$TARGET/.worktree-port"
@@ -179,9 +183,11 @@ if [ ! -d "$TARGET" ]; then
 fi
 
 echo "[worktree] worktree: $TARGET  branch: $BRANCH"
+echo "[worktree] open in editor: code $TARGET"
 if [ -f "$TARGET/.worktree-port" ]; then
   echo "[worktree] dev server:  PORT=$(cat "$TARGET/.worktree-port") $DEV_CMD"
 fi
 if [ "$ACTION" = "open" ]; then
-  cd "$TARGET" && claude
+  cd "$TARGET" && claude 2>/dev/null || \
+    echo "[worktree] Note: open a new terminal, cd $TARGET, and run 'claude' to start a session."
 fi

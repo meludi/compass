@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **`/compass:worktree` — graceful `claude` auto-open** — when invoked from within a Claude Code session, the `claude` launch no longer errors; instead it prints a note to open a new terminal manually.
+- **`/compass:worktree` — symlink `settings.local.json`** — `.claude/settings.local.json` is now symlinked from the main project into each new worktree (same as `.env.local`), so tracker auth and MCP config are available immediately.
+
 ## v0.3.0 — 2026-06-04
 
 ### Changed
