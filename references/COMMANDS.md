@@ -27,8 +27,9 @@ Configures the project — generates `.claude/compass.yml`, `compass.schema.json
 
 ### /compass:onboard
 
-Scans an existing codebase and fills the sections `/compass:setup` leaves as TODO —
-Architecture, Code Patterns, Testing, Key Files.
+Self-contained brownfield onboarding — bootstraps `compass.yml` if missing, then scans
+the codebase and fills `CLAUDE.md` with real patterns (Architecture, Code Patterns,
+Testing, Key Files). No prior `/compass:setup` needed.
 
 | | |
 |---|---|
@@ -38,11 +39,15 @@ Architecture, Code Patterns, Testing, Key Files.
 | **Trigger** | User |
 |---|---|
 
-**Without argument:** fills empty/TODO sections for the first time.
+**Phase 1** (when `compass.yml` missing or `name` blank): copies template, auto-detects commands/repo/branch. Stops — fill in `name` and other blanks, then re-run.
 
-**With `--refresh`:** re-runs the scan and overwrites the scanned sections — use when `CLAUDE.md` has drifted.
+**Phase 2** (when `name` set): validates `compass.yml`, generates `CLAUDE.md` if absent.
 
-**When to run:** after `setup`, when the project already has source code. Not for greenfield — use `/compass:setup-stack` instead.
+**Phase 3** (scan): reads the codebase and fills Architecture, Code Patterns, Testing, Key Files.
+
+**With `--refresh`:** skips Phases 1–2, re-runs the scan and overwrites the scanned sections — use when `CLAUDE.md` has drifted.
+
+**When to run:** on any existing project with source code. Not for greenfield — use `/compass:setup-stack` instead.
 
 ---
 
