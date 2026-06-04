@@ -19,22 +19,52 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 
 ## Install
 
+**Global** (available in every project) — run in a Claude Code session or in your terminal:
+
 ```
 /plugin marketplace add meludi/compass
+```
+```
 /plugin install compass@compass
 ```
 
-Restart Claude Code after installing (or run `/reload-plugins`). This installs compass **globally** — it becomes available in every project you open.
+Or equivalently from your terminal:
 
-**Want it in one project only?** The `--scope` flag isn't available in the `/plugin` slash command — use the shell CLI in your terminal instead:
+```bash
+claude plugin marketplace add meludi/compass
+```
+```bash
+claude plugin install compass@compass
+```
+
+**Project-only** (`.--scope` is not available in the `/plugin` slash command — use the terminal):
 
 ```bash
 claude plugin marketplace add meludi/compass --scope local
+```
+```bash
 claude plugin install compass@compass --scope local
 ```
 
 - `--scope local` — this project only, private to you (`.claude/settings.local.json`, gitignored)
 - `--scope project` — this project only, shared with collaborators via git (`.claude/settings.json`)
+
+Restart Claude Code after installing (or run `/reload-plugins`).
+
+**Update to a new version:**
+
+```
+/plugin update compass
+```
+
+Or from the terminal:
+
+```bash
+claude plugin marketplace update compass
+```
+```bash
+claude plugin install compass@compass
+```
 
 Then configure your project (run from the project root in Claude Code):
 
