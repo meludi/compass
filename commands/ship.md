@@ -93,7 +93,7 @@ Note: for yes — run /clear first so the subagents start with a clean context.
 
 **If "no":** stop. Remind the user to test manually using the PR checklist, and that `/compass:reflect` is available after merge.
 
-**If "yes":** run `/compass:review <PR-number>` — it handles the full 3-subagent fan-out, aggregation, security check, and verdict.
+**If "yes":** run `/compass:review-project <PR-number>` — it handles the full 3-subagent fan-out, aggregation, security check, and verdict.
 
 > For a trivial change (Quick Path — typo, 1-line fix), answer **no**: the 3-subagent review is overkill for a one-line diff.
 

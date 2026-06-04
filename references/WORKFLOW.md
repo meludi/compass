@@ -57,16 +57,16 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 
 | Command | Details |
 |---|---|
-| `/compass:code-review [low→ultra]` | [→ details](COMMANDS.md#compasscode-review) |
-| `/compass:review` | [→ details](COMMANDS.md#compassreview) |
+| `/compass:review-code [low→ultra]` | [→ details](COMMANDS.md#compassreview-code) |
+| `/compass:review-project` | [→ details](COMMANDS.md#compassreview-project) |
 | CI `claude-review` | automatic on push in `review-only`/`full` — nothing to invoke |
 
 **Step 2 — fix** (pick one):
 
 | Command | Details |
 |---|---|
-| `/compass:code-review --fix` | [→ details](COMMANDS.md#compasscode-review) |
-| `/compass:apply-ci-review` | [→ details](COMMANDS.md#compassapply-ci-review) |
+| `/compass:review-code --fix` | [→ details](COMMANDS.md#compassreview-code) |
+| `/compass:fix-ci-review` | [→ details](COMMANDS.md#compassfix-ci-review) |
 | Edit by hand | — |
 
 **Step 3 — verify:** `/compass:validate` — re-run lint/types/tests (a fix can break them).
@@ -80,7 +80,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 | | `off` | `review-only` |
 |---|---|---|
 | Who triggers the review | you, each round | CI, automatically on every push |
-| Fix entry | `/compass:code-review --fix` | `/compass:apply-ci-review` |
+| Fix entry | `/compass:review-code --fix` | `/compass:fix-ci-review` |
 | Re-review after a fix | manual (run it again) | automatic on push |
 | "Clean" signal | your judgement | `## Review Summary` with no findings |
 | Findings live | in chat (ephemeral) | PR comments (audit trail) |
@@ -89,7 +89,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 
 ## Axis — `autonomy_mode`
 
-A cross-cutting setting (`.claude/compass.yml`), not a step — it decides how Loop 2 runs (see the **Two modes** table above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/compass:apply-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
+A cross-cutting setting (`.claude/compass.yml`), not a step — it decides how Loop 2 runs (see the **Two modes** table above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/compass:fix-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
 
 Comparison matrix, cost, and security notes: `AUTONOMY.md`.
 
@@ -116,7 +116,7 @@ These run automatically inside the steps above but can also be invoked directly.
 | `/compass:context` | step 1 of `plan-feature` + `implement` | [→ details](COMMANDS.md#compasscontext) |
 | `/compass:validate` | end of `implement` | [→ details](COMMANDS.md#compassvalidate) |
 | `/compass:commit` | `ship` | [→ details](COMMANDS.md#compasscommit) |
-| `/compass:security-review` | `ship` on risky diffs | [→ details](COMMANDS.md#compasssecurity-review) |
+| `/compass:review-security` | `ship` on risky diffs | [→ details](COMMANDS.md#compassreview-security) |
 
 ---
 

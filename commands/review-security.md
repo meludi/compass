@@ -1,17 +1,28 @@
 ---
-description: Security review of code changes
-argument-hint: [file-or-directory]
+description: Security-focused review — injection, auth, data exposure, secrets. Advisory by default; --fix applies findings and runs validate.
+argument-hint: "[--fix] [file-or-directory]"
 ---
 
-# /compass:security-review
+# /compass:review-security — Security Review
 
 > **Model:** `/model opus` — deep analysis for security review.
 
 Perform a security-focused code review on the specified files, directory, or staged changes.
 
-**Input**: $ARGUMENTS (defaults to staged git changes if no path provided)
+**Input**: `$ARGUMENTS` — optional `--fix` flag and/or file/directory path. Defaults to staged git changes if no path provided.
 
 **When to run**: Auto-triggered by `/compass:ship`'s review step — or run manually on specific files.
+
+---
+
+## Step 0 — Session check
+
+Prompt the user:
+
+> For the sharpest results, run `/clear` first, then re-run `/compass:review-security` — or proceed with current session? (y/n)
+
+- **y** → continue
+- **n** → stop
 
 ---
 
@@ -120,3 +131,11 @@ For each finding:
 ```
 
 **Note:** Output is inline in the conversation. Do NOT post to GitHub unless explicitly asked.
+
+---
+
+## With `--fix`
+
+When `--fix` is passed: after the report, apply all Critical and High findings to the
+working tree. Then run `/compass:validate`. Never auto-commits — stop after validation
+and hand back to the user.

@@ -162,7 +162,7 @@ Suggested feature (small, one PIV pass): **"a `version` helper that returns the 
 - [ ] Reads the report; `/compass:commit` shows status/diff, proposes a Conventional Commit, **waits for confirmation**; pushes; opens a PR with the template body (Summary/Changes/Manual Test Plan/Notes)
 - [ ] `## Manual Test Plan` checklist is in the PR body (from `/compass:ship`, mode-independent)
 - [ ] "Run code review now?" → **yes** → 3 subagents run; verdict inline; **no** GitHub comment posted; **no** `Co-Authored-By`
-- [ ] No `/compass:security-review` auto-trigger for a non-risky diff
+- [ ] No `/compass:review-security` auto-trigger for a non-risky diff
 
 ### `/compass:reflect` (Scope 2 — Post-Feature)
 - [ ] 5 questions come **one at a time**; empty answers produce no diff; confirmation before any apply
@@ -175,7 +175,7 @@ The PR from Loop 1 is open. This is the same loop in two modes; run both.
 
 ### Mode A — `autonomy_mode: off` (local)
 With `off` in `compass.yml`, intentionally leave/introduce a fixable issue, then:
-- [ ] `/compass:code-review` (or `/compass:code-review --fix`) surfaces it locally; you apply the fix
+- [ ] `/compass:review-code` (or `/compass:review-code --fix`) surfaces it locally; you apply the fix
 - [ ] `/compass:validate` green → `/compass:commit` → `git push`
 - [ ] On GitHub, only the **`test`** job runs (no Claude jobs); merge is yours
 - [ ] "Clean" is your own judgement — no CI review comments appear
@@ -184,7 +184,7 @@ With `off` in `compass.yml`, intentionally leave/introduce a fixable issue, then
 Set `autonomy_mode: review-only`, commit, push. Open (or update) a PR that carries a **real finding**.
 - [ ] CI runs `test` + `claude-review` (inline comments) + `claude-checklist` (PR comment) + **one `## Review Summary`** comment
 - [ ] GitHub notifies you; the `## Review Summary` states the finding count and the "fix locally, never by CI" reminder
-- [ ] `/compass:apply-ci-review` pulls the PR comments and applies fixes **locally** (no second review); it **stops before commit**
+- [ ] `/compass:fix-ci-review` pulls the PR comments and applies fixes **locally** (no second review); it **stops before commit**
 - [ ] `/compass:validate` → `/compass:commit` → `git push` → CI **re-reviews** automatically; repeat until the Summary reports no findings
 - [ ] CI never commits; the merge is yours
 

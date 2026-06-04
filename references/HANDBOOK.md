@@ -91,7 +91,7 @@ The `/compass:reflect` command guides you through all of the above.
 | | Opus 4.8 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
-| **In this workflow** | `/compass:ideate`, `/compass:plan-feature`, `/compass:ship`, `/compass:review`, `/compass:security-review` | `/compass:setup`, `/compass:setup-stack`, `/compass:implement`, `/compass:auto-implement`, `/compass:validate`, `/compass:create-stories`, `/compass:reflect` | `/compass:commit`, `/compass:worktree` |
+| **In this workflow** | `/compass:ideate`, `/compass:plan-feature`, `/compass:ship`, `/compass:review-project`, `/compass:review-security` | `/compass:setup`, `/compass:setup-stack`, `/compass:implement`, `/compass:auto-implement`, `/compass:validate`, `/compass:create-stories`, `/compass:reflect` | `/compass:commit`, `/compass:worktree` |
 | **Latency** | Moderate | Fast | Fastest |
 | **Context window** | 1M tokens | 1M tokens | 200k tokens |
 | **Max output** | 128k tokens | 64k tokens | 64k tokens |
@@ -122,10 +122,10 @@ Full details — arguments, with/without behavior, when to run standalone: `COMM
 | `/compass:validate` | PIV | Auto or User |
 | `/compass:commit` | PIV | Auto or User |
 | `/compass:ship` | PIV | User |
-| `/compass:review` | PIV | Auto or User |
-| `/compass:code-review` | PIV | User |
-| `/compass:apply-ci-review` | PIV (Fix) | User |
-| `/compass:security-review` | PIV | Auto or User |
+| `/compass:review-project` | PIV | Auto or User |
+| `/compass:review-code` | PIV | User |
+| `/compass:fix-ci-review` | PIV (Fix) | User |
+| `/compass:review-security` | PIV | Auto or User |
 | `/compass:reflect` | Anytime | User |
 
 ---
@@ -145,7 +145,7 @@ Write tests one behavior at a time alongside the code (see `/compass:implement` 
 
 ## Refactor candidates
 
-After a task's tests are **green** (never while red), scan for these and clean up — used by `/compass:implement` (post-green), `/compass:review`, and `/compass:code-review`:
+After a task's tests are **green** (never while red), scan for these and clean up — used by `/compass:implement` (post-green), `/compass:review-project`, and `/compass:review-code`:
 
 | Smell | Remediation |
 |---|---|

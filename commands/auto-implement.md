@@ -85,7 +85,7 @@ EOF
 
 After the PR URL is printed:
 
-- Do **not** run code review (no 3-subagent fan-out, no `/compass:security-review` prompt).
+- Do **not** run code review (no 3-subagent fan-out, no `/compass:review-security` prompt).
 - Do **not** merge or enable auto-merge.
 - Do **not** prompt for follow-up actions.
 

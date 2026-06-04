@@ -270,40 +270,42 @@ and offers the parallel code review. Pre-flight: checks `gh` is installed before
 | **Level** | PIV |
 | **Recommended model** | Opus |
 | **Trigger** | User |
-| **Uses** | `/compass:commit`, `/compass:review` |
+| **Uses** | `/compass:commit`, `/compass:review-project` |
 |---|---|
 
-Folds in: `/compass:commit`, `/compass:review`, `/compass:security-review` (on risky diffs).
+Folds in: `/compass:commit`, `/compass:review-project`, `/compass:review-security` (on risky diffs).
 
 ---
 
 ## Review & fix
 
-### /compass:review
+### /compass:review-project
 
 3-subagent parallel review — your `CLAUDE.md` conventions, pattern reuse,
-test-coverage gaps. Advisory only; never edits or commits.
+test-coverage gaps. Advisory by default; `--fix` applies findings.
 
 | | |
 |---|---|
 | **Level** | PIV |
 | **Recommended model** | Opus |
-| **Argument** | `[PR-number]` — optional |
+| **Argument** | `[--fix] [PR-number]` — optional |
 | **Trigger** | Auto (inside `ship`) or User |
-| **Uses** | `/compass:security-review` (conditional — risky diffs only) |
+| **Uses** | `/compass:review-security` (conditional — risky diffs only) |
 |---|---|
 
 **Without argument:** uses the current branch's PR (inferred) or falls back to `git diff {base_branch}...HEAD`.
 
 **With argument:** reviews that specific PR number.
 
-**When to run standalone:** before shipping, for re-reviews after addressing feedback, for external/contributed PRs, or after a manual push. Run `/clear` first for the sharpest results.
+**With `--fix`:** applies Critical and Important findings — if any were applied, runs `/compass:validate`. Never auto-commits.
 
-**vs. `/compass:code-review`:** this command checks your project conventions and test coverage (advisory). `/compass:code-review` is a deep generic bug hunt with tunable effort and `--fix`.
+**When to run standalone:** before shipping, for re-reviews after addressing feedback, for external/contributed PRs, or after a manual push.
+
+**vs. `/compass:review-code`:** this command checks your project conventions and test coverage. `/compass:review-code` is a deep generic bug hunt with tunable effort.
 
 ---
 
-### /compass:code-review
+### /compass:review-code
 
 Deep bug hunt with a tunable effort dial. Wraps the built-in `/code-review` with
 compass-specific follow-up: after `--fix`, automatically runs `/compass:validate`.
@@ -317,9 +319,11 @@ compass-specific follow-up: after `--fix`, automatically runs `/compass:validate
 | **Uses** | `/code-review` (built-in), `/compass:validate` (after `--fix`) |
 |---|---|
 
-**Without `--fix`:** advisory — findings shown, nothing applied.
+**Without flags:** advisory — findings shown inline, nothing applied.
 
-**With `--fix`:** applies fixes in the working tree, then runs `/compass:validate`. Never auto-commits.
+**With `--fix`:** applies fixes in the working tree — if any were applied, runs `/compass:validate`. Never auto-commits.
+
+**With `--comment`:** posts findings as inline PR comments on GitHub instead of showing them in chat.
 
 | Level | Cost | Use for |
 |---|---|---|
@@ -328,11 +332,11 @@ compass-specific follow-up: after `--fix`, automatically runs `/compass:validate
 | `max` | high | Risky changes |
 | `ultra` | highest (cloud) | DB migrations, auth, large refactors |
 
-Match the level to the risk — don't rely on the default.
+**Default level:** inherits the session's current effort — set it with `/effort low|medium|high|xhigh`. Pass a level explicitly to override for a single run.
 
 ---
 
-### /compass:apply-ci-review
+### /compass:fix-ci-review
 
 Pulls the CI `claude-review` inline comments from the open PR and applies the fixes
 locally, then runs `/compass:validate`. Stops before commit.
@@ -350,26 +354,28 @@ locally, then runs `/compass:validate`. Stops before commit.
 
 **With argument:** uses that specific PR number.
 
-**When to use:** in `review-only`/`full` mode — the CI already reviewed the diff, so re-reviewing with `/compass:code-review` would be redundant. In `off` mode or before the PR exists, use `/compass:code-review --fix` instead.
+**When to use:** in `review-only`/`full` mode — the CI already reviewed the diff, so re-reviewing with `/compass:review-code` would be redundant. In `off` mode or before the PR exists, use `/compass:review-code --fix` instead.
 
 ---
 
-### /compass:security-review
+### /compass:review-security
 
-Security-focused review — injection, auth, data exposure, secrets. Advisory; never
-edits. Defaults to staged changes if no argument given.
+Security-focused review — injection, auth, data exposure, secrets. Advisory by default;
+`--fix` applies findings. Defaults to staged changes if no argument given.
 
 | | |
 |---|---|
 | **Level** | PIV |
 | **Recommended model** | Opus |
-| **Argument** | `[file-or-directory]` — optional |
+| **Argument** | `[--fix] [file-or-directory]` — optional |
 | **Trigger** | Auto (inside `ship` on risky diffs) or User |
 |---|---|
 
 **Without argument:** reviews staged `git diff --cached`, or unstaged `git diff` if nothing is staged.
 
 **With argument:** reviews those paths specifically (e.g. `src/api/auth.ts`).
+
+**With `--fix`:** applies Critical and High findings — if any were applied, runs `/compass:validate`. Never auto-commits.
 
 **When to run standalone:** before shipping when you touched sensitive code, for a targeted file/directory audit, or to review external/vendored code.
 

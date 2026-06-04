@@ -3,15 +3,15 @@ description: Fetch the CI review comments on the PR and apply the fixes locally,
 argument-hint: [PR-number]
 ---
 
-# /compass:apply-ci-review — Apply CI review findings
+# /compass:fix-ci-review — Apply CI Review Findings
 
 > **Model:** `/model opus` — applying review feedback needs careful editing.
 
-Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:code-review`.
+Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:review-code`.
 
 **Input**: `$ARGUMENTS` — PR number (optional).
 
-Use `/compass:code-review --fix` instead when there is **no** CI review (mode `off`, or before the PR exists).
+Use `/compass:review-code --fix` instead when there is **no** CI review (mode `off`, or before the PR exists).
 
 ## PR source — how it's resolved
 
@@ -19,7 +19,7 @@ Use `/compass:code-review --fix` instead when there is **no** CI review (mode `o
 |---|---|
 | `$ARGUMENTS` is a PR number | that PR |
 | No argument, PR exists for current branch | inferred via `gh pr view` |
-| No argument, no PR found | stop — nothing to apply (suggest `/compass:code-review --fix`) |
+| No argument, no PR found | stop — nothing to apply (suggest `/compass:review-code --fix`) |
 
 Read `repo` from `.claude/compass.yml`.
 
@@ -31,7 +31,7 @@ command -v gh >/dev/null 2>&1 || echo "MISSING"
 
 This command reads PR comments via `gh`, so it can't run without it. If missing, stop:
 tell the user to install it (`brew install gh` → `gh auth login`), or use
-`/compass:code-review --fix` for a fresh local review instead.
+`/compass:review-code --fix` for a fresh local review instead.
 
 ## Steps
 

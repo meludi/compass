@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Changed
+- **Review commands renamed and improved** — consistent `review-*` prefix for all review commands; `apply-ci-review` renamed to `fix-ci-review` (clarifies it applies CI findings rather than reviewing). `review-project` (was `review`) and `review-security` (was `security-review`) gain a `--fix` flag. All three `review-*` commands prompt to run `/clear` first for a clean context.
 - **`references/COMMANDS.md` — `Uses` field per command** — each command entry now lists which other compass commands it invokes internally (explicit calls and inline procedure inclusions), making the dependency graph visible at a glance.
 - **`/compass:onboard` is now self-contained** — no longer requires a prior `/compass:setup` run. If `compass.yml` is missing (the normal case for any brownfield project), it bootstraps the config inline (Phase 1: copy template + auto-detect values, Phase 2: validate + generate `CLAUDE.md` if absent), then proceeds directly to the codebase scan. Running `/compass:setup` first is no longer necessary.
 
@@ -10,10 +11,10 @@
 
 ### Added
 - **`/compass:onboard`** — brownfield project onboarding: scans the existing codebase and fills `CLAUDE.md` (Architecture, Code Patterns, Testing, Key Files) instead of leaving TODO stubs. Supports `--refresh` to re-scan after codebase evolution.
-- **`/compass:code-review`** — namespaced wrapper around the built-in `/code-review` with compass-specific follow-up: after `--fix` applies changes, automatically runs `/compass:validate`. All bare `/code-review` references updated to `/compass:code-review` throughout.
+- **`/compass:review-code`** — namespaced wrapper around the built-in `/code-review` with compass-specific follow-up: after `--fix` applies changes, automatically runs `/compass:validate`. All bare `/code-review` references updated to `/compass:review-code` throughout.
 - **`references/COMMANDS.md`** — single source for every command: consistent schema per entry (description, metadata table with Level/Recommended model/Argument/Trigger, With/Without argument, When to run standalone). HANDBOOK and WORKFLOW now point here instead of duplicating command details.
 - **`/compass:commit --push` flag** — commit and push in one step; without the flag, `/compass:commit` asks whether to push after committing.
-- **`gh` pre-flight checks** in `/compass:ship`, `/compass:auto-implement`, `/compass:apply-ci-review`, `/compass:review`, and `/compass:setup-stack` — stops before committing if `gh` is not installed, with install instructions and a manual alternative.
+- **`gh` pre-flight checks** in `/compass:ship`, `/compass:auto-implement`, `/compass:fix-ci-review`, `/compass:review-project`, and `/compass:setup-stack` — stops before committing if `gh` is not installed, with install instructions and a manual alternative.
 
 ### Changed
 - **`reference/` renamed to `references/`** — all cross-references updated.

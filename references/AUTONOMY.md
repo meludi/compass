@@ -70,7 +70,7 @@ Without this gate, `auto-merge` will fire as soon as CI is green, regardless of 
 | **— Always present (mode-independent) —** | | | |
 | `## Manual Test Plan` in PR body (from `/compass:ship`) | ✓ | ✓ | ✓ |
 | `/compass:ship` local 3-subagent review | ✓ optional | ✓ optional | ✓ optional |
-| Local `/compass:code-review` / `/compass:review` | ✓ | ✓ | ✓ |
+| Local `/compass:review-code` / `/compass:review-project` | ✓ | ✓ | ✓ |
 | **— Who does what —** | | | |
 | Who reviews | you, locally | you locally **+ CI** | you locally **+ CI** |
 | Who fixes | you (local) | you (local) | you (local) |
@@ -91,7 +91,7 @@ Notes:
 
 ## Fixing review findings
 
-The fix loop itself — review → fix → `/compass:validate` → `/compass:commit` → push → re-review → merge, in both `off` and `review-only` modes — lives in `WORKFLOW.md` → **"Loop 2 — Fix"**. In CI modes you consume the findings with `/compass:apply-ci-review`. Two autonomy-specific notes:
+The fix loop itself — review → fix → `/compass:validate` → `/compass:commit` → push → re-review → merge, in both `off` and `review-only` modes — lives in `WORKFLOW.md` → **"Loop 2 — Fix"**. In CI modes you consume the findings with `/compass:fix-ci-review`. Two autonomy-specific notes:
 
 - **CI never commits.** `claude-review` only surfaces findings; applying a fix is always a deliberate human step. The single sanctioned auto-commit anywhere is `/compass:auto-implement` (a pre-approved plan on a `feat/*` branch).
 - **A new comment per push.** Every push (`synchronize`) re-runs `claude-review`, so a fresh `## Review Summary` comment is posted each iteration — comments are **not** edited in place. This is intentional: it doubles as a per-round record.
@@ -192,4 +192,4 @@ If you run `/compass:auto-implement` (see below) with this hook installed, the h
 - `/compass:ship` always runs its local 3-subagent review **regardless of `autonomy_mode`**; the CI review (in `review-only`/`full`) is an additional, auditable pass on the PR.
 - `/compass:auto-implement` composes with any mode and **never merges** — the PR it opens still gets the CI review jobs when the mode is on.
 
-Security is one of the five focus areas of the CI `claude-review`; for a deeper audit, run `/compass:security-review` locally.
+Security is one of the five focus areas of the CI `claude-review`; for a deeper audit, run `/compass:review-security` locally.

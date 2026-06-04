@@ -1,18 +1,31 @@
 ---
-description: Run parallel code review on a PR or local branch diff (3 subagents + security check)
-argument-hint: [PR-number]
+description: Run parallel code review on a PR or local branch diff — checks CLAUDE.md conventions, pattern reuse, and test coverage gaps. 3 subagents in parallel.
+argument-hint: "[--fix] [PR-number]"
 ---
 
-# /compass:review — Parallel Code Review
+# /compass:review-project — Parallel Project Review
 
 > **Model:** `/model opus` — deep analysis needed.
-> **Before running:** `/clear` — gives all three subagents a clean context window.
 
-Runs a 3-agent parallel review. Works with or without an open PR.
+Runs a 3-agent parallel review tuned to *your* project conventions, patterns, and test
+coverage gaps. Works with or without an open PR.
 
 Can be triggered from `/compass:ship` (step 5) or run standalone at any time.
 
-**Input**: `$ARGUMENTS` — PR number (optional).
+**Input**: `$ARGUMENTS` — optional `--fix` flag and/or PR number.
+
+---
+
+## Step 0 — Session check
+
+Prompt the user:
+
+> For the sharpest results, run `/clear` first, then re-run `/compass:review-project` — or proceed with current session? (y/n)
+
+- **y** → continue
+- **n** → stop
+
+---
 
 ## Diff source — how it's resolved
 
@@ -97,7 +110,7 @@ Brief description of what the diff does.
 
 ### 4. Security check (automatic)
 
-If the diff touches any of the following — run `/compass:security-review` on those files:
+If the diff touches any of the following — run `/compass:review-security` on those files:
 
 - API route handlers
 - Database queries or ORM calls
@@ -117,8 +130,19 @@ One-sentence overall code health summary.
 
 **Note:** Output is inline in the conversation. Do NOT post to GitHub unless explicitly asked.
 
+---
+
+## With `--fix`
+
+When `--fix` is passed: after the verdict, apply all Critical and Important findings
+to the working tree. Then run `/compass:validate`. Never auto-commits — stop after
+validation and hand back to the user.
+
+---
+
 ## Rules
 
 - Never merge — hand back to the user after the verdict
 - No secrets — never log `.env.local`, `*.db`, or credential files
 - For a trivial change (typo, 1-line fix), skip this command — the 3-subagent review is overkill for a one-line diff
+- **Never auto-commit** — even with `--fix`, the commit is always a deliberate human step
