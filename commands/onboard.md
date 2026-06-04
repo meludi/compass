@@ -16,17 +16,77 @@ as the codebase evolves. Safe to repeat.
 
 ---
 
-## Pre-condition
+## Phase Detection
 
-Check whether compass is already configured:
+Read `.claude/compass.yml`:
 
-- `.claude/compass.yml` missing **or** `name: ""` → run `/compass:setup` (both phases)
-  first, then continue below.
-- Already configured → skip straight to the scan.
+- **File missing or `name: ""`** → run **Phase 1** (config bootstrap) below.
+- **`name` has a value** → skip to **Phase 3** (codebase scan).
 
 ---
 
-## Codebase Scan
+## Phase 1 — Bootstrap config
+
+`compass.yml` does not exist yet (normal for any brownfield project). Generate it
+from the plugin template:
+
+1. Create `.claude/` if it does not exist.
+2. Copy `${CLAUDE_PLUGIN_ROOT}/templates/compass.yml` → `.claude/compass.yml`.
+3. Copy `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` → `.claude/compass.schema.json`.
+
+**Pre-fill what can be detected** — leave the rest for the user:
+
+- `package_manager` — from lockfile (`pnpm-lock.yaml`→pnpm, `yarn.lock`→yarn,
+  `bun.lockb`→bun, else npm).
+- `dev_cmd` / `test_cmd` / `lint_cmd` / `format_cmd` / `type_check_cmd` — from
+  matching `package.json` scripts; blank if no matching script. Skip for non-JS projects.
+- `repo` — from `git remote get-url origin` (as `owner/repo`).
+- `base_branch` — the repo's current default branch.
+
+Then output:
+
+```
+.claude/compass.yml created — auto-filled what could be detected.
+Fill in: name, description — and anything left blank.
+Then run /compass:onboard again.
+```
+
+Stop. Do not proceed further until the user re-runs the command.
+
+---
+
+## Phase 2 — Validate config
+
+Run automatically when `name` is set. Validate `.claude/compass.yml` against
+`${CLAUDE_PLUGIN_ROOT}/compass.schema.json`. Collect **all** violations before
+reporting:
+
+```
+Validation failed — fix the following in .claude/compass.yml:
+
+  - package_manager: "npmp" is not valid. Must be one of: npm, pnpm, yarn, bun
+  - repo: "my-app" must match owner/repo
+```
+
+Stop if any errors exist. Do not proceed to the scan until the config is clean.
+
+If valid, confirm:
+
+```
+Commands (from package.json — verify they run):
+  dev: {dev_cmd} · test: {test_cmd} · lint: {lint_cmd} · format: {format_cmd} · types: {type_check_cmd or "—"}
+```
+
+If `.claude/CLAUDE.md` does not exist, generate it now from
+`${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE-template.md` — fill description, tech stack,
+commands, and directory structure from `compass.yml` + codebase; mark Code Patterns,
+Architecture, Testing as `TODO: update after first feature`. Then continue to Phase 3.
+
+If `.claude/CLAUDE.md` already exists, skip generation and continue to Phase 3.
+
+---
+
+## Phase 3 — Codebase Scan
 
 ### 1 — Architecture
 
@@ -61,7 +121,7 @@ cat Cargo.toml 2>/dev/null | head -20
 ```
 
 Note: language/runtime, framework, test runner, linter, formatter. This supplements
-(do not duplicate) what `/compass:setup` already put in `compass.yml`.
+(do not duplicate) what Phase 1 already put in `compass.yml`.
 
 ### 3 — Code Patterns
 
@@ -160,6 +220,8 @@ run /compass:ideate to start your first initiative.
 
 - **Read-only scan** — never modify source files, only `.claude/CLAUDE.md`.
 - **Replace, not append** — overwrite only the scanned sections; leave the rest untouched.
+- **Self-contained** — never tell the user to run `/compass:setup` first; bootstrap
+  the config inline (Phase 1/2) if needed.
 - **Brownfield, not scaffold** — no new files, no style questions, no seed components.
   That is `/compass:setup-stack`.
 - **Honest about gaps** — if a pattern can't be inferred, say so rather than inventing.
