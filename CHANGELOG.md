@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0 — 2026-06-08
+
+### Added
+- **`/compass:update`** — reconciles an existing project's `.claude/compass.yml` with the installed plugin after a `/plugin update compass`. Refreshes the schema copy, diffs config keys against the plugin template, surfaces keys the update added (with defaults + comments) or removed, adds the new ones non-destructively on confirmation, and re-validates. Behaviour-changing new keys (e.g. `test_policy`, `autonomy_mode`) are called out with a pointer to their docs. Existing values are never changed; orphaned keys are reported, not deleted. Closes the gap where plugin updates left existing configs untouched, silently defaulting new switches.
+
 ## v0.4.0 — 2026-06-08
 
 ### Added

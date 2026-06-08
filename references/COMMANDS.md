@@ -51,6 +51,21 @@ Testing, Key Files). No prior `/compass:setup` needed.
 
 ---
 
+### /compass:update
+
+Reconciles an existing project config with the installed plugin — run **after** `/plugin update compass`. Refreshes the schema copy, surfaces config keys the update added or removed, adds new ones on confirmation (non-destructive), and re-validates. Does **not** update the plugin itself.
+
+| | |
+|---|---|
+| **Level** | After a plugin update |
+| **Recommended model** | Sonnet |
+| **Trigger** | User |
+|---|---|
+
+New keys are appended with their template default + comment; existing values are never changed. Orphaned/removed keys are reported, not deleted. Behaviour-changing new keys (e.g. `test_policy`, `autonomy_mode`) are called out with a pointer to their docs.
+
+---
+
 ### /compass:setup-stack
 
 Scaffolds the tech stack for a blank project — framework, tooling, seed files, a

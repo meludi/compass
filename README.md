@@ -66,6 +66,8 @@ claude plugin marketplace update compass
 claude plugin install compass@compass
 ```
 
+After updating, run **`/compass:update`** in each project to sync `.claude/compass.yml` with the new version — it refreshes the schema and surfaces any new config keys (with their defaults) the update added.
+
 Then configure your project (run from the project root in Claude Code):
 
 ```
