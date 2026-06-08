@@ -14,6 +14,8 @@ install_cmd: ""         # Optional — custom install for any stack, e.g. uv syn
 dev_cmd: npm run dev    # Start dev server
 dev_port: 3000          # Dev server port
 test_cmd: npm test
+test_policy: first      # first | after | none — when/whether tests are written for logic tasks
+                        #  first = test-first (RED→GREEN, TDD); after = code then test; none = no forced test
 lint_cmd: npm run lint
 format_cmd: npm run format
 type_check_cmd: ""      # Optional, e.g. npm run typecheck — leave blank if not used

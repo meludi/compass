@@ -24,7 +24,7 @@ Execute the loading procedure from `${CLAUDE_PLUGIN_ROOT}/commands/context.md` (
 ### 2. Load plan
 
 - Read the plan file
-- Read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`
+- Read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `test_policy`, `lint_cmd`, `format_cmd`, `dev_port`
 - Extract: goal, files to change, tasks, acceptance criteria
 - Confirm branch is correct (`git branch --show-current`)
 
@@ -40,18 +40,20 @@ For each task in the plan:
 
 **Implement** — two paths depending on the task:
 
-- **Logic-bearing task** (the task has a `Behavior` line in the plan — domain logic, data transforms, API handlers, hooks/functions with real logic): work **test-first**, one behavior at a time.
-  1. Write **one** failing test for the task's behavior (RED). Follow the test-quality rules in `references/HANDBOOK.md` → *Test quality*.
-  2. Write the **minimal** code to make it pass (GREEN).
-  3. Do not write the whole task's tests up front — one behavior → one bit of code → repeat. (Writing all tests first tends to test imagined, not actual, behavior.)
-- **UI / glue / config task** (no `Behavior` line): follow the Mirror pattern from the plan directly; no forced test.
+- **Logic-bearing task** (the task has a `Behavior` line in the plan — domain logic, data transforms, API handlers, hooks/functions with real logic): how the test relates to the code is set by `test_policy` in `.claude/compass.yml` (default `first`):
+  - **`first`** (test-first / TDD): write **one** failing test for the behavior (RED), then the **minimal** code to make it pass (GREEN). One behavior → one bit of code → repeat. Do not write the whole task's tests up front (writing all tests first tends to test imagined, not actual, behavior).
+  - **`after`** (test-after): write the minimal code first, then **one** unit test that pins the behavior. The test is still required — the task is not done until it exists and passes.
+  - **`none`**: implement directly; no forced test for this task.
+
+  When you do write a test (`first` or `after`), follow the test-quality rules in `references/HANDBOOK.md` → *Test quality*.
+- **UI / glue / config task** (no `Behavior` line): follow the Mirror pattern from the plan directly; no forced test, regardless of `test_policy`.
 
 For both: after implementing, verify integration — imports resolve, callers/callees still work, data flows correctly across boundaries.
 
 **Validate:** run the task's gate (skip a command if blank in `.claude/compass.yml`):
 
-- Logic task → the new **test passes** *and* `type_check_cmd` passes.
-- UI/glue task → `type_check_cmd` passes.
+- Logic task, `test_policy` `first` or `after` → the new **test passes** *and* `type_check_cmd` passes.
+- Logic task, `test_policy` `none`, or UI/glue task → `type_check_cmd` passes.
 
 Then:
 

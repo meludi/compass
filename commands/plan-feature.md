@@ -92,7 +92,7 @@ One sentence: what this plan achieves.
 
 {...repeat for each task}
 
-The `Behavior` line is what `/compass:implement` writes a test against (test-first, RED→GREEN). Add it only for tasks with real logic; leave it off for pure UI/glue/config tasks.
+The `Behavior` line marks a logic-bearing task and describes the observable behavior to verify. Add it only for tasks with real logic; leave it off for pure UI/glue/config tasks. Whether and when `/compass:implement` writes a test against it is set by `test_policy` in `.claude/compass.yml` — `first` (test-first, RED→GREEN), `after` (test-after), or `none` (no forced test).
 
 ## Validation
 

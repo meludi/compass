@@ -139,7 +139,7 @@ Used by `/compass:plan-feature` (when listing behaviors), `/compass:implement` (
 - **A good test survives an internal refactor.** If renaming or restructuring an internal function breaks the test while behavior is unchanged, the test was coupled to implementation — fix the test.
 - **Prefer integration-style over heavy mocking.** Exercise real code paths; mock only true boundaries (network, clock, external services), not your own collaborators.
 
-Write tests one behavior at a time alongside the code (see `/compass:implement` Step 3) — not all tests up front, which tends to test imagined rather than actual behavior.
+Write tests one behavior at a time alongside the code (see `/compass:implement` Step 3) — not all tests up front, which tends to test imagined rather than actual behavior. Whether a test comes before or after the code, and whether one is forced at all, is set by `test_policy` in `.claude/compass.yml` (`first` / `after` / `none`); these quality rules apply whenever a test is written.
 
 ---
 
@@ -167,7 +167,9 @@ Refactor in small steps and re-run tests after each — behavior must not change
 - **Schema** — `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` defines required keys, enums, and types. The `# yaml-language-server: $schema=` line at the top of `compass.yml` gives autocomplete + inline validation in editors with the YAML extension, and `/compass:setup` validates against it (a mistyped key or bad enum is reported, not silently defaulted).
 - **One reader** — `${CLAUDE_PLUGIN_ROOT}/scripts/read-config.sh` (`read_config <key>`) is the only parser; `worktree.sh` sources it and CI calls it. It reads **flat** `key: value` only (by design — zero runtime dependencies). Don't nest fields; add new ones flat and to the schema.
 
-Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/compass:setup`/`/compass:setup-stack`; re-run `/compass:setup` to re-sync if scripts change.
+Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/compass:setup`/`/compass:setup-stack`; re-run `/compass:setup` to re-sync if scripts change. The per-field reference is the schema descriptions plus the inline comments in `compass.yml` itself — not duplicated here, so they can't drift.
+
+Behaviour-changing fields (as opposed to stack commands) are surfaced where they apply: `autonomy_mode` / `ci_review_provider` in `AUTONOMY.md`, and `test_policy` (`first` / `after` / `none` — when/whether tests are written for logic tasks) in `/compass:implement` Step 3 and the *Test quality* section above. All default to the no-surprises value (`autonomy_mode: off`, `test_policy: first`).
 
 **Guidance split (plugin hook vs CLAUDE.md).** The compass plugin's SessionStart hook injects the workflow orientation + the framework on-demand doc index at session start — it is **plugin-owned** and updates with the plugin. The generated `CLAUDE.md` stays **user-owned** — project facts plus a "Project Context" table for your own docs. Keep framework pointers in the hook, project pointers in CLAUDE.md.
 

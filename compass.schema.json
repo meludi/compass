@@ -42,6 +42,11 @@
       "description": "Dev server port. Worktrees get dev_port + N."
     },
     "test_cmd": { "type": "string", "description": "Run tests." },
+    "test_policy": {
+      "enum": ["first", "after", "none"],
+      "default": "first",
+      "description": "When tests are written for logic-bearing tasks in /compass:implement: first = test-first TDD (RED→GREEN); after = implement then write the test; none = no forced test. UI/glue/config tasks never force a test."
+    },
     "lint_cmd": { "type": "string", "description": "Run the linter." },
     "format_cmd": { "type": "string", "description": "Run the formatter." },
     "type_check_cmd": {

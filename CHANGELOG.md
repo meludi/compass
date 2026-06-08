@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.0 — 2026-06-08
+
+### Added
+- **`test_policy` config option** (`first | after | none`) in `.claude/compass.yml` — choose how tests relate to logic-bearing tasks: `first` = test-first TDD (RED → GREEN, the default and unchanged behavior), `after` = implement then write the test, `none` = no forced test. UI/glue/config tasks never force a test, regardless of policy. Honored by `/compass:implement`; surfaced in the README Configuration section and documented in `/compass:plan-feature`, `references/COMMANDS.md`, and `references/HANDBOOK.md`.
+
 ## v0.3.1 — 2026-06-04
 
 ### Fixed

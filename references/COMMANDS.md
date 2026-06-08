@@ -207,7 +207,7 @@ validation suite. Folds in `/compass:validate` (including browser smoke test).
 | **Uses** | `/compass:context` (inline), `/compass:validate` (inline) |
 |---|---|
 
-For logic-bearing tasks: builds test-first (RED → GREEN). For UI/glue/config tasks: type-check gate only.
+For logic-bearing tasks: writes a test per `test_policy` in `.claude/compass.yml` — `first` (test-first, RED → GREEN, default), `after` (test-after), or `none` (no forced test). For UI/glue/config tasks: type-check gate only.
 
 ---
 
