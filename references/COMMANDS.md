@@ -158,6 +158,7 @@ optionally a spec.
 | **Recommended model** | Sonnet |
 | **Argument** | `[story \| issue-id \| "description"]` — optional |
 | **Trigger** | Auto (step 1 of `plan-feature` + `implement`) or User |
+| **Used in** | `/compass:plan-feature` (inline), `/compass:implement` (inline) |
 |---|---|
 
 **Without argument:** reloads project rules + git state only. No spec loaded.
@@ -239,6 +240,7 @@ Runs lint → type-check → tests → browser smoke test. Mirrors the CI `test`
 | **Level** | PIV |
 | **Recommended model** | Sonnet |
 | **Trigger** | Auto (end of `implement`) or User |
+| **Used in** | `/compass:implement` (inline), `/compass:auto-implement` (inline), `/compass:review-code` (after `--fix`), `/compass:review-project` (after `--fix`), `/compass:review-security` (after `--fix`), `/compass:fix-ci-review` |
 |---|---|
 
 **When to run standalone:** before `/compass:ship`, to debug a failing check, after a manual fix, or mid-implementation to confirm a previous task didn't break anything.
@@ -255,6 +257,7 @@ Stages and commits with a Conventional Commit message. Always shows state and dr
 | **Recommended model** | Haiku |
 | **Argument** | `[--push]` — optional |
 | **Trigger** | Auto (inside `ship`) or User |
+| **Used in** | `/compass:auto-implement` (inline), `/compass:ship` |
 |---|---|
 
 **Without `--push`:** commits, then asks "Push to origin now?".
@@ -296,6 +299,7 @@ test-coverage gaps. Advisory by default; `--fix` applies findings.
 | **Argument** | `[--fix] [PR-number]` — optional |
 | **Trigger** | Auto (inside `ship`) or User |
 | **Uses** | `/compass:review-security` (conditional — risky diffs only) |
+| **Used in** | `/compass:ship` |
 |---|---|
 
 **Without argument:** uses the current branch's PR (inferred) or falls back to `git diff {base_branch}...HEAD`.
@@ -374,6 +378,7 @@ Security-focused review — injection, auth, data exposure, secrets. Advisory by
 | **Recommended model** | Opus |
 | **Argument** | `[--fix] [file-or-directory]` — optional |
 | **Trigger** | Auto (inside `ship` on risky diffs) or User |
+| **Used in** | `/compass:review-project` (conditional) |
 |---|---|
 
 **Without argument:** reviews staged `git diff --cached`, or unstaged `git diff` if nothing is staged.
