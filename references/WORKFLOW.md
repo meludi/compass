@@ -92,7 +92,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 |---|---|
 | `/compass:review-code [low→ultra]` | [→ details](COMMANDS.md#compassreview-code) |
 | `/compass:review-project` | [→ details](COMMANDS.md#compassreview-project) |
-| CI `claude-review` | automatic on push in `review-only`/`full` — nothing to invoke |
+| CI `ci-review` | automatic on push in `review-only`/`full` — nothing to invoke |
 
 **Step 2 — fix** (pick one):
 
@@ -110,7 +110,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 
 ```mermaid
 flowchart TD
-  PR([PR open]) --> RV[1 · review<br/>review-code · review-project · CI claude-review]
+  PR([PR open]) --> RV[1 · review<br/>review-code · review-project · CI ci-review]
   RV --> FX{findings?}
   FX -- yes --> FIX[2 · fix<br/>review-code --fix · fix-ci-review · by hand]
   FIX --> VAL[3 · validate<br/>lint · types · tests]
@@ -142,7 +142,7 @@ The loop shape never changes. Two **independent** choices decide how you run it 
 |---|---|
 | `/compass:review-code [low→ultra]` | generic bug hunt, tunable effort |
 | `/compass:review-project` | project conventions, pattern reuse, test gaps (+ security on risky diffs) — this is what `/compass:ship` runs |
-| `claude-review` (CI) | the diff, inline on the PR |
+| `ci-review` (CI) | the diff on the PR — inline (claude) or one summary (openai/gemini) |
 
 **Which command when:**
 

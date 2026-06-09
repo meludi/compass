@@ -26,7 +26,7 @@ Three modes, each a superset of the last.
 | **`full`** | `review-only` + auto-merges once all checks are green | bot PRs, low-stakes — **only with a label gate** (below) |
 
 - **`off`** is pure CI — same checks as `/compass:validate`, just on every PR push. No API calls.
-- **`review-only`** adds two jobs: `claude-review` (inline comments on code quality, types, test gaps, edge cases, security — never auto-fixes) and `claude-checklist` (a `## Manual Verification Before Merge` comment). It complements `/compass:ship`'s local review: ship runs in your chat with full context; CI posts auditable comments on the PR.
+- **`review-only`** adds two jobs: **`ci-review`** (status check **"CI review"** — for `claude`, inline comments on code quality, types, test gaps, edge cases, security; for `openai`/`gemini`, one summary comment; never auto-fixes) and **`ci-checklist`** (a `## Manual Verification Before Merge` comment — every provider). It complements `/compass:ship`'s local review: ship runs in your chat with full context; CI posts auditable comments on the PR.
 - **`full`** triggers `gh pr merge --auto --squash`. ⚠️ GitHub cannot enforce that you ticked the checklist — it is a prompt, not a gate. For a real gate, require a `ready-for-merge` label in branch protection and add it by hand after ticking. Otherwise auto-merge fires the moment CI is green.
 
 ### Comparison
@@ -35,7 +35,7 @@ Three modes, each a superset of the last.
 |---|---|---|---|
 | API key needed | no | yes | yes |
 | `test` (lint + types + tests) | ✓ | ✓ | ✓ |
-| `claude-review` + `claude-checklist` | ✗ | ✓ | ✓ |
+| `ci-review` (check "CI review") + `ci-checklist` | ✗ | ✓ | ✓ |
 | Re-review on each push | ✗ | ✓ | ✓ |
 | `auto-merge` | ✗ | ✗ | ✓ |
 | Who merges | you | you | **CI** |
@@ -58,7 +58,7 @@ Two gotchas:
 | Provider | What you get | Secret |
 |---|---|---|
 | **`claude`** *(recommended)* | inline comments + `## Review Summary` + checklist, via `claude-code-action@v1` | `ANTHROPIC_API_KEY` |
-| **`openai`** / **`gemini`** | one `## Review Summary` comment (no inline comments, no checklist) | `OPENAI_API_KEY` / `GEMINI_API_KEY` |
+| **`openai`** / **`gemini`** | one `## Review Summary` comment + the checklist (no inline comments) | `OPENAI_API_KEY` / `GEMINI_API_KEY` |
 
 `ci_review_model` pins the model. Blank = the provider default (`claude-code-action` default · `gpt-4o` · `gemini-1.5-pro`). To override, use a full model id, e.g.:
 
@@ -132,7 +132,7 @@ gh secret list                    # verify (names only)
 
 **2. Branch protection** (GitHub → Settings → Branches, rule on `base_branch`):
 - Require a pull request before merging
-- Require status checks: `test` always; `claude-review` + `claude-checklist` in `review-only`/`full`
+- Require status checks: `test` always; **`CI review`** and **`CI checklist`** in `review-only`/`full` (both names are stable across providers)
 - Require branches up to date
 - `full` with a hard gate: also require the `ready-for-merge` label
 
@@ -142,7 +142,7 @@ gh secret list                    # verify (names only)
 
 ## Cost
 
-Per PR with `ci_review_provider: claude` (Sonnet 4.6 pricing): `claude-review` ~$0.024 + `claude-checklist` ~$0.009 ≈ **$0.033**. Ten PRs/day ≈ $0.33/day. With `openai`/`gemini` it's a single summary call (no checklist), priced by that provider. Draft PRs are excluded, so they cost nothing.
+Per PR with `ci_review_provider: claude` (Sonnet 4.6 pricing): `ci-review` ~$0.024 + `ci-checklist` ~$0.009 ≈ **$0.033**. Ten PRs/day ≈ $0.33/day. With `openai`/`gemini` it's two calls (summary + checklist), priced by that provider. Draft PRs are excluded, so they cost nothing.
 
 ---
 
@@ -157,8 +157,8 @@ Per PR with `ci_review_provider: claude` (Sonnet 4.6 pricing): `claude-review` ~
 
 ## Notes
 
-- **CI never commits.** `claude-review` only surfaces findings — applying them is always a deliberate step (`/compass:fix-ci-review`, or by hand). The one sanctioned auto-commit anywhere is `/compass:auto-implement`. The full fix loop lives in `WORKFLOW.md` → *Loop 2 — Fix*.
-- **One review comment per push.** Each `synchronize` re-runs `claude-review` and posts a fresh `## Review Summary` (never edited in place) — a per-round record.
+- **CI never commits.** `ci-review` only surfaces findings — applying them is always a deliberate step (`/compass:fix-ci-review`, or by hand). The one sanctioned auto-commit anywhere is `/compass:auto-implement`. The full fix loop lives in `WORKFLOW.md` → *Loop 2 — Fix*.
+- **One review comment per push.** Each `synchronize` re-runs `ci-review` and posts a fresh `## Review Summary` (never edited in place) — a per-round record.
 - **`autonomy_mode` is CI-only.** It changes nothing about local commands. `/compass:ship` always runs its local review regardless; `/compass:auto-implement` never merges. For a deeper security pass, run `/compass:review-security` locally.
 
 ---

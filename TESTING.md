@@ -108,7 +108,7 @@ A fresh repo so the test never touches a real project.
    ```bash
    gh secret set ANTHROPIC_API_KEY
    ```
-   GitHub → Settings → Branches → require the `test` status check on `main` (and `claude-review` + `claude-checklist` once you switch to `review-only`).
+   GitHub → Settings → Branches → require the `test` status check on `main` (and `CI review` + `CI checklist` once you switch to `review-only`).
 
 - [ ] Sandbox repo exists on GitHub, `main` pushed
 - [ ] Plugin loaded (`/compass:*` commands + SessionStart hook present); `/compass:setup` produced `.claude/compass.yml` + `.claude/compass.schema.json` + `.claude/CLAUDE.md`
@@ -182,7 +182,7 @@ With `off` in `compass.yml`, intentionally leave/introduce a fixable issue, then
 
 ### Mode B — `autonomy_mode: review-only` (CI + API)
 Set `autonomy_mode: review-only`, commit, push. Open (or update) a PR that carries a **real finding**.
-- [ ] CI runs `test` + `claude-review` (inline comments) + `claude-checklist` (PR comment) + **one `## Review Summary`** comment
+- [ ] CI runs `test` + `ci-review` (inline comments) + `ci-checklist` (PR comment) + **one `## Review Summary`** comment
 - [ ] GitHub notifies you; the `## Review Summary` states the finding count and the "fix locally, never by CI" reminder
 - [ ] `/compass:fix-ci-review` pulls the PR comments and applies fixes **locally** (no second review); it **stops before commit**
 - [ ] `/compass:validate` → `/compass:commit` → `git push` → CI **re-reviews** automatically; repeat until the Summary reports no findings

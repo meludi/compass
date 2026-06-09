@@ -82,5 +82,5 @@ Pass the level explicitly — don't rely on the default. **Match the level to th
 - **Always validate after `--fix`.** A patch that fixes a bug can break a type or a
   test — do not skip this.
 - **Not a replacement for CI review.** In `review-only`/`full` mode, the CI
-  `claude-review` already reviewed the PR diff. Use `/compass:fix-ci-review` to act
+  `ci-review` already reviewed the PR diff. Use `/compass:fix-ci-review` to act
   on those findings instead of re-reviewing the same diff here.

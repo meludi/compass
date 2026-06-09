@@ -362,7 +362,7 @@ compass-specific follow-up: after `--fix`, automatically runs `/compass:validate
 
 ### /compass:fix-ci-review
 
-Pulls the CI `claude-review` inline comments from the open PR and applies the fixes
+Pulls the CI `ci-review` comments from the open PR and applies the fixes
 locally, then runs `/compass:validate`. Stops before commit.
 
 | | |

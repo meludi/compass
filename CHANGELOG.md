@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.0 — 2026-06-10
+
+### Added
+- **Manual-test checklist for every CI provider** — `ci-checklist` previously ran only for `claude`; `openai` and `gemini` now also post the `## Manual Verification Before Merge` checklist (a second API call, same rules: ≤10 manual, user-facing items). Inline review comments remain Claude-only.
+
+### Changed
+- **CI review/checklist are provider-neutral** — the old `claude-review` and `external-review` jobs are merged into one **`ci-review`** job whose status check is named **"CI review"** regardless of `ci_review_provider` (claude posts inline comments; openai/gemini post one summary comment). The checklist job is **`ci-checklist`** (check "CI checklist"). Branch-protection check names now stay stable when you switch providers.
+  - **Migration:** if your branch protection required `claude-review` / `claude-checklist`, change them to `CI review` / `CI checklist`.
+
 ## v0.6.0 — 2026-06-10
 
 ### Added

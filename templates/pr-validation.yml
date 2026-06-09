@@ -6,8 +6,13 @@ on:
 
 # Behaviour is gated by `autonomy_mode` in .claude/compass.yml:
 #   off          (default) — runs only `test` (lint + types + tests)
-#   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
+#   review-only  + ci-review (provider-neutral check "CI review") + ci-checklist
 #   full         + auto-merge once all checks are green
+#
+# Both ci-review and ci-checklist run for every provider; ci_review_provider picks
+# how the review posts (claude = inline comments, openai/gemini = one summary
+# comment). The checklist is the same `## Manual Verification Before Merge` comment
+# for all providers.
 #
 # Independent of autonomy_mode: `autofix_max_pushes` (>0) enables the autofix-guard
 # circuit-breaker for the native `auto-fix` toggle — fails red + escalates once a PR
@@ -90,20 +95,37 @@ jobs:
         if: needs.config.outputs.test_cmd != ''
         run: ${{ needs.config.outputs.test_cmd }}
 
-  # autonomy_mode != off — inline PR review by claude-code-action.
-  # Posts findings as inline comments. Does NOT auto-fix or commit.
-  claude-review:
+  # autonomy_mode != off — the CI code review. One job, provider-neutral check
+  # name ("CI review") so branch protection stays stable when ci_review_provider
+  # changes. Per provider:
+  #   claude        → inline line-level comments + a ## Review Summary (claude-code-action)
+  #   openai/gemini → one ## Review Summary comment (no inline-comment equivalent)
+  # Never auto-fixes or commits.
+  ci-review:
+    name: CI review
     needs: [config, test]
-    if: needs.config.outputs.autonomy_mode != 'off' && needs.config.outputs.ci_review_provider == 'claude'
+    if: needs.config.outputs.autonomy_mode != 'off'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PROVIDER: ${{ needs.config.outputs.ci_review_provider }}
+      CI_REVIEW_MODEL: ${{ needs.config.outputs.ci_review_model }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: anthropics/claude-code-action@v1
+
+      # Claude — inline comments + a summary.
+      - name: Review with Claude (inline comments)
+        if: needs.config.outputs.ci_review_provider == 'claude'
+        uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           # Pin the model when ci_review_model is set; otherwise the action default.
@@ -131,64 +153,9 @@ jobs:
             mcp__github__create_pull_request_review_comment,
             mcp__github__create_issue_comment
 
-  # autonomy_mode != off — dynamic test checklist as PR comment.
-  claude-checklist:
-    needs: [config, test]
-    if: needs.config.outputs.autonomy_mode != 'off' && needs.config.outputs.ci_review_provider == 'claude'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Pin the model when ci_review_model is set; otherwise the action default.
-          claude_args: ${{ needs.config.outputs.ci_review_model != '' && format('--model {0}', needs.config.outputs.ci_review_model) || '' }}
-          prompt: |
-            Based on this PR diff, generate a manual testing checklist.
-            Format as GitHub checkboxes (`- [ ] item`).
-            Rules:
-            - ONLY things a human must verify by hand — never items a unit test,
-              the type checker, or lint already covers (no "tests pass", no
-              "types check"). If CI can verify it, leave it out.
-            - Each item must describe observable, user-facing behaviour or a
-              visible side effect — what the user sees or experiences.
-            - Flag auth, payments, and data migrations separately
-            - Hard limit: max 10 items. Fewer is better — only what truly needs eyes.
-
-            Post as a PR comment with this header:
-            ## Manual Verification Before Merge
-          allowed_tools: >
-            Bash(git diff*),
-            mcp__github__create_issue_comment
-
-  # autonomy_mode != off AND ci_review_provider is openai/gemini.
-  # Non-Claude providers have no inline-comment action, so this posts a single
-  # `## Review Summary` PR comment instead of line-level comments.
-  external-review:
-    needs: [config, test]
-    if: needs.config.outputs.autonomy_mode != 'off' && (needs.config.outputs.ci_review_provider == 'openai' || needs.config.outputs.ci_review_provider == 'gemini')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      PROVIDER: ${{ needs.config.outputs.ci_review_provider }}
-      CI_REVIEW_MODEL: ${{ needs.config.outputs.ci_review_model }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
-      BASE_REF: ${{ github.event.pull_request.base.ref }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Review diff with external LLM
+      # OpenAI / Gemini — one summary comment (no inline-comment equivalent).
+      - name: Review with external LLM (summary comment)
+        if: needs.config.outputs.ci_review_provider == 'openai' || needs.config.outputs.ci_review_provider == 'gemini'
         run: |
           set -euo pipefail
           DIFF=$(git diff "origin/$BASE_REF...HEAD" 2>/dev/null | head -c 100000 || true)
@@ -227,14 +194,109 @@ jobs:
                 -H "Content-Type: application/json" -d "$BODY")
               REVIEW=$(echo "$RESP" | jq -r '.candidates[0].content.parts[0].text')
               ;;
-            *)
-              echo "Unknown provider: $PROVIDER"; exit 1 ;;
           esac
 
           [ -n "$REVIEW" ] && [ "$REVIEW" != "null" ] || REVIEW="## Review Summary
           Review could not be generated (empty response from $PROVIDER)."
           printf '%s\n' "$REVIEW" > review.md
           gh pr comment "$PR_NUMBER" --body-file review.md
+
+  # autonomy_mode != off — dynamic manual-test checklist as a PR comment.
+  # All providers: claude via claude-code-action, openai/gemini via a direct call.
+  ci-checklist:
+    name: CI checklist
+    needs: [config, test]
+    if: needs.config.outputs.autonomy_mode != 'off'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PROVIDER: ${{ needs.config.outputs.ci_review_provider }}
+      CI_REVIEW_MODEL: ${{ needs.config.outputs.ci_review_model }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Claude — posts the checklist comment itself.
+      - name: Checklist with Claude
+        if: needs.config.outputs.ci_review_provider == 'claude'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin the model when ci_review_model is set; otherwise the action default.
+          claude_args: ${{ needs.config.outputs.ci_review_model != '' && format('--model {0}', needs.config.outputs.ci_review_model) || '' }}
+          prompt: |
+            Based on this PR diff, generate a manual testing checklist.
+            Format as GitHub checkboxes (`- [ ] item`).
+            Rules:
+            - ONLY things a human must verify by hand — never items a unit test,
+              the type checker, or lint already covers (no "tests pass", no
+              "types check"). If CI can verify it, leave it out.
+            - Each item must describe observable, user-facing behaviour or a
+              visible side effect — what the user sees or experiences.
+            - Flag auth, payments, and data migrations separately
+            - Hard limit: max 10 items. Fewer is better — only what truly needs eyes.
+
+            Post as a PR comment with this header:
+            ## Manual Verification Before Merge
+          allowed_tools: >
+            Bash(git diff*),
+            mcp__github__create_issue_comment
+
+      # OpenAI / Gemini — generate the items, then post under the same header.
+      - name: Checklist with external LLM
+        if: needs.config.outputs.ci_review_provider == 'openai' || needs.config.outputs.ci_review_provider == 'gemini'
+        run: |
+          set -euo pipefail
+          DIFF=$(git diff "origin/$BASE_REF...HEAD" 2>/dev/null | head -c 100000 || true)
+          PROMPT=$(cat <<'EOF'
+          From this PR diff, produce a manual testing checklist as GitHub
+          checkboxes (`- [ ] item`). Rules:
+          - ONLY things a human must verify by hand — never what a unit test,
+            the type checker, or lint already covers.
+          - Each item describes observable, user-facing behaviour or a visible
+            side effect.
+          - Flag auth, payments, and data migrations separately.
+          - Max 10 items, fewer is better. Output ONLY the checkbox lines.
+          EOF
+          )
+          INPUT="$PROMPT
+
+          --- PR DIFF ---
+          $DIFF"
+
+          case "$PROVIDER" in
+            openai)
+              [ -n "$OPENAI_API_KEY" ] || { echo "OPENAI_API_KEY not set"; exit 1; }
+              MODEL="${CI_REVIEW_MODEL:-gpt-4o}"
+              BODY=$(jq -n --arg c "$INPUT" --arg m "$MODEL" \
+                '{model:$m, messages:[{role:"user", content:$c}]}')
+              RESP=$(curl -sf https://api.openai.com/v1/chat/completions \
+                -H "Authorization: Bearer $OPENAI_API_KEY" \
+                -H "Content-Type: application/json" -d "$BODY")
+              ITEMS=$(echo "$RESP" | jq -r '.choices[0].message.content')
+              ;;
+            gemini)
+              [ -n "$GEMINI_API_KEY" ] || { echo "GEMINI_API_KEY not set"; exit 1; }
+              MODEL="${CI_REVIEW_MODEL:-gemini-1.5-pro}"
+              BODY=$(jq -n --arg c "$INPUT" \
+                '{contents:[{parts:[{text:$c}]}]}')
+              RESP=$(curl -sf "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent?key=$GEMINI_API_KEY" \
+                -H "Content-Type: application/json" -d "$BODY")
+              ITEMS=$(echo "$RESP" | jq -r '.candidates[0].content.parts[0].text')
+              ;;
+          esac
+
+          [ -n "$ITEMS" ] && [ "$ITEMS" != "null" ] || ITEMS="_Checklist could not be generated (empty response from $PROVIDER)._"
+          printf '## Manual Verification Before Merge\n\n%s\n' "$ITEMS" > checklist.md
+          gh pr comment "$PR_NUMBER" --body-file checklist.md
 
   # Circuit-breaker for the native `auto-fix` toggle (Desktop/CLI). Independent of
   # autonomy_mode — auto-fix is a client-side feature. When a PR accumulates
@@ -283,17 +345,16 @@ jobs:
   # NOTE: native GitHub branch protection cannot enforce checkbox completion.
   # For a hard checkbox gate, add a "ready-for-merge" label requirement to your
   # branch protection rules and add the label manually after ticking the boxes.
-  # `always()` + per-job result checks so a skipped review path (the provider not
-  # in use) does not block merge, while a failed one does.
+  # `always()` + per-job result checks so a skipped path (e.g. ci-checklist on a
+  # non-Claude provider) does not block merge, while a failed one does.
   auto-merge:
-    needs: [config, test, claude-review, claude-checklist, external-review, autofix-guard]
+    needs: [config, test, ci-review, ci-checklist, autofix-guard]
     if: >
       always()
       && needs.config.outputs.autonomy_mode == 'full'
       && needs.test.result == 'success'
-      && needs.claude-review.result != 'failure'
-      && needs.claude-checklist.result != 'failure'
-      && needs.external-review.result != 'failure'
+      && needs.ci-review.result != 'failure'
+      && needs.ci-checklist.result != 'failure'
       && needs.autofix-guard.result != 'failure'
     runs-on: ubuntu-latest
     permissions:

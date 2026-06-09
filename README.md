@@ -70,7 +70,7 @@ Generates `.claude/compass.yml` (config), `.claude/compass.schema.json` (editor 
 | **Loop 2 — Fix** | until PR is clean | `/compass:review-code` → fix → `/compass:validate` → `/compass:commit [--push]` → merge |
 | **Quick Path** | tiny fix (typo, 1-liner) | `/compass:worktree` → edit → `/compass:validate` → `/compass:ship` |
 
-**Review** runs in two places: after opening the PR, `/compass:ship` offers a parallel-subagent review of the diff with fresh context (skip it for trivial changes); then Loop 2 re-reviews each round — locally (`/compass:review-code` / `/compass:review-project`) or in CI (`claude-review`, when `autonomy_mode` is on).
+**Review** runs in two places: after opening the PR, `/compass:ship` offers a parallel-subagent review of the diff with fresh context (skip it for trivial changes); then Loop 2 re-reviews each round — locally (`/compass:review-code` / `/compass:review-project`) or in CI (`ci-review`, when `autonomy_mode` is on).
 
 Single task, no initiative: `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. A reviewed, stable plan can run hands-off via `/compass:auto-implement` (stops at PR-open, never merges). Where does a feature stand? `/compass:status`. Full flow + diagrams: [`references/WORKFLOW.md`](references/WORKFLOW.md).
 

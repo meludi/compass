@@ -7,7 +7,7 @@ argument-hint: [PR-number]
 
 > **Model:** `/model opus` — applying review feedback needs careful editing.
 
-Consumes the comments the CI `claude-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:review-code`.
+Consumes the comments the CI `ci-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:review-code`.
 
 **Input**: `$ARGUMENTS` — PR number (optional).
 
