@@ -13,151 +13,91 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 | [GitHub CLI](https://cli.github.com) (`gh`) | For PRs | Local PIV loop still works; `/compass:ship` can't push or open a PR | `brew install gh` → `gh auth login` |
 | [agent-browser](https://agent-browser.dev) | Optional | `/compass:validate` skips the browser smoke test | `brew install agent-browser` → `agent-browser install` |
 
-> compass is built for **GitHub** (`gh` + GitHub Actions). The local PIV loop (plan → implement → validate → commit) is host-agnostic; only `/compass:ship` (open a PR) and the CI autonomy layer require GitHub. On GitLab/Bitbucket: push works, open the MR/PR yourself.
+> compass is built for **GitHub** (`gh` + GitHub Actions). The local PIV loop is host-agnostic; only `/compass:ship` and the CI autonomy layer need GitHub. On GitLab/Bitbucket: push works, open the MR/PR yourself.
 
 ---
 
 ## Install
 
-**Global** (available in every project) — run in a Claude Code session or in your terminal:
+Run in a Claude Code session (or prefix each with `claude` in your terminal):
 
 ```
 /plugin marketplace add meludi/compass
-```
-```
 /plugin install compass@compass
 ```
 
-Or equivalently from your terminal:
+Restart Claude Code afterwards (or `/reload-plugins`).
 
-```bash
-claude plugin marketplace add meludi/compass
-```
-```bash
-claude plugin install compass@compass
-```
+- **Project-only install** (terminal): add `--scope local` (private, gitignored) or `--scope project` (shared via git) to `claude plugin install compass@compass`.
+- **Update:** `/plugin update compass`, then run `/compass:update` in each project to sync new config keys.
 
-**Project-only** (`.--scope` is not available in the `/plugin` slash command — use the terminal):
+The plugin installs centrally — nothing is copied into your repo. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
 
-```bash
-claude plugin marketplace add meludi/compass --scope local
-```
-```bash
-claude plugin install compass@compass --scope local
-```
+---
 
-- `--scope local` — this project only, private to you (`.claude/settings.local.json`, gitignored)
-- `--scope project` — this project only, shared with collaborators via git (`.claude/settings.json`)
+## Configure
 
-Restart Claude Code after installing (or run `/reload-plugins`).
-
-**Update to a new version:**
-
-```
-/plugin update compass
-```
-
-Or from the terminal:
-
-```bash
-claude plugin marketplace update compass
-```
-```bash
-claude plugin install compass@compass
-```
-
-After updating, run **`/compass:update`** in each project to sync `.claude/compass.yml` with the new version — it refreshes the schema and surfaces any new config keys (with their defaults) the update added.
-
-Then configure your project (run from the project root in Claude Code):
+From your project root:
 
 ```
 /compass:setup
 ```
 
-`/compass:setup` generates these project files:
+Generates `.claude/compass.yml` (config), `.claude/compass.schema.json` (editor autocomplete + validation), `.claude/CLAUDE.md` (project conventions), and `.mcp.json` (only with a tracker).
 
-- `.claude/compass.yml` — your project config
-- `.claude/compass.schema.json` — editor autocomplete + validation
-- `.claude/CLAUDE.md` — project conventions (a living document)
-- `.mcp.json` — issue-tracker MCP, only if you opt into a tracker
+- **Greenfield?** After `/compass:ideate`, run `/compass:setup-stack <prd>` to scaffold the stack.
+- **Existing project?** Run `/compass:onboard` to fill `CLAUDE.md` from the real codebase.
 
-**Greenfield project?** After `/compass:ideate`, run `/compass:setup-stack <prd>` to scaffold the stack.
+`compass.yml` is the single, schema-validated source of config, documented inline. The fields you'll most likely touch:
 
-**Existing project?** Run `/compass:onboard` to scan the codebase and fill `CLAUDE.md` with real patterns (architecture, code style, testing) instead of TODO stubs.
+| Field | Default | Controls |
+|---|---|---|
+| `test_policy` | `first` | tests for logic tasks: `first` (TDD) · `after` · `none` |
+| `autonomy_mode` | `off` | CI depth: `off` · `review-only` · `full` |
+| `ci_review_provider` / `ci_review_model` | `claude` / default | who reviews in CI, and an optional pinned model |
+| `autofix_max_pushes` | `0` | brake for the native auto-fix loop (`0` = off) |
 
-Nothing is copied into your repo — the plugin is installed centrally. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
+**Optional integrations** — **issue tracker** (off by default; `/compass:setup-tracker` — see [`references/HANDBOOK.md`](references/HANDBOOK.md)), **CI & autonomy** (`/compass:setup-stack` installs the PR workflow — see [`references/AUTONOMY.md`](references/AUTONOMY.md)), **deploy** (Vercel / Coolify / Netlify on merge — see [`references/HANDBOOK.md`](references/HANDBOOK.md)).
 
 ---
 
 ## Workflow
 
-| Stage | When | Command flow |
-|-------|------|--------------|
-| **Stage 0 — Setup** | once per project / initiative | `/compass:setup` (or `/compass:onboard`) → `/compass:ideate` → `/compass:create-stories` |
-| **Loop 1 — PIV** | per story | `/compass:worktree` → `/compass:plan-feature` → `/compass:implement` → `/compass:ship` → `/compass:reflect` |
-| **Auto-implement** | plan reviewed + stable | `/compass:auto-implement <plan>` — automates Loop 1 steps 3–4 (implement + ship) (no confirmation at each step). Hard-stops at PR-open; never merges. |
-| **Loop 2 — Fix** | until PR is clean | review → fix → `/compass:validate` → `/compass:commit [--push]` → repeat → merge |
+| Stage | When | Commands |
+|-------|------|----------|
+| **Setup** | once per project / initiative | `/compass:setup` (or `/compass:onboard`) → `/compass:ideate` → `/compass:create-stories` |
+| **Loop 1 — PIV** | per story | `/compass:worktree` → `/compass:plan-feature` → `/compass:implement` → `/compass:ship` _(commit, PR, then optional review)_ → `/compass:reflect` |
+| **Loop 2 — Fix** | until PR is clean | `/compass:review-code` → fix → `/compass:validate` → `/compass:commit [--push]` → merge |
 | **Quick Path** | tiny fix (typo, 1-liner) | `/compass:worktree` → edit → `/compass:validate` → `/compass:ship` |
 
-- **Single task without an initiative?** — `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. No story file needed.
-- **CI review?** — set `autonomy_mode: review-only` in `compass.yml`; CI reviews every push, `/compass:fix-ci-review` applies the findings locally.
-- **Full command reference:** [`references/COMMANDS.md`](references/COMMANDS.md)
-- **Detailed command flow:** [`references/WORKFLOW.md`](references/WORKFLOW.md)
+**Review** runs in two places: after opening the PR, `/compass:ship` offers a parallel-subagent review of the diff with fresh context (skip it for trivial changes); then Loop 2 re-reviews each round — locally (`/compass:review-code` / `/compass:review-project`) or in CI (`claude-review`, when `autonomy_mode` is on).
+
+Single task, no initiative: `/compass:plan-feature "description"` → `/compass:implement` → `/compass:ship`. A reviewed, stable plan can run hands-off via `/compass:auto-implement` (stops at PR-open, never merges). Where does a feature stand? `/compass:status`. Full flow + diagrams: [`references/WORKFLOW.md`](references/WORKFLOW.md).
 
 ---
 
-## Working directory — `.work/`
+## Auto-fix the PR
 
-Your specs and outputs live in `.work/` (created on first use) — **no issue tracker required**. This is the default home for everything the workflow produces:
-
-| Path | Holds | Git |
-|------|-------|-----|
-| `.work/prds/` | PRDs from `/compass:ideate` | committed |
-| `.work/stories/` | stories from `/compass:create-stories` | committed |
-| `.work/plans/` | plans from `/compass:plan-feature` | committed |
-| `.work/reports/`, `.work/screenshots/` | build + validation output | gitignored |
-| `.work/BACKLOG.md` | local backlog (when you skip a tracker) | committed |
-
----
-
-## Configuration
-
-One file drives everything: **`.claude/compass.yml`** (generated by `/compass:setup`) — commands, dev port, branch, test policy, tracker settings. Commands read it at runtime and it is schema-validated. Every field is documented inline in the file and in [`compass.schema.json`](compass.schema.json) (editor autocomplete + validation); how the config fits together is in [`references/HANDBOOK.md`](references/HANDBOOK.md).
-
-By default, logic-bearing tasks are built **test-first** (TDD, RED → GREEN). Set `test_policy` in `compass.yml` to `after` (test-after) or `none` (no forced test) to change that — UI/glue/config tasks never force a test in any mode.
-
-**Optional integrations:**
-
-- **Issue tracker** — **off by default**; specs live locally in `.work/` (above). To sync issues to a tracker, run `/compass:setup-tracker` — Linear is preconfigured, Jira and Azure DevOps are supported. Switching only rewrites project config, never command files.
-- **CI & autonomy** — `/compass:setup-stack` installs a self-contained `.github/workflows/pr-validation.yml`: pure CI by default (lint + types + tests), with opt-in Claude PR review, checklists, and auto-merge via `autonomy_mode`. See [`references/AUTONOMY.md`](references/AUTONOMY.md).
-- **Deploy** — point Vercel / Coolify / Netlify at the repo to auto-deploy on merge to `base_branch`. See [`references/HANDBOOK.md`](references/HANDBOOK.md).
-
-**Supported trackers:**
-
-| Tracker | Auth | MCP server |
-|---------|------|-----------|
-| [Linear](https://linear.app) (preconfigured) | API key | [mcp.linear.app](https://mcp.linear.app) |
-| [Jira — Atlassian Rovo](https://www.atlassian.com/software/jira) | OAuth (no key) | [mcp.atlassian.com](https://mcp.atlassian.com/v1/mcp) |
-| [Jira — community](https://github.com/sooperset/mcp-atlassian) | API token | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) |
-| [Azure DevOps — remote](https://learn.microsoft.com/azure/devops/mcp-server) | OAuth (no key) | mcp.dev.azure.com/{org} |
-| [Azure DevOps — local](https://github.com/microsoft/azure-devops-mcp) | PAT | [azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) |
+Once a PR is open, Claude can drive it to green — watching CI and review comments and pushing fixes until checks pass. This is a **built-in Claude Code feature**: run `/autofix-pr` (terminal) or flip the **auto-fix** toggle in the PR's CI status bar (Desktop / web). compass adds a brake — `autofix_max_pushes` stops it if the PR keeps pushing without going green. Details: [`references/AUTONOMY.md`](references/AUTONOMY.md) → *Auto-fix the PR loop*.
 
 ---
 
 ## Documentation
 
+Specs and outputs live in `.work/` (created on first use, **no tracker required**): `prds/`, `stories/`, `plans/` committed; `reports/`, `screenshots/` gitignored.
+
 | Doc | What's inside |
 |-----|---------------|
-| [`references/COMMANDS.md`](references/COMMANDS.md) | Every command — arguments, with/without behavior, when to run standalone |
-| [`references/CONCEPTS.md`](references/CONCEPTS.md) | The why — the frameworks and golden rules behind the workflow |
-| [`references/WORKFLOW.md`](references/WORKFLOW.md) | The command flow — Level 1, Level 2, Quick Path, fix loop |
-| [`references/HANDBOOK.md`](references/HANDBOOK.md) | Models, `.work/` layout, project config, test quality, troubleshooting |
-| [`references/WORKTREES.md`](references/WORKTREES.md) | Git worktree mental model, lifecycle, and isolation recipes |
-| [`references/AUTONOMY.md`](references/AUTONOMY.md) | CI autonomy — modes, inline review, auto-merge, costs, security |
+| [`references/COMMANDS.md`](references/COMMANDS.md) | Every command — arguments, behavior, when to run standalone |
+| [`references/CONCEPTS.md`](references/CONCEPTS.md) | The why — frameworks and golden rules behind the workflow |
+| [`references/WORKFLOW.md`](references/WORKFLOW.md) | The command flow — Loop 1, Loop 2, Quick Path, with diagrams |
+| [`references/HANDBOOK.md`](references/HANDBOOK.md) | Models, `.work/` layout, config, trackers, test quality, troubleshooting |
+| [`references/WORKTREES.md`](references/WORKTREES.md) | Git worktree mental model, lifecycle, isolation recipes |
+| [`references/AUTONOMY.md`](references/AUTONOMY.md) | CI autonomy — modes, inline review, the auto-fix loop, auto-merge, costs, security |
 
 ---
 
 ## What's included
 
-- **The plugin** (installed centrally; repo root is the plugin root): `commands/`, `agents/`, `skills/`, `hooks/` (SessionStart orientation), `references/`, `scripts/`, `templates/`, `compass.schema.json`, `.claude-plugin/{plugin.json,marketplace.json}`.
-- **Your project** (generated by `/compass:setup` — the only compass files in your repo): `.claude/compass.yml`, `.claude/compass.schema.json`, `.claude/CLAUDE.md`, `.work/` (plans, PRDs, stories), `.github/workflows/pr-validation.yml`, and `.mcp.json`.
+- **The plugin** (installed centrally; repo root is the plugin root): `commands/`, `agents/`, `skills/`, `hooks/`, `references/`, `scripts/`, `templates/`, `compass.schema.json`, `.claude-plugin/`.
+- **In your repo** (generated by `/compass:setup`): `.claude/compass.yml`, `.claude/compass.schema.json`, `.claude/CLAUDE.md`, `.work/`, `.github/workflows/pr-validation.yml`, and `.mcp.json`.

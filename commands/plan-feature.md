@@ -104,6 +104,14 @@ The `Behavior` line marks a logic-bearing task and describes the observable beha
 
 - [ ] {criterion 1}
 - [ ] {criterion 2}
+
+## Loop log
+
+<!-- Filled in during implementation/fix, not now. Capture only what the plan
+     above does NOT already say: decisions made while coding, snags hit,
+     "tried X — failed because Y" landmines, and any handover note. Deltas only,
+     never a restatement of the plan. This is the feature's only durable scratch
+     space — status (PR/CI/findings) is derived live by /compass:status. -->
 ```
 
 ### 6. Output

@@ -1,195 +1,176 @@
 # CI & Autonomy
 
-`/compass:setup-stack` installs `.github/workflows/pr-validation.yml` into your project (copied from the plugin template; self-contained, so it reads `.claude/compass.yml` and runs in CI without the plugin installed). Its behaviour is controlled by a single field in `.claude/compass.yml`:
+How compass uses GitHub Actions, and how much you let it do for you.
+
+`/compass:setup-stack` installs one workflow — `.github/workflows/pr-validation.yml`. It is self-contained (reads `.claude/compass.yml`, runs without the plugin) and driven by four config fields:
 
 ```yaml
-autonomy_mode: off          # off | review-only | full
-ci_review_provider: claude  # claude | openai | gemini
+autonomy_mode: off          # off | review-only | full   — how much CI does
+ci_review_provider: claude  # claude | openai | gemini    — who reviews
+ci_review_model: ""         # blank = provider default    — pin a review model
+autofix_max_pushes: 0       # 0 = off                     — brake for native auto-fix
 ```
 
-You can change these at any time, commit, and the next PR run picks up the new behaviour. No reinstall, no second workflow file.
-
-`ci_review_provider` selects which LLM runs the CI review (defaults to `claude` if omitted):
-
-- **`claude`** — uses `anthropics/claude-code-action@v1`. Posts **inline** PR comments plus a `## Review Summary` and a manual-test checklist. Secret: `ANTHROPIC_API_KEY`. Recommended.
-- **`openai`** / **`gemini`** — uses a generic API call and posts **one `## Review Summary` PR comment** (no inline comments, no separate checklist — those have no drop-in equivalent outside claude-code-action). Secret: `OPENAI_API_KEY` or `GEMINI_API_KEY`.
-
-`autonomy_mode: off` disables the review regardless of provider.
+Edit, commit, and the next PR run picks up the change. No reinstall, no second workflow.
 
 ---
 
-## The three modes
+## `autonomy_mode` — how much CI does
 
-Set by `autonomy_mode`; each mode is a superset of the previous. At-a-glance grid: *Mode comparison* below.
+Three modes, each a superset of the last.
 
-### `off` — the safe baseline
+| Mode | What runs | Use when |
+|---|---|---|
+| **`off`** | `test` only (lint + types + tests) | default; solo, hand-written logic |
+| **`review-only`** | `off` + Claude reviews the diff (inline comments) + posts a manual-test checklist | you want a second pair of eyes + an audit trail |
+| **`full`** | `review-only` + auto-merges once all checks are green | bot PRs, low-stakes — **only with a label gate** (below) |
 
-Pure CI: lint, type-check, tests. Same as running `/compass:validate` locally, just on PR open and on each push. No API calls, no surprises. Recommended default for new projects.
+- **`off`** is pure CI — same checks as `/compass:validate`, just on every PR push. No API calls.
+- **`review-only`** adds two jobs: `claude-review` (inline comments on code quality, types, test gaps, edge cases, security — never auto-fixes) and `claude-checklist` (a `## Manual Verification Before Merge` comment). It complements `/compass:ship`'s local review: ship runs in your chat with full context; CI posts auditable comments on the PR.
+- **`full`** triggers `gh pr merge --auto --squash`. ⚠️ GitHub cannot enforce that you ticked the checklist — it is a prompt, not a gate. For a real gate, require a `ready-for-merge` label in branch protection and add it by hand after ticking. Otherwise auto-merge fires the moment CI is green.
 
-### `review-only` — second pair of eyes
-
-Adds two jobs:
-
-1. **`claude-review`** — uses `anthropics/claude-code-action@v1` to review the diff and post **inline comments** on specific lines. Covers code quality, type safety, test coverage gaps, edge cases, and security concerns. Does **not** auto-fix or commit — you decide on each finding.
-2. **`claude-checklist`** — generates a manual testing checklist from the diff and posts it as a PR comment under the header `## Manual Verification Before Merge`. Use it as your tick-list before merging.
-
-Mode `review-only` complements `/compass:ship`'s local 3-subagent review:
-- **`/compass:ship` review** runs in your chat session, has full conversational context, is fast, and is local.
-- **`claude-review` in CI** runs against the GitHub PR, posts auditable inline comments visible to anyone with repo access.
-
-Running both gives you a chat-side overview plus an audit trail in GitHub.
-
-### `full` — auto-merge after green
-
-Adds `auto-merge` on top of `review-only`. Triggers `gh pr merge --auto --squash` so the PR auto-merges as soon as all required status checks pass.
-
-**Important caveat:** GitHub branch protection cannot natively enforce manual checkbox completion. The generated checklist is a *prompt*, not a *gate*. If you want hard enforcement:
-
-- Add a required label like `ready-for-merge` to your branch protection rules.
-- Tick the checklist, then add the label.
-- Only then does auto-merge fire.
-
-Without this gate, `auto-merge` will fire as soon as CI is green, regardless of whether you ticked the checklist. Plan accordingly.
-
----
-
-## Mode comparison (at a glance)
+### Comparison
 
 |  | `off` | `review-only` | `full` |
 |---|---|---|---|
-| **— Setup —** | | | |
 | API key needed | no | yes | yes |
-| Recommended branch protection | require `test` | + `claude-review`, `claude-checklist` | + label `ready-for-merge` |
-| **— CI on GitHub —** | | | |
 | `test` (lint + types + tests) | ✓ | ✓ | ✓ |
-| `claude-review` (inline comments) | ✗ | ✓ | ✓ |
-| `claude-checklist` (PR comment) | ✗ | ✓ | ✓ |
-| `## Review Summary` (one summary comment) | ✗ | ✓ | ✓ |
+| `claude-review` + `claude-checklist` | ✗ | ✓ | ✓ |
+| Re-review on each push | ✗ | ✓ | ✓ |
 | `auto-merge` | ✗ | ✗ | ✓ |
-| Claude re-review on each push | ✗ (only `test`) | ✓ | ✓ |
-| **— Always present (mode-independent) —** | | | |
-| `## Manual Test Plan` in PR body (from `/compass:ship`) | ✓ | ✓ | ✓ |
-| `/compass:ship` local 3-subagent review | ✓ optional | ✓ optional | ✓ optional |
-| Local `/compass:review-code` / `/compass:review-project` | ✓ | ✓ | ✓ |
-| **— Who does what —** | | | |
-| Who reviews | you, locally | you locally **+ CI** | you locally **+ CI** |
-| Who fixes | you (local) | you (local) | you (local) |
-| Who merges | you | you | **CI automatically** |
+| Who merges | you | you | **CI** |
 | Human merge gate | ✓ | ✓ | ✗ (unless label gate) |
-| How you learn of findings | in chat | chat **+ GitHub notification** | chat + GitHub notification |
-| **— Practicalities —** | | | |
-| Cost / PR | $0 | ~$0.03 | ~$0.03 |
-| Review output lives | chat only | chat **+ auditable on GitHub** | chat + GitHub |
-| Main risk | no second pair of eyes | findings may be missed (merge stays manual) | **unreviewed merge on green CI** |
-| Suitable for | solo, hand-written logic | audit trail, teams, CI second opinion | bot PRs, low-stakes, **only with label gate** |
+| Cost / PR (Claude) | $0 | ~$0.03 | ~$0.03 |
+| Main risk | no second opinion | findings missed (merge stays manual) | **unreviewed merge on green** |
 
-Notes:
-- **Mode set without `ANTHROPIC_API_KEY`** → the Claude jobs fail (red), they do not skip → you effectively get `off` plus red checks that may block branch protection. Keep the key and the mode together.
-- **Draft PRs trigger CI in no mode** — the workflow fires only on `opened`, `synchronize`, and `ready_for_review`.
+Always present, regardless of mode: the `autofix-guard` brake (when `autofix_max_pushes > 0`), the `## Manual Test Plan` in the PR body (from `/compass:ship`), and any local review you run (`/compass:ship`, `/compass:review-code`).
+
+Two gotchas:
+- **Mode on but matching secret missing** → the Claude jobs go red (they do not skip). You get `off` plus failing checks. Keep the key and the mode together.
+- **Draft PRs never trigger CI** — the workflow fires only on `opened`, `synchronize`, `ready_for_review`.
 
 ---
 
-## Fixing review findings
+## `ci_review_provider` / `ci_review_model` — who reviews
 
-The fix loop itself — review → fix → `/compass:validate` → `/compass:commit` → push → re-review → merge, in both `off` and `review-only` modes — lives in `WORKFLOW.md` → **"Loop 2 — Fix"**. In CI modes you consume the findings with `/compass:fix-ci-review`. Two autonomy-specific notes:
+`ci_review_provider` picks the LLM (default `claude`):
 
-- **CI never commits.** `claude-review` only surfaces findings; applying a fix is always a deliberate human step. The single sanctioned auto-commit anywhere is `/compass:auto-implement` (a pre-approved plan on a `feat/*` branch).
-- **A new comment per push.** Every push (`synchronize`) re-runs `claude-review`, so a fresh `## Review Summary` comment is posted each iteration — comments are **not** edited in place. This is intentional: it doubles as a per-round record.
+| Provider | What you get | Secret |
+|---|---|---|
+| **`claude`** *(recommended)* | inline comments + `## Review Summary` + checklist, via `claude-code-action@v1` | `ANTHROPIC_API_KEY` |
+| **`openai`** / **`gemini`** | one `## Review Summary` comment (no inline comments, no checklist) | `OPENAI_API_KEY` / `GEMINI_API_KEY` |
+
+`ci_review_model` pins the model. Blank = the provider default (`claude-code-action` default · `gpt-4o` · `gemini-1.5-pro`). To override, use a full model id, e.g.:
+
+```yaml
+ci_review_provider: claude
+ci_review_model: claude-sonnet-4-5-20250929
+```
+
+(`autonomy_mode: off` disables the review for every provider.)
+
+---
+
+## Auto-fix the PR loop
+
+Claude Code can drive an open PR to green for you — watching CI and review comments and **pushing fixes until the checks pass**. This is a **native Claude Code feature, not a compass command.**
+
+**Turn it on** (needs `gh` installed + logged in):
+- **Terminal:** `/autofix-pr`
+- **Desktop / web:** the **auto-fix** toggle in the PR's CI status bar
+
+Full feature docs: [Claude Code — Desktop](https://code.claude.com/docs/en/desktop).
+
+### compass's brake: `autofix_max_pushes`
+
+Native auto-fix has **no documented stop condition** — on a structural problem it can push fix after fix without ever going green. compass adds a circuit-breaker that watches the PR from outside:
+
+- Set `autofix_max_pushes: N` (`>0`). The `autofix-guard` CI job counts commits on the PR; at `N` it **fails (red)** and posts one `## Auto-fix stopped` comment for a human to take over.
+- It is idempotent, independent of `autonomy_mode`, and in `full` mode a tripped guard also blocks auto-merge.
+- It rests only on `gh` commit counts — never on auto-fix's internals, so it can't drift. `/compass:status` reports `escalated` once the comment exists.
+
+Pick `N` with headroom — e.g. `6` allows the first push plus a few rounds before calling the PR stuck.
+
+### The loop end to end
+
+```mermaid
+flowchart TD
+  AI[/auto-implement<br/>or manual Loop 1/] --> PR([PR open])
+  PR --> TOG{{enable auto-fix<br/>toggle or /autofix-pr}}
+  TOG --> CI{CI green?}
+  CI -- no --> AF[auto-fix pushes a fix<br/>from your client]
+  AF --> GD{pushes ≥ autofix_max_pushes?}
+  GD -- no --> CI
+  GD -- yes --> STOP[autofix-guard: red<br/>posts ## Auto-fix stopped<br/>→ human takes over]
+  CI -- yes --> CL[awaiting-checklist] --> MRG([merge])
+```
+
+| Actor | Role | Commits? |
+|---|---|---|
+| **You** | enable auto-fix, set the cap, handle escalation, merge | — |
+| **`/compass:auto-implement`** | one-shot, **before** the PR: first implementation → opens PR → stops | yes — once, locally (the only sanctioned local auto-commit) |
+| **native `auto-fix`** | iterative, **after** the PR: drives it to green | yes — pushes from your client, **not** CI |
+| **`autofix-guard`** | passive brake — trips at the cap | no |
+| **`/compass:status`** | reports where the PR stands, derived live | no |
+
+`auto-implement` gets you **to** the open PR; `auto-fix` gets the PR **to green** — sequential, not alternatives. This keeps compass's "CI never commits" rule intact: it's your client pushing, never GitHub Actions.
 
 ---
 
 ## Setup
 
-### 1. Required secret
-
-For `review-only` and `full`, set the secret that matches `ci_review_provider`:
+**1. Secret** (for `review-only` / `full`) — set the one matching your provider. Interactive, so run it yourself:
 
 ```bash
-gh secret set ANTHROPIC_API_KEY   # ci_review_provider: claude (default)
-gh secret set OPENAI_API_KEY      # ci_review_provider: openai
-gh secret set GEMINI_API_KEY      # ci_review_provider: gemini
+gh secret set ANTHROPIC_API_KEY   # claude (default) — key at https://console.anthropic.com
+gh secret set OPENAI_API_KEY      # openai
+gh secret set GEMINI_API_KEY      # gemini
+gh secret list                    # verify (names only)
 ```
 
-Get a Claude key at <https://console.anthropic.com>. The starter does not need any additional secrets — `GITHUB_TOKEN` is provided by GitHub automatically. If the mode is on but the matching secret is missing, the review job fails (red) rather than skipping.
+`GITHUB_TOKEN` is provided by GitHub automatically. `/compass:setup-stack` checks for the secret but never sets it.
 
-Verify a secret is present (names only, never values):
+**2. Branch protection** (GitHub → Settings → Branches, rule on `base_branch`):
+- Require a pull request before merging
+- Require status checks: `test` always; `claude-review` + `claude-checklist` in `review-only`/`full`
+- Require branches up to date
+- `full` with a hard gate: also require the `ready-for-merge` label
 
-```bash
-gh secret list
-```
-
-`gh secret set <NAME>` is interactive — run it yourself; `/compass:setup-stack` checks for the secret but never sets it (it would have to handle the raw key).
-
-### 2. Branch protection rules
-
-In GitHub → Settings → Branches, add a rule for your `base_branch`:
-
-- **Require a pull request before merging**
-- **Require status checks to pass:** `test` (always), `claude-review` and `claude-checklist` (if `review-only` or `full`)
-- **Require branches to be up to date before merging**
-- For `full` with hard checkbox gate: **Require a label** (`ready-for-merge`)
-
-### 3. Switching modes
-
-Just edit `.claude/compass.yml` and commit:
-
-```yaml
-autonomy_mode: review-only
-```
-
-The CI workflow reads this field at the start of each run via the `config` job.
+**3. Switching modes** — edit `.claude/compass.yml` and commit. The `config` job re-reads it each run.
 
 ---
 
-## Cost estimate
+## Cost
 
-Based on Sonnet 4.6 pricing, per-PR cost is roughly:
-
-| Job | Tokens (approx.) | Cost / PR |
-|-----|------------------|-----------|
-| `claude-review` | ~8 000 | ~$0.024 |
-| `claude-checklist` | ~3 000 | ~$0.009 |
-| **Sum** | ~11 000 | **~$0.033** |
-
-A team doing 10 PRs/day on `review-only` mode pays around **$0.33/day** in Claude API costs.
-
-The figures above are for `ci_review_provider: claude`. With `openai`/`gemini` there is a single summary call per PR (no checklist job), and cost depends on that provider's pricing for the model used.
-
-To save budget on draft PRs, the workflow only triggers on `opened`, `synchronize`, and `ready_for_review` — so draft PRs are excluded by default.
+Per PR with `ci_review_provider: claude` (Sonnet 4.6 pricing): `claude-review` ~$0.024 + `claude-checklist` ~$0.009 ≈ **$0.033**. Ten PRs/day ≈ $0.33/day. With `openai`/`gemini` it's a single summary call (no checklist), priced by that provider. Draft PRs are excluded, so they cost nothing.
 
 ---
 
-## Optional: pre-commit hook (review-only style)
+## Security
 
-If you also want a local pre-commit check, a template hook lives at `${CLAUDE_PLUGIN_ROOT}/templates/husky-pre-commit.sh`. **It is not installed automatically.** To use it:
+- **`full` merges without human code review.** Use only with the checklist ticked and ideally a label gate. Multi-contributor repos: prefer `review-only`.
+- **Secrets in diffs.** The review reads the diff — a committed secret reaches the API. Add a pre-push scanner (e.g. `gitleaks`).
+- **Key scope.** Put rate/budget caps on the `ANTHROPIC_API_KEY` at the Anthropic side.
+- **Fork PRs.** GitHub withholds secrets from fork PRs by default, so the Claude jobs fail there unless you opt into `pull_request_target` (research the risks first).
+
+---
+
+## Notes
+
+- **CI never commits.** `claude-review` only surfaces findings — applying them is always a deliberate step (`/compass:fix-ci-review`, or by hand). The one sanctioned auto-commit anywhere is `/compass:auto-implement`. The full fix loop lives in `WORKFLOW.md` → *Loop 2 — Fix*.
+- **One review comment per push.** Each `synchronize` re-runs `claude-review` and posts a fresh `## Review Summary` (never edited in place) — a per-round record.
+- **`autonomy_mode` is CI-only.** It changes nothing about local commands. `/compass:ship` always runs its local review regardless; `/compass:auto-implement` never merges. For a deeper security pass, run `/compass:review-security` locally.
+
+---
+
+## Optional: local pre-commit hook
+
+A template lives at `${CLAUDE_PLUGIN_ROOT}/templates/husky-pre-commit.sh` — **not installed automatically**:
 
 ```bash
-npm install --save-dev husky
-npx husky init
+npm install --save-dev husky && npx husky init
 cp ${CLAUDE_PLUGIN_ROOT}/templates/husky-pre-commit.sh .husky/pre-commit
 chmod +x .husky/pre-commit
 ```
 
-The template runs tests locally and asks Claude for a review — but does **not** auto-fix and does **not** auto-commit. Findings are printed to your terminal; you decide what to fix.
-
-If you run `/compass:auto-implement` (see below) with this hook installed, the hook still fires on the auto-commit: it acts as a final safety net (tests must pass, review findings are printed). It does not turn into an auto-fixer.
-
----
-
-## Security considerations
-
-- **`full` mode merges code without human code review.** Use it only when (a) you also tick the manual checklist, and (b) ideally with a label gate as described above. For repos with multiple contributors, prefer `review-only`.
-- **Secrets in PR diffs.** `claude-review` reads the diff. If you accidentally commit a secret, the API will see it. Use a pre-push secret scanner (e.g. `gitleaks`) as a separate safeguard.
-- **API key scope.** The `ANTHROPIC_API_KEY` you store as a GitHub secret should have rate limits or budget caps configured at the Anthropic side.
-- **Fork PRs.** GitHub does not expose secrets to PRs from forks by default. The Claude jobs will fail silently on fork PRs unless you explicitly opt-in via `pull_request_target` (which has its own security considerations — research before enabling).
-
----
-
-## How `autonomy_mode` interacts with the commands
-
-`autonomy_mode` is CI-only — it changes nothing about how the local commands behave (see `COMMANDS.md` for what each command does). Two interactions worth knowing:
-
-- `/compass:ship` always runs its local 3-subagent review **regardless of `autonomy_mode`**; the CI review (in `review-only`/`full`) is an additional, auditable pass on the PR.
-- `/compass:auto-implement` composes with any mode and **never merges** — the PR it opens still gets the CI review jobs when the mode is on.
-
-Security is one of the five focus areas of the CI `claude-review`; for a deeper audit, run `/compass:review-security` locally.
+It runs tests and asks Claude for a review, prints findings to your terminal, and **never** auto-fixes or commits. With `/compass:auto-implement`, it fires on the auto-commit as a final safety net (tests + printed review).

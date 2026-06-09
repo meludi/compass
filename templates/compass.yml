@@ -50,3 +50,10 @@ autonomy_mode: off          # off | review-only | full
 ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI review.
                             # Secret per provider (gh secret set): ANTHROPIC_API_KEY /
                             # OPENAI_API_KEY / GEMINI_API_KEY. See AUTONOMY.md.
+ci_review_model: ""         # Optional — pin the review model. Blank = provider default
+                            # (claude-code-action default / gpt-4o / gemini-1.5-pro).
+                            # Use a full model id, e.g. claude-sonnet-4-5-20250929. See AUTONOMY.md.
+autofix_max_pushes: 0       # Circuit-breaker for the native `auto-fix` toggle (Desktop/CLI).
+                            # 0 = off. >0 = the autofix-guard CI job fails (red) and posts a
+                            # `## Auto-fix stopped` comment once a PR has this many pushes
+                            # without going green — stops endless fix loops. See AUTONOMY.md.

@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.6.0 — 2026-06-10
+
+### Added
+- **`/compass:status`** — reports where the feature on the current branch stands (phase, PR, CI, findings, auto-fix push count) **derived live** from `git` + `gh` every time, so it can never drift. Phases: `not-started`, `local — no PR yet`, `ci-running`, `ci-failing`, `awaiting-fixes`, `awaiting-checklist`, `ready-to-merge`, `escalated`, `merged`, each with the facts behind it and a one-line next step. Read-only; falls back to local-only status when `gh` is absent. Replaces the idea of a hand-maintained status file — there is no state file to forget to update.
+- **`## Loop log` section in every plan** — `/compass:plan-feature` now ends the plan with a `## Loop log`; `/compass:implement` and `/compass:fix-ci-review` append deltas to it during the loop (decisions made while coding, snags, "tried X — failed because Y" landmines). It is the feature's durable scratch space across sessions and handovers — the only thing persisted, since live status is derived.
+- **`autofix_max_pushes` config + `autofix-guard` CI job** — a circuit-breaker for Claude Code's native `auto-fix` toggle (Desktop/web/CLI), which otherwise has no documented stop condition. Set `autofix_max_pushes: N` (`>0`) and the CI job fails (red) and posts a single `## Auto-fix stopped` comment once a PR reaches N pushes without going green, so a human takes over. Independent of `autonomy_mode`; idempotent; blocks auto-merge in `full` mode when tripped. Rests only on `gh` commit counts, not on auto-fix internals. Documented in `references/AUTONOMY.md`.
+- **"Running the autonomous PR loop" docs** — `references/AUTONOMY.md` now explains end to end how the native `auto-fix` loop is started (it is not a compass command) and an actor table contrasting it with `/compass:auto-implement` (one-shot, pre-PR, local commit) vs `auto-fix` (iterative, post-PR, client pushes). Surfaced in the README Workflow section.
+- **Mermaid workflow diagrams** — step-by-step flowcharts for the overall map, Loop 1 (PIV), and Loop 2 (Fix) in `references/WORKFLOW.md`, and the autonomous PR loop in `references/AUTONOMY.md`. The existing ASCII overview is kept for terminal-friendly scanning.
+- **`ci_review_model` config** — pin the model the CI review uses. Blank keeps the provider default (`claude-code-action` default / `gpt-4o` / `gemini-1.5-pro`); set a full model id to override. Wired into the Claude jobs (`claude_args --model`) and the OpenAI/Gemini path. Documented in `references/AUTONOMY.md`.
+- **README "Auto-fix the PR" section** — dedicated, plain-language explanation of how to start Claude's native `auto-fix` (`/autofix-pr` or the Desktop toggle), with a link to the Claude Code docs and how `autofix_max_pushes` brakes it.
+
+### Changed
+- **CI `claude-checklist` prompt tightened** — the manual-verification checklist now excludes anything CI already covers (no "tests pass"/"types check") and requires every item to describe observable, user-facing behaviour, hard-capped at 10 items.
+- **Docs simplified for scannability** — `references/AUTONOMY.md` restructured (lead-with-summary sections, tighter tables, less repetition; ~30% shorter, same information); `references/HANDBOOK.md` "Deploying" prose turned into a table; `references/WORKFLOW.md` Loop 2 reframed as two independent axes (local-vs-CI × which-review) with a "which command when" guide.
+- **README condensed to a quick-start** — tightened to Install → Configure → Workflow → docs, with a key-config table (`test_policy`, `autonomy_mode`, `ci_review_provider`/`ci_review_model`, `autofix_max_pushes`). The supported-trackers table moved to `references/HANDBOOK.md`; deeper detail now links out instead of living on the front page (~180 → ~95 lines).
+
+### Fixed
+- **WORKFLOW.md Stage 0 ordering** — `/compass:setup-stack` was listed as step 1c (before `/compass:ideate`), contradicting its own "run after ideate" instruction and PRD input; moved to after `ideate`, before `create-stories`.
+- **README polish** — corrected a `--scope` typo and a "Level 1/Level 2" label that should read "Loop 1/Loop 2".
+
 ## v0.5.0 — 2026-06-08
 
 ### Added

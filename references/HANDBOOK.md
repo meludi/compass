@@ -37,6 +37,8 @@ Your session-persistent workspace — local to your machine.
 
 Plans, PRDs, stories, and BACKLOG are committed — they are your project's spec artifacts. Reports and screenshots are generated output — gitignored.
 
+Each plan ends with a `## Loop log` section, filled in *during* implementation/fix: decisions made while coding, snags, and "tried X — failed because Y" landmines (deltas only, never a restatement of the plan). It is the feature's durable scratch space across sessions and handovers. Live status — phase, PR, CI, findings — is **not** stored anywhere; `/compass:status` derives it from `git` + `gh` on demand.
+
 ---
 
 ## Parallel Development
@@ -169,9 +171,23 @@ Refactor in small steps and re-run tests after each — behavior must not change
 
 Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/compass:setup`/`/compass:setup-stack`; re-run `/compass:setup` to re-sync if scripts change. The per-field reference is the schema descriptions plus the inline comments in `compass.yml` itself — not duplicated here, so they can't drift.
 
-Behaviour-changing fields (as opposed to stack commands) are surfaced where they apply: `autonomy_mode` / `ci_review_provider` in `AUTONOMY.md`, and `test_policy` (`first` / `after` / `none` — when/whether tests are written for logic tasks) in `/compass:implement` Step 3 and the *Test quality* section above. All default to the no-surprises value (`autonomy_mode: off`, `test_policy: first`).
+Behaviour-changing fields (as opposed to stack commands) are surfaced where they apply: `autonomy_mode` / `ci_review_provider` / `ci_review_model` / `autofix_max_pushes` in `AUTONOMY.md`, and `test_policy` (`first` / `after` / `none` — when/whether tests are written for logic tasks) in `/compass:implement` Step 3 and the *Test quality* section above. All default to the no-surprises value (`autonomy_mode: off`, `autofix_max_pushes: 0`, `test_policy: first`).
 
 **Guidance split (plugin hook vs CLAUDE.md).** The compass plugin's SessionStart hook injects the workflow orientation + the framework on-demand doc index at session start — it is **plugin-owned** and updates with the plugin. The generated `CLAUDE.md` stays **user-owned** — project facts plus a "Project Context" table for your own docs. Keep framework pointers in the hook, project pointers in CLAUDE.md.
+
+---
+
+## Issue trackers (optional)
+
+Off by default — stories live in `.work/stories/` and need no external tool. Run `/compass:setup-tracker` to sync issues to a tracker instead (it rewrites project config + `.mcp.json`, never command files). Supported:
+
+| Tracker | Auth | MCP server |
+|---------|------|-----------|
+| [Linear](https://linear.app) (preconfigured) | API key | [mcp.linear.app](https://mcp.linear.app) |
+| [Jira — Atlassian Rovo](https://www.atlassian.com/software/jira) | OAuth (no key) | [mcp.atlassian.com](https://mcp.atlassian.com/v1/mcp) |
+| [Jira — community](https://github.com/sooperset/mcp-atlassian) | API token | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) |
+| [Azure DevOps — remote](https://learn.microsoft.com/azure/devops/mcp-server) | OAuth (no key) | mcp.dev.azure.com/{org} |
+| [Azure DevOps — local](https://github.com/microsoft/azure-devops-mcp) | PAT | [azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) |
 
 ---
 
@@ -194,22 +210,12 @@ Behaviour-changing fields (as opposed to stack commands) are surfaced where they
 
 ## Deploying
 
-The starter does not opinionate on deployment — pick what fits the project.
-Three common patterns once `auto-merge` lands code on your `base_branch`:
+The starter doesn't opinionate on deployment. Once `auto-merge` (or you) lands code on `base_branch`, point a host at the repo:
 
-**Vercel** — connect the repo at <https://vercel.com/new>, pick `base_branch`
-as the production branch. Every merge auto-deploys. Preview deployments are
-created per PR automatically.
+| Host | Setup | Previews |
+|---|---|---|
+| **Vercel** | connect at [vercel.com/new](https://vercel.com/new), set `base_branch` as production | per PR, automatic |
+| **Coolify** (self-hosted) | create a service for the repo, set deploy branch = `base_branch`, add its webhook URL as a GitHub push webhook | — |
+| **Netlify** | connect at [app.netlify.com](https://app.netlify.com), set `base_branch` + build/publish from `compass.yml` | per PR, default on |
 
-**Coolify** (self-hosted) — in the Coolify dashboard, create a service for the
-repo, set the deployment branch to `base_branch`, copy the webhook URL, and add
-it as a GitHub webhook (Settings → Webhooks → Push event).
-
-**Netlify** — connect the repo at <https://app.netlify.com>, pick `base_branch`,
-set build command and publish directory from `compass.yml`. Deploy Previews per
-PR are enabled by default.
-
-For any of these: keep production secrets in the host's environment variables,
-not in the repo. The CI workflow only needs the review provider's key —
-`ANTHROPIC_API_KEY` by default, or `OPENAI_API_KEY` / `GEMINI_API_KEY`
-(see `AUTONOMY.md`).
+Keep production secrets in the host's env vars, never in the repo. The CI workflow itself only needs the review provider's key (`ANTHROPIC_API_KEY` by default — see `AUTONOMY.md`).

@@ -58,7 +58,7 @@ Run `/compass:validate` (lint + types + tests + browser smoke). Fixes can break 
 
 ### 5. Hand back
 
-Report what was fixed and what was left (with reasons). **Stop here** — the human commits and pushes. The push re-triggers the CI review.
+Report what was fixed and what was left (with reasons). If a finding revealed something non-obvious (a wrong assumption, a landmine, a deliberate decision), append one delta line to the `## Loop log` of the plan file (`.work/plans/{feature}.plan.md`) — skip this when there is no plan (Quick-Path change). **Stop here** — the human commits and pushes. The push re-triggers the CI review.
 
 ## Rules
 

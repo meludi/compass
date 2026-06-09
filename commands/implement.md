@@ -62,6 +62,8 @@ Then:
 
 Never start the next task while the current task's gate is failing. Save broader cleanup/refactor for after the suite is green — use `/compass:review-code`; see `references/HANDBOOK.md` → *Refactor candidates* for what to scan for (do not refactor while a test is red).
 
+**Loop log:** whenever you hit something the plan does not already say — a decision made while coding, a snag, a "tried X — failed because Y" landmine — append one line to the `## Loop log` section of the plan file (`.work/plans/{feature}.plan.md`). Deltas only; do not restate the plan. This is the feature's durable scratch space for the next session or developer; status itself is derived live by `/compass:status`.
+
 ### 4. Full validation
 
 After all tasks complete, run the full validation suite — lint, type check, tests, and the browser smoke test. This is the same suite as `/compass:validate`; follow that command's process.

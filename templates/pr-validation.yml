@@ -9,6 +9,10 @@ on:
 #   review-only  + claude-review (inline PR comments) + claude-checklist (PR comment)
 #   full         + auto-merge once all checks are green
 #
+# Independent of autonomy_mode: `autofix_max_pushes` (>0) enables the autofix-guard
+# circuit-breaker for the native `auto-fix` toggle — fails red + escalates once a PR
+# hits that many pushes without going green.
+#
 # See the compass AUTONOMY reference (references/AUTONOMY.md in the compass plugin)
 # for details, secrets, costs, and security notes.
 
@@ -20,6 +24,8 @@ jobs:
     outputs:
       autonomy_mode: ${{ steps.read.outputs.autonomy_mode }}
       ci_review_provider: ${{ steps.read.outputs.ci_review_provider }}
+      ci_review_model: ${{ steps.read.outputs.ci_review_model }}
+      autofix_max_pushes: ${{ steps.read.outputs.autofix_max_pushes }}
       test_cmd: ${{ steps.read.outputs.test_cmd }}
       lint_cmd: ${{ steps.read.outputs.lint_cmd }}
       type_check_cmd: ${{ steps.read.outputs.type_check_cmd }}
@@ -43,15 +49,19 @@ jobs:
           [ -z "$PROVIDER" ] && PROVIDER="claude"
           PM=$(read_field package_manager)
           [ -z "$PM" ] && PM="npm"
+          MAXPUSH=$(read_field autofix_max_pushes)
+          [ -z "$MAXPUSH" ] && MAXPUSH="0"
           {
             echo "autonomy_mode=$MODE"
             echo "ci_review_provider=$PROVIDER"
+            echo "ci_review_model=$(read_field ci_review_model)"
+            echo "autofix_max_pushes=$MAXPUSH"
             echo "test_cmd=$(read_field test_cmd)"
             echo "lint_cmd=$(read_field lint_cmd)"
             echo "type_check_cmd=$(read_field type_check_cmd)"
             echo "package_manager=$PM"
           } >> "$GITHUB_OUTPUT"
-          echo "autonomy_mode: $MODE / ci_review_provider: $PROVIDER"
+          echo "autonomy_mode: $MODE / ci_review_provider: $PROVIDER / autofix_max_pushes: $MAXPUSH"
 
   test:
     needs: config
@@ -96,6 +106,8 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin the model when ci_review_model is set; otherwise the action default.
+          claude_args: ${{ needs.config.outputs.ci_review_model != '' && format('--model {0}', needs.config.outputs.ci_review_model) || '' }}
           prompt: |
             Review this PR diff thoroughly. Cover:
             1. Code quality and correctness
@@ -134,14 +146,19 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin the model when ci_review_model is set; otherwise the action default.
+          claude_args: ${{ needs.config.outputs.ci_review_model != '' && format('--model {0}', needs.config.outputs.ci_review_model) || '' }}
           prompt: |
             Based on this PR diff, generate a manual testing checklist.
             Format as GitHub checkboxes (`- [ ] item`).
             Rules:
-            - Only include things that cannot be verified by unit tests
-            - Focus on user-facing behaviour and side effects
+            - ONLY things a human must verify by hand — never items a unit test,
+              the type checker, or lint already covers (no "tests pass", no
+              "types check"). If CI can verify it, leave it out.
+            - Each item must describe observable, user-facing behaviour or a
+              visible side effect — what the user sees or experiences.
             - Flag auth, payments, and data migrations separately
-            - Keep it concise — max 10 items
+            - Hard limit: max 10 items. Fewer is better — only what truly needs eyes.
 
             Post as a PR comment with this header:
             ## Manual Verification Before Merge
@@ -164,6 +181,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PROVIDER: ${{ needs.config.outputs.ci_review_provider }}
+      CI_REVIEW_MODEL: ${{ needs.config.outputs.ci_review_model }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       BASE_REF: ${{ github.event.pull_request.base.ref }}
     steps:
@@ -192,8 +210,9 @@ jobs:
           case "$PROVIDER" in
             openai)
               [ -n "$OPENAI_API_KEY" ] || { echo "OPENAI_API_KEY not set"; exit 1; }
-              BODY=$(jq -n --arg c "$INPUT" \
-                '{model:"gpt-4o", messages:[{role:"user", content:$c}]}')
+              MODEL="${CI_REVIEW_MODEL:-gpt-4o}"
+              BODY=$(jq -n --arg c "$INPUT" --arg m "$MODEL" \
+                '{model:$m, messages:[{role:"user", content:$c}]}')
               RESP=$(curl -sf https://api.openai.com/v1/chat/completions \
                 -H "Authorization: Bearer $OPENAI_API_KEY" \
                 -H "Content-Type: application/json" -d "$BODY")
@@ -201,9 +220,10 @@ jobs:
               ;;
             gemini)
               [ -n "$GEMINI_API_KEY" ] || { echo "GEMINI_API_KEY not set"; exit 1; }
+              MODEL="${CI_REVIEW_MODEL:-gemini-1.5-pro}"
               BODY=$(jq -n --arg c "$INPUT" \
                 '{contents:[{parts:[{text:$c}]}]}')
-              RESP=$(curl -sf "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=$GEMINI_API_KEY" \
+              RESP=$(curl -sf "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent?key=$GEMINI_API_KEY" \
                 -H "Content-Type: application/json" -d "$BODY")
               REVIEW=$(echo "$RESP" | jq -r '.candidates[0].content.parts[0].text')
               ;;
@@ -216,6 +236,49 @@ jobs:
           printf '%s\n' "$REVIEW" > review.md
           gh pr comment "$PR_NUMBER" --body-file review.md
 
+  # Circuit-breaker for the native `auto-fix` toggle (Desktop/CLI). Independent of
+  # autonomy_mode — auto-fix is a client-side feature. When a PR accumulates
+  # autofix_max_pushes commits without going green, this fails (red) and posts one
+  # `## Auto-fix stopped` comment so a human steps in. Commit count is a proxy for
+  # pushes; it rests on `gh`, NOT on auto-fix's (undocumented) internal loop.
+  autofix-guard:
+    needs: [config, test]
+    if: needs.config.outputs.autofix_max_pushes != '' && needs.config.outputs.autofix_max_pushes != '0'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MAX: ${{ needs.config.outputs.autofix_max_pushes }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check push count against cap
+        run: |
+          set -euo pipefail
+          # Guard against a non-numeric cap — treat anything else as "off".
+          case "$MAX" in ''|*[!0-9]*) echo "autofix_max_pushes not numeric — skipping."; exit 0 ;; esac
+          COUNT=$(gh pr view "$PR_NUMBER" --json commits -q '.commits | length')
+          echo "Commits on PR: $COUNT / cap $MAX"
+          if [ "$COUNT" -lt "$MAX" ]; then
+            echo "Under cap — ok."
+            exit 0
+          fi
+          # At/over cap: post the escalation comment once (idempotent), then fail.
+          HEADER="## Auto-fix stopped"
+          if gh pr view "$PR_NUMBER" --json comments -q '.comments[].body' | grep -qF "$HEADER"; then
+            echo "Escalation comment already present — not reposting."
+          else
+            gh pr comment "$PR_NUMBER" --body "$HEADER
+
+          This PR has reached **$COUNT pushes** without going green (cap: \`autofix_max_pushes: $MAX\`). That usually means a structural problem small fixes cannot resolve — not a flaky check.
+
+          Auto-fix is paused. A human should take over: review the failures, fix by hand, or close the PR and start fresh. Adjust or disable the cap via \`autofix_max_pushes\` in \`.claude/compass.yml\`."
+          fi
+          echo "::error::Auto-fix push cap reached ($COUNT/$MAX) — escalated to a human."
+          exit 1
+
   # autonomy_mode == full — enable auto-merge once all required checks pass.
   # NOTE: native GitHub branch protection cannot enforce checkbox completion.
   # For a hard checkbox gate, add a "ready-for-merge" label requirement to your
@@ -223,7 +286,7 @@ jobs:
   # `always()` + per-job result checks so a skipped review path (the provider not
   # in use) does not block merge, while a failed one does.
   auto-merge:
-    needs: [config, test, claude-review, claude-checklist, external-review]
+    needs: [config, test, claude-review, claude-checklist, external-review, autofix-guard]
     if: >
       always()
       && needs.config.outputs.autonomy_mode == 'full'
@@ -231,6 +294,7 @@ jobs:
       && needs.claude-review.result != 'failure'
       && needs.claude-checklist.result != 'failure'
       && needs.external-review.result != 'failure'
+      && needs.autofix-guard.result != 'failure'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

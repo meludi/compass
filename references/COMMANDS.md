@@ -421,3 +421,23 @@ and reference docs based on what went wrong or right.
 |---|---|
 
 **When to run:** after a merge, after a frustrating session, after a bug, or periodically to keep `CLAUDE.md` and commands aligned with how the project has evolved.
+
+---
+
+### /compass:status
+
+Reports where the feature on the current branch stands — phase, PR, CI, findings — **derived live** from `git` + `gh`. There is no state file; nothing is stored, so the report cannot drift.
+
+| | |
+|---|---|
+| **Level** | Anytime |
+| **Recommended model** | Haiku |
+| **Argument** | `[PR-number]` — optional (inferred from the branch) |
+| **Trigger** | User |
+|---|---|
+
+**What it derives:** `not-started` · `local — no PR yet` · `ci-running` · `ci-failing` · `awaiting-fixes` · `awaiting-checklist` · `ready-to-merge` · `escalated` · `merged`. Each comes with the facts behind it (PR URL, last commit, check counts, unresolved findings, auto-fix push count) and a one-line next step.
+
+**When to run:** picking a feature back up after a break, on handover to another developer, or any time you want to know "where are we" without opening GitHub. Read-only — never edits or commits.
+
+**Why derived, not stored:** a hand-maintained status file drifts the moment one update is missed. `/compass:status` recomputes from the repo each time, so it is always true. Durable per-feature notes live in the plan's `## Loop log`, not in a status file.
