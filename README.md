@@ -79,7 +79,9 @@ Single task, no initiative: `/compass:plan-feature "description"` → `/compass:
 
 ## Auto-fix the PR
 
-Once a PR is open, Claude can drive it to green — watching CI and review comments and pushing fixes until checks pass. This is a **built-in Claude Code feature**: run `/autofix-pr` (terminal) or flip the **auto-fix** toggle in the PR's CI status bar (Desktop / web). compass adds a brake — `autofix_max_pushes` stops it if the PR keeps pushing without going green. Details: [`references/AUTONOMY.md`](references/AUTONOMY.md) → *Auto-fix the PR loop*.
+Once a PR is open, Claude can drive it to green — watching CI and review comments and pushing fixes until checks pass. This is a **built-in Claude Code feature**: run `/autofix-pr` (terminal) or flip the **auto-fix** toggle in the PR's CI status bar (Desktop / web) — setup: [Claude Code — Desktop](https://code.claude.com/docs/en/desktop). compass adds a brake — `autofix_max_pushes` stops it if the PR keeps pushing without going green. Details: [`references/AUTONOMY.md`](references/AUTONOMY.md) → *Auto-fix the PR loop*.
+
+**Using a native reviewer instead (e.g. Codex)?** If you let Codex (or another GitHub-native reviewer) review **and** fix, set `autonomy_mode: off` so compass's own review stands down — the `test` gate still runs, and `autofix_max_pushes` still brakes a runaway fixer. **Run only one autonomous fixer per PR** (Codex *or* Claude auto-fix, never both). Codex setup: [Codex code review](https://developers.openai.com/codex/cloud/code-review). More: [`references/AUTONOMY.md`](references/AUTONOMY.md) → *Delegating review + fix to an external reviewer (Codex)*.
 
 ---
 

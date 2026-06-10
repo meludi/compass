@@ -7,6 +7,7 @@ Stage 0 — Plugin check claude plugin details   (well-formed: ~18 cmds, 3 agent
 Stage 1 — Setup        /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
 Loop 1 — PIV           /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship → /compass:reflect
 Loop 2 — Fix           review → fix → /compass:validate → /compass:commit → push   (mode off: local · review-only: CI)
+Auto-fix flows         Claude native auto-fix · Codex external reviewer            (optional, per ecosystem)
 Quick Path             /compass:worktree → edit → /compass:validate → /compass:ship
 + worktree lifecycle   /compass:worktree <name> rm   (guarded)
 ```
@@ -54,6 +55,8 @@ For testing this branch, use **B**. Route **A** only works after the merge to `m
 - [ ] Node + your package manager installed
 - [ ] An `ANTHROPIC_API_KEY` available (needed for the `review-only` part of Loop 2; if `ci_review_provider` is `openai`/`gemini`, use that provider's key instead)
 - [ ] Budget awareness: each `review-only` PR costs ~$0.03 (see `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` → Cost estimate)
+- [ ] _(Auto-fix Flow A, optional)_ Claude Code client with auto-fix available (`/autofix-pr` or the CI-status-bar toggle)
+- [ ] _(Auto-fix Flow B, optional)_ Codex connected to the sandbox repo (OpenAI plan) — see `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` → *Delegating review + fix to an external reviewer (Codex)*
 
 ---
 
@@ -189,6 +192,31 @@ Set `autonomy_mode: review-only`, commit, push. Open (or update) a PR that carri
 - [ ] CI never commits; the merge is yours
 
 > No `autonomy_mode: full` test here — auto-merge belongs only in a disposable sandbox with a label gate, and is out of this guide's default path.
+
+---
+
+## Auto-fix the PR — both flows (optional, per ecosystem)
+
+These exercise the **autonomous post-PR fix loop** (beyond Loop 2's manual fixing). Both need the open PR from Loop 1 and an external capability — run whichever you have set up. `autofix_max_pushes` brakes both; set it small (e.g. `2`) in `compass.yml` to test the brake quickly. See `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` → *Auto-fix the PR loop*.
+
+### Flow A — Claude native auto-fix (toggle / `/autofix-pr`)
+Requires the Claude Code client feature. Give the PR a **red `test` check** (introduce a failing test/lint):
+- [ ] Enable auto-fix — `/autofix-pr` (terminal) or the **auto-fix** toggle in the CI status bar (Desktop/web). Needs `gh` authenticated
+- [ ] Claude reads the red check + review comments and **pushes a fix commit from your client** (author = you; CI itself never commits)
+- [ ] CI re-runs on the push; on green the loop stops; `/compass:status` reports the state
+- [ ] **Brake:** with `autofix_max_pushes: 2` and an issue small fixes can't resolve, after 2 pushes `autofix-guard` goes **red** + posts one `## Auto-fix stopped`; `/compass:status` → `escalated`
+- [ ] Only one fixer runs (no `@codex fix` in parallel)
+
+### Flow B — Codex external reviewer (`autonomy_mode: off`)
+Requires Codex connected to the sandbox repo (OpenAI plan) and Claude auto-fix **off**. Set `autonomy_mode: off`:
+- [ ] On a PR with a real finding, **compass posts nothing** — only the `test` job runs (no `ci-review`/`ci-checklist`)
+- [ ] Codex auto-reviews (or `@codex review`) → inline P0/P1 comments appear
+- [ ] `@codex fix <the issue>` → Codex **pushes a fix** to the branch; the `test` gate re-runs
+- [ ] A rule added to `AGENTS.md` is reflected in Codex's review (its equivalent of `ci_review_guidelines`)
+- [ ] **Brake:** `autofix-guard` counts Codex's pushes too — at the cap it trips with `## Auto-fix stopped`
+- [ ] **One fixer:** Claude auto-fix stays **off** (running both = churn/races)
+
+> Skip the flow whose ecosystem you don't have — they're add-ons to the manual Loop 2, not required for a workflow pass.
 
 ---
 

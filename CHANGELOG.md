@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+- **Delegating CI review + fix to an external reviewer (Codex)** — `references/AUTONOMY.md` gains a subsection (with a Mermaid schema and a review-fix-loop-per-provider table) on handing PR review **and** fix to Codex's native GitHub integration: set `autonomy_mode: off` (compass review stands down, the `test` gate stays), keep `autofix_max_pushes` as the brake, put conventions in `AGENTS.md`, and run **one autonomous fixer per PR** (Codex *or* Claude auto-fix). README's *Auto-fix the PR* section links to it. Setup links added for both Codex and Claude auto-fix. Docs-only; no config or workflow change.
+- **`TESTING.md` — auto-fix flow steps** — added an "Auto-fix the PR — both flows" section with test checklists for Claude native auto-fix (`/autofix-pr` + the `autofix-guard` brake) and the Codex external-reviewer path, plus matching overview and prerequisite lines.
+
 ## v0.8.0 — 2026-06-10
 
 ### Added

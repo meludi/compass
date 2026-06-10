@@ -118,6 +118,36 @@ flowchart TD
 
 `auto-implement` gets you **to** the open PR; `auto-fix` gets the PR **to green** — sequential, not alternatives. This keeps compass's "CI never commits" rule intact: it's your client pushing, never GitHub Actions.
 
+### Delegating review + fix to an external reviewer (Codex)
+
+Native `auto-fix` is the Claude path. If you live in the OpenAI ecosystem, **Codex's GitHub integration** is the equivalent: it reviews PRs (automatically, or on `@codex review`) and pushes a fix on `@codex fix …`. compass can't drive Codex — it's configured on OpenAI's side ([Codex code review setup](https://developers.openai.com/codex/cloud/code-review)) — so the job is to **hand off cleanly and get out of the way**:
+
+- **Set `autonomy_mode: off`.** compass's own `ci-review`/`ci-checklist` stand down, but the `test` gate (lint + types + tests) still runs on every PR — that's your safety net while Codex reviews.
+- **Keep `autofix_max_pushes > 0`.** `autofix-guard` counts pushes from **any** source, so it still brakes a runaway Codex fix loop.
+- **Put your conventions in `AGENTS.md`.** That's Codex's equivalent of `ci_review_guidelines` (it applies the closest `AGENTS.md` per changed file).
+
+> **One autonomous fixer per PR.** Codex's `@codex fix` and Claude's `auto-fix` both push fix commits to the branch. Running both = races, churn, and a fast-tripped guard. Pick one and turn the other off. `autofix-guard` is a backstop, not enforcement — compass can't see either toggle (both live outside compass).
+
+```mermaid
+flowchart TD
+  PR([PR open]) --> REV[Codex auto-review<br/>inline P0/P1 comments]
+  REV --> Q{issues?}
+  Q -- no --> CI{CI test gate green?}
+  Q -- yes --> FIX["you: @codex fix<br/>Codex pushes a fix"]
+  FIX --> CI
+  CI -- no --> FIX
+  CI -- yes --> M([merge])
+  G[/compass autofix-guard<br/>brakes runaway pushes/] -.watches.-> FIX
+```
+
+**Review-fix loop per provider** — each ecosystem brings its own; compass supplies the `test` gate + the brake:
+
+| Provider | Review | Fix loop |
+|---|---|---|
+| **Claude** | `ci-review` (claude-code-action) or your client | native `auto-fix` (toggle / `/autofix-pr`) |
+| **OpenAI** | Codex (auto / `@codex review`) | Codex (`@codex fix`) |
+| **Gemini** | `ci-review` summary comment | **none native** — pair with Claude `auto-fix`, or fix by hand |
+
 ---
 
 ## Setup
