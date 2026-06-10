@@ -53,6 +53,12 @@ ci_review_provider: claude  # claude | openai | gemini — which LLM runs the CI
 ci_review_model: ""         # Optional — pin the review model. Blank = provider default
                             # (claude-code-action default / gpt-4o / gemini-1.5-pro).
                             # Use a full model id, e.g. claude-sonnet-4-5-20250929. See AUTONOMY.md.
+ci_review_guidelines: .github/review-guidelines.md
+                            # Path to a Markdown file with your project's review conventions;
+                            # its content is appended to the CI review prompt for every provider,
+                            # so the review carries your project's signature. Created by
+                            # /compass:setup-stack (CI step) — edit it to taste. Blank = none;
+                            # a missing file is fine (the review just runs without it).
 autofix_max_pushes: 0       # Circuit-breaker for the native `auto-fix` toggle (Desktop/CLI).
                             # 0 = off. >0 = the autofix-guard CI job fails (red) and posts a
                             # `## Auto-fix stopped` comment once a PR has this many pushes

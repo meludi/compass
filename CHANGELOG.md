@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.8.0 — 2026-06-10
+
+### Added
+- **`ci_review_guidelines` — project review conventions in the CI prompt** — CI appends a Markdown file of your conventions to the review prompt for **every** provider (Claude, OpenAI, Gemini) as higher-priority criteria, so the CI review carries your project's signature. **On by default:** `/compass:setup-stack` drops a starter at `.github/review-guidelines.md` and points the field at it; edit it to taste, or set the field blank to disable (a missing file is harmless). The cross-provider stand-in for a review "skill" — external providers are a plain API call with no skill system, so the prompt is the only lever.
+
+### Fixed
+- **Config schema completed** — `compass.schema.json` was missing `ci_review_model` and `autofix_max_pushes` (added in earlier 0.6.x/0.7.0 releases); with `additionalProperties: false` they were flagged as invalid keys by editor validation and `/compass:setup`. Added them plus `ci_review_guidelines`.
+
 ## v0.7.0 — 2026-06-10
 
 ### Added

@@ -80,6 +80,21 @@
       "default": "claude",
       "description": "Which LLM runs the CI review. Secret per provider: ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY."
     },
+    "ci_review_model": {
+      "type": "string",
+      "description": "Optional. Pin the CI review model (full model id). Blank = provider default (claude-code-action default / gpt-4o / gemini-1.5-pro). See AUTONOMY.md."
+    },
+    "ci_review_guidelines": {
+      "type": "string",
+      "default": ".github/review-guidelines.md",
+      "description": "Path to a Markdown file of project review conventions, appended to the CI review prompt for every provider. Blank = none; a missing file is harmless. See AUTONOMY.md."
+    },
+    "autofix_max_pushes": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Circuit-breaker for the native auto-fix toggle: CI fails + escalates once a PR has this many pushes without going green. 0 = off. See AUTONOMY.md."
+    },
     "tracker": {
       "enum": ["none", "linear", "jira-official", "jira-community", "azure"],
       "default": "linear",

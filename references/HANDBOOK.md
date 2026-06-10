@@ -171,7 +171,7 @@ Refactor in small steps and re-run tests after each — behavior must not change
 
 Command fields (`dev_cmd`, `test_cmd`, …) are populated from `package.json` by `/compass:setup`/`/compass:setup-stack`; re-run `/compass:setup` to re-sync if scripts change. The per-field reference is the schema descriptions plus the inline comments in `compass.yml` itself — not duplicated here, so they can't drift.
 
-Behaviour-changing fields (as opposed to stack commands) are surfaced where they apply: `autonomy_mode` / `ci_review_provider` / `ci_review_model` / `autofix_max_pushes` in `AUTONOMY.md`, and `test_policy` (`first` / `after` / `none` — when/whether tests are written for logic tasks) in `/compass:implement` Step 3 and the *Test quality* section above. All default to the no-surprises value (`autonomy_mode: off`, `autofix_max_pushes: 0`, `test_policy: first`).
+Behaviour-changing fields (as opposed to stack commands) are surfaced where they apply: `autonomy_mode` / `ci_review_provider` / `ci_review_model` / `ci_review_guidelines` / `autofix_max_pushes` in `AUTONOMY.md`, and `test_policy` (`first` / `after` / `none` — when/whether tests are written for logic tasks) in `/compass:implement` Step 3 and the *Test quality* section above. All default to the no-surprises value (`autonomy_mode: off`, `autofix_max_pushes: 0`, `test_policy: first`).
 
 **Guidance split (plugin hook vs CLAUDE.md).** The compass plugin's SessionStart hook injects the workflow orientation + the framework on-demand doc index at session start — it is **plugin-owned** and updates with the plugin. The generated `CLAUDE.md` stays **user-owned** — project facts plus a "Project Context" table for your own docs. Keep framework pointers in the hook, project pointers in CLAUDE.md.
 

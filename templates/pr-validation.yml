@@ -30,6 +30,7 @@ jobs:
       autonomy_mode: ${{ steps.read.outputs.autonomy_mode }}
       ci_review_provider: ${{ steps.read.outputs.ci_review_provider }}
       ci_review_model: ${{ steps.read.outputs.ci_review_model }}
+      ci_review_guidelines: ${{ steps.read.outputs.ci_review_guidelines }}
       autofix_max_pushes: ${{ steps.read.outputs.autofix_max_pushes }}
       test_cmd: ${{ steps.read.outputs.test_cmd }}
       lint_cmd: ${{ steps.read.outputs.lint_cmd }}
@@ -60,6 +61,7 @@ jobs:
             echo "autonomy_mode=$MODE"
             echo "ci_review_provider=$PROVIDER"
             echo "ci_review_model=$(read_field ci_review_model)"
+            echo "ci_review_guidelines=$(read_field ci_review_guidelines)"
             echo "autofix_max_pushes=$MAXPUSH"
             echo "test_cmd=$(read_field test_cmd)"
             echo "lint_cmd=$(read_field lint_cmd)"
@@ -115,12 +117,25 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PROVIDER: ${{ needs.config.outputs.ci_review_provider }}
       CI_REVIEW_MODEL: ${{ needs.config.outputs.ci_review_model }}
+      CI_REVIEW_GUIDELINES: ${{ needs.config.outputs.ci_review_guidelines }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       BASE_REF: ${{ github.event.pull_request.base.ref }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Load the project's review conventions (ci_review_guidelines) into
+      # REVIEW_GUIDELINES so every provider's prompt carries them. Empty if unset.
+      - name: Load review guidelines
+        run: |
+          {
+            echo 'REVIEW_GUIDELINES<<COMPASS_EOF'
+            if [ -n "${CI_REVIEW_GUIDELINES:-}" ] && [ -f "$CI_REVIEW_GUIDELINES" ]; then
+              cat "$CI_REVIEW_GUIDELINES"
+            fi
+            echo 'COMPASS_EOF'
+          } >> "$GITHUB_ENV"
 
       # Claude — inline comments + a summary.
       - name: Review with Claude (inline comments)
@@ -137,6 +152,10 @@ jobs:
             3. Test coverage — are all changed code paths tested?
             4. Edge cases without corresponding tests
             5. Security concerns (injection, auth, data exposure, secrets in code)
+
+            When the project review conventions below are non-empty, apply them as
+            additional, higher-priority criteria:
+            ${{ env.REVIEW_GUIDELINES }}
 
             Post inline comments on specific lines for anything requiring
             attention. Do NOT auto-fix or commit — the author decides on each
@@ -170,6 +189,9 @@ jobs:
           EOF
           )
           INPUT="$PROMPT
+
+          Project review conventions (apply as higher-priority criteria; may be empty):
+          ${REVIEW_GUIDELINES:-}
 
           --- PR DIFF ---
           $DIFF"

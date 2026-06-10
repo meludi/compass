@@ -2,12 +2,13 @@
 
 How compass uses GitHub Actions, and how much you let it do for you.
 
-`/compass:setup-stack` installs one workflow — `.github/workflows/pr-validation.yml`. It is self-contained (reads `.claude/compass.yml`, runs without the plugin) and driven by four config fields:
+`/compass:setup-stack` installs one workflow — `.github/workflows/pr-validation.yml`. It is self-contained (reads `.claude/compass.yml`, runs without the plugin) and driven by these config fields:
 
 ```yaml
 autonomy_mode: off          # off | review-only | full   — how much CI does
 ci_review_provider: claude  # claude | openai | gemini    — who reviews
 ci_review_model: ""         # blank = provider default    — pin a review model
+ci_review_guidelines: .github/review-guidelines.md   # your review conventions (blank = none)
 autofix_max_pushes: 0       # 0 = off                     — brake for native auto-fix
 ```
 
@@ -67,7 +68,9 @@ ci_review_provider: claude
 ci_review_model: claude-sonnet-4-5-20250929
 ```
 
-(`autonomy_mode: off` disables the review for every provider.)
+`ci_review_guidelines` gives the review **your project's signature**: CI appends that file's content to the review prompt for **every** provider (Claude, OpenAI, Gemini) as higher-priority criteria. `/compass:setup-stack` drops a starter at `.github/review-guidelines.md` and sets this field to it by default — **edit that file** with your conventions. Set blank to disable; a missing file is harmless (the review runs without it).
+
+The file is read from the checked-out repo, so it must be **committed and pushed**, and its content is sent to the review provider's API — keep secrets out of it. This is the cross-provider stand-in for a review "skill": the external providers are a plain API call (no agent, no skill system), so the prompt is the only lever — this field is how you pull it. (`autonomy_mode: off` disables the review for every provider.)
 
 ---
 

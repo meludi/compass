@@ -573,11 +573,19 @@ Copy the workflow from the plugin into the project (create the directory first):
 ```bash
 mkdir -p .github/workflows
 cp "${CLAUDE_PLUGIN_ROOT}/templates/pr-validation.yml" .github/workflows/pr-validation.yml
+# Project review conventions, appended to the CI review prompt (ci_review_guidelines).
+# -n = don't clobber an edited copy on re-run.
+cp -n "${CLAUDE_PLUGIN_ROOT}/templates/review-guidelines.md" .github/review-guidelines.md
 ```
 
 The template is **self-contained** — its `config` job reads `.claude/compass.yml`
 with an inline reader, so CI works on the user repo even though the compass plugin
 is not installed in GitHub Actions.
+
+`.github/review-guidelines.md` is the starter for `ci_review_guidelines` (set by
+default in `compass.yml`). CI appends its content to the review prompt for every
+provider — tell the user to edit it with the project's conventions. Deleting it is
+safe (the review still runs with its built-in criteria).
 
 For `review-only` or `full`, **verify the matching secret is present** before
 finishing — otherwise the review job runs red on the first PR. Determine the
