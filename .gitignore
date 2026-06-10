@@ -5,3 +5,5 @@
 .work/
 .mcp.json
 .worktree-port
+# Transient selftest reports (scripts/selftest.sh --report) — never committed:
+reports/

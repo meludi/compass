@@ -22,6 +22,7 @@ Conventional Commit format — drives versioning:
 
 We restarted at `0.x` for the plugin migration; `1.0.0` is the first stable release. While on `0.x`, breaking changes bump the minor.
 
+- Before a release commit, run `bash scripts/selftest.sh` — a read-only static dry-run (manifests, template YAML, config-vs-schema, doc links, shell syntax, inventory). It must exit 0. It does not replace the manual `TESTING.md` run; it catches the breakage that doesn't need a human.
 - No Co-Authored-By attribution
 - The version lives in **`.claude-plugin/plugin.json`** (`version` field) — that is what `/plugin` and the marketplace show. On a release (`feat:`/`fix:`/breaking), bump `plugin.json` `version` **together with** the CHANGELOG entry, in the same commit. There is no standalone `VERSION` file.
 - Tag on the last commit of the release (after CHANGELOG + `plugin.json` bump), then push:
@@ -39,7 +40,7 @@ A **Claude Code plugin** — the repo root *is* the plugin root, installed (not 
 - Commands live in `commands/` → invoked as `/compass:<name>`
 - Agents in `agents/`, skills in `skills/`
 - Reference docs in `references/`
-- The worktree lifecycle script is `scripts/worktree.sh`; the shared config reader is `scripts/read-config.sh`
+- The worktree lifecycle script is `scripts/worktree.sh`; the shared config reader is `scripts/read-config.sh`; the static dry-run/self-test is `scripts/selftest.sh`
 - Always-on guidance is the `SessionStart` hook (`hooks/hooks.json` → `hooks/session-start.sh`) — a plugin `CLAUDE.md` is **not** loaded by Claude Code, so guidance must come via the hook
 - Bundled files referenced from commands/scripts use `${CLAUDE_PLUGIN_ROOT}/…`; user-project files use `${CLAUDE_PROJECT_DIR}/…` (or stay relative in command prose, where CWD is the project)
 - `CHANGELOG.md` tracks versions of the plugin itself, not user projects

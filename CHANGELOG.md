@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- **`scripts/selftest.sh` — dry-run / self-test (maintainer tool)** — one command that validates the parts of the plugin that need no human: JSON manifests, template YAML, `compass.yml` keys vs the schema (`additionalProperties: false` guard), the CI workflow's jobs, shell syntax, `${CLAUDE_PLUGIN_ROOT}`/doc-link integrity, code-fence balance, and the component inventory. `--full` also runs a **functional `worktree.sh` test** in a throwaway temp repo (create, port, symlink, `rm` guards, `--force`). `--report [file]` writes a timestamped Markdown report (default `reports/selftest-report-<date-time>.md`, gitignored). Exits non-zero on any failure; the static checks change nothing. The "lint" to `TESTING.md`'s manual E2E — referenced from `TESTING.md` (run it first) and `CLAUDE.md` (run before a release commit).
+
 ### Docs
 - **Delegating CI review + fix to an external reviewer (Codex)** — `references/AUTONOMY.md` gains a subsection (with a Mermaid schema and a review-fix-loop-per-provider table) on handing PR review **and** fix to Codex's native GitHub integration: set `autonomy_mode: off` (compass review stands down, the `test` gate stays), keep `autofix_max_pushes` as the brake, put conventions in `AGENTS.md`, and run **one autonomous fixer per PR** (Codex *or* Claude auto-fix). README's *Auto-fix the PR* section links to it. Setup links added for both Codex and Claude auto-fix. Docs-only; no config or workflow change.
 - **`TESTING.md` — auto-fix flow steps** — added an "Auto-fix the PR — both flows" section with test checklists for Claude native auto-fix (`/autofix-pr` + the `autofix-guard` brake) and the Codex external-reviewer path, plus matching overview and prerequisite lines.

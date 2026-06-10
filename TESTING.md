@@ -3,7 +3,8 @@
 End-to-end test of the workflow this plugin ships. It exercises all four flows from `${CLAUDE_PLUGIN_ROOT}/references/WORKFLOW.md` against a throwaway **sandbox project** with a real GitHub remote:
 
 ```
-Stage 0 — Plugin check claude plugin details   (well-formed: ~18 cmds, 3 agents, 1 hook, 0 MCP servers)
+Dry-run (static)       bash scripts/selftest.sh         (manifests, schema, doc links, shell — no human/GitHub needed)
+Stage 0 — Plugin check claude plugin details   (well-formed: ~21 cmds, 3 agents, 1 hook, 0 MCP servers)
 Stage 1 — Setup        /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
 Loop 1 — PIV           /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship → /compass:reflect
 Loop 2 — Fix           review → fix → /compass:validate → /compass:commit → push   (mode off: local · review-only: CI)
@@ -60,6 +61,24 @@ For testing this branch, use **B**. Route **A** only works after the merge to `m
 
 ---
 
+## Dry-run first — `scripts/selftest.sh`
+
+Before any of the manual stages, run the static dry-run from the repo root:
+
+```bash
+bash scripts/selftest.sh
+```
+
+It validates everything that needs no human: JSON manifests, template YAML,
+`compass.yml` keys vs the schema, the CI workflow's jobs, shell syntax, doc-link and
+`${CLAUDE_PLUGIN_ROOT}` reference integrity, code-fence balance, and the component
+inventory. Exit 0 = all green; it changes nothing. Fix any `FAIL` before spending
+time (or API budget) on the manual run below.
+
+- [ ] `bash scripts/selftest.sh` exits 0 (all PASS)
+
+---
+
 ## Stage 0 — Plugin loads & is well-formed
 
 Before the sandbox, confirm Claude Code accepts the plugin. Register this clone as a
@@ -74,7 +93,7 @@ claude plugin details compass
 
 Good if you see:
 - `compass <version>` with its description line
-- `Skills (~18)`, `Agents (3)`, `Hooks (1) SessionStart`, and **`MCP servers (0)`**
+- `Skills (~21)`, `Agents (3)`, `Hooks (1) SessionStart`, and **`MCP servers (0)`**
   — the `0` matters: the plugin must **not** force a tracker MCP server on every install
 
 Clean up afterwards (so your global config is unchanged):
