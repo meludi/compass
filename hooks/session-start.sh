@@ -23,6 +23,7 @@ isolation. Plugin commands and skills are namespaced \`/compass:<name>\`
 | Workflow concepts    | $REF/CONCEPTS.md                          |
 | Command flow         | $REF/WORKFLOW.md                          |
 | Reference / handbook | $REF/HANDBOOK.md                          |
+| Debugging            | $REF/DEBUGGING.md                         |
 | Worktrees            | $REF/WORKTREES.md                         |
 | CI & autonomy        | $REF/AUTONOMY.md                          |
 

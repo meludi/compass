@@ -52,6 +52,8 @@ List the findings concisely (file · line · what to change), grouped by severit
 
 Edit the files to address each finding. Skip or flag any comment you disagree with (state why) rather than forcing a change — the author decides on contested points. Do not invent fixes for comments you cannot map to code.
 
+**3-fix boundary:** if the same finding resists three distinct fix attempts, stop patching it — switch to root-cause mode (`/compass:debug`) or hand it back to the author. Three misses means the diagnosis is wrong, not the patch; more variations just churn the PR. See `references/DEBUGGING.md`.
+
 ### 4. Validate
 
 Run `/compass:validate` (lint + types + tests + browser smoke). Fixes can break lint/types/tests — this is the gate. If validation fails, fix and re-run before finishing.
@@ -67,3 +69,4 @@ Report what was fixed and what was left (with reasons). If a finding revealed so
 - **No secrets** — never log `.env.local`, `*.db`, or credential files.
 - **No AI attribution** — no `Co-Authored-By` trailers.
 - Don't force a change for a finding you disagree with — flag it for the author instead.
+- **Stop at three** — after three failed attempts on the same finding, re-investigate (`/compass:debug`) instead of patching again.

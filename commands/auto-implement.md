@@ -1,6 +1,6 @@
 ---
 description: Execute a confirmed plan all the way to PR-open without intermediate confirmation
-argument-hint: <path to .work/plans/*.plan.md>
+argument-hint: <path to .work/plans/*.plan.md> [--review-tasks]
 ---
 
 # /compass:auto-implement — Plan to PR without confirmation
@@ -21,7 +21,9 @@ For everything else, stay with `/compass:implement` → `/compass:ship`.
 
 ## Input
 
-`/compass:auto-implement <path to .work/plans/*.plan.md>`
+`/compass:auto-implement <path to .work/plans/*.plan.md> [--review-tasks]`
+
+**`--review-tasks`** (optional, off by default): after each task passes its gate, dispatch the `code-reviewer` subagent for a fast **spec-compliance** check before moving on — catching drift early in an unattended run, where there is no human watching task by task. Off by default keeps the standard behavior; interactive work uses the end-of-PR review (`/compass:ship`), which is better for cohesion. Trade-off: one extra subagent per task = more tokens and latency.
 
 ## Pre-flight checks (any failure → abort, no commit, no push)
 
@@ -40,6 +42,7 @@ Execute Steps 1–5 from `${CLAUDE_PLUGIN_ROOT}/commands/implement.md`:
 1. Load context (`${CLAUDE_PLUGIN_ROOT}/commands/context.md` Steps 1–5).
 2. Load plan, read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `dev_port`, `base_branch`, `worktree_prefix`, `repo`, `src_dir`.
 3. Execute tasks one by one with per-task `type_check_cmd` after each. On type-check failure: fix, re-run, confirm PASS before continuing.
+   - **With `--review-tasks`:** after a task's gate passes, dispatch the `code-reviewer` subagent (`${CLAUDE_PLUGIN_ROOT}/agents/code-reviewer.md`) on just that task's diff for a spec-compliance check against the plan. Apply any Critical/Important finding before the next task; ignore nits. A failed root cause that resists three fixes hits the 3-fix boundary (`references/DEBUGGING.md`) — stop and abort rather than churn.
 4. After all tasks: full validation suite — lint, type check, tests, browser smoke test (same suite as `/compass:validate`).
 5. Write the implementation report to `.work/reports/<feature>-report.md`.
 

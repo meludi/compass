@@ -102,6 +102,7 @@ Note: for yes — run /clear first so the subagents start with a clean context.
 ## Rules
 
 - **Never auto-commit** — always show state and wait for confirmation. The only sanctioned exception is `/compass:auto-implement`, which runs on a `feat/*` branch with a pre-approved plan and stops at PR-open.
+- **Verified state only** — the PR body (Summary, Changes, Manual Test Plan) reflects what validation actually confirmed in `/compass:implement`, not what was intended. See `references/HANDBOOK.md` → *Verification before completion*.
 - **No Co-Authored-By** — no AI attribution in commits or PR body
 - **Never push to base branch** — feature branch only
 - **Never merge the PR** — hand back to the user after the review

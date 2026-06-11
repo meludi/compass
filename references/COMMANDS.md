@@ -235,12 +235,14 @@ open PR. Hard-stops at PR-open; **never merges**.
 |---|---|
 | **Level** | PIV |
 | **Recommended model** | Sonnet |
-| **Argument** | `<path to .work/plans/*.plan.md>` — required |
+| **Argument** | `<path to .work/plans/*.plan.md> [--review-tasks]` |
 | **Trigger** | User |
-| **Uses** | `/compass:context` (inline), `/compass:validate` (inline), `/compass:commit` (inline) |
+| **Uses** | `/compass:context` (inline), `/compass:validate` (inline), `/compass:commit` (inline), `code-reviewer` (with `--review-tasks`) |
 |---|---|
 
 Pre-flight checks gate it: `feat/*` branch, inside a worktree, `gh` installed, clean working tree, plan exists.
+
+**With `--review-tasks`:** runs the `code-reviewer` subagent on each task's diff for a spec-compliance check before the next task — early drift-catching for an unattended run. Off by default; adds a subagent per task (more tokens/latency).
 
 **Not for:** DB migrations, auth changes, or first use of a new pattern. Use `/compass:implement` → `/compass:ship` instead.
 
@@ -379,6 +381,23 @@ locally, then runs `/compass:validate`. Stops before commit.
 **With argument:** uses that specific PR number.
 
 **When to use:** in `review-only`/`full` mode — the CI already reviewed the diff, so re-reviewing with `/compass:review-code` would be redundant. In `off` mode or before the PR exists, use `/compass:review-code --fix` instead.
+
+---
+
+### /compass:debug
+
+Root-causes a failure before fixing it — four-phase investigation (root cause → pattern
+analysis → one-hypothesis testing → fix-with-failing-test) with a hard **3-fix boundary**.
+
+| | |
+|---|---|
+| **Level** | PIV (Fix) |
+| **Recommended model** | Sonnet |
+| **Argument** | `[symptom \| failing test \| error message]` — optional (uses the last failure in context) |
+| **Trigger** | User |
+|---|---|
+
+**When to use:** a test or CI is failing and the cause isn't obvious, or a fix has already bounced once or twice. For a clean failure with an obvious one-line cause, just fix it. Full method: `DEBUGGING.md`.
 
 ---
 

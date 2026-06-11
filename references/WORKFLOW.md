@@ -100,6 +100,7 @@ A PR is open. The reviewer points, **you** fix, CI never commits — repeat unti
 |---|---|
 | `/compass:review-code --fix` | [→ details](COMMANDS.md#compassreview-code) |
 | `/compass:fix-ci-review` | [→ details](COMMANDS.md#compassfix-ci-review) |
+| `/compass:debug` _(when a fix isn't obvious or has bounced)_ | [→ details](COMMANDS.md#compassdebug) |
 | Edit by hand | — |
 
 **Step 3 — verify:** `/compass:validate` — re-run lint/types/tests (a fix can break them).
@@ -150,6 +151,7 @@ The loop shape never changes. Two **independent** choices decide how you run it 
 - No CI (`off`), or before the PR exists? → `/compass:review-code --fix`.
 - Specifically "does this fit the project?" (not generic bugs) → `/compass:review-project`.
 - The fix entry follows **where the findings live**: chat → `--fix` / by hand; PR → `/compass:fix-ci-review`.
+- A failure whose cause isn't obvious, or a fix that already bounced? → `/compass:debug` — root-cause it (four phases, 3-fix boundary) instead of guessing. See `DEBUGGING.md`.
 
 ---
 
@@ -190,4 +192,4 @@ These run automatically inside the steps above but can also be invoked directly.
 ---
 
 Reference: `COMMANDS.md` (every command in detail) · `HANDBOOK.md` (models, `.work/`, glossary, troubleshooting) ·
-`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) · `AUTONOMY.md` (CI + `autonomy_mode`).
+`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) · `AUTONOMY.md` (CI + `autonomy_mode`) · `DEBUGGING.md` (root-cause method).

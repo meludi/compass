@@ -93,7 +93,7 @@ The `/compass:reflect` command guides you through all of the above.
 | | Opus 4.8 | Sonnet 4.6 | Haiku 4.5 |
 |---|---|---|---|
 | **Best for** | Complex reasoning, architecture, deep analysis | Balanced quality + speed | Fast, lightweight tasks |
-| **In this workflow** | `/compass:ideate`, `/compass:plan-feature`, `/compass:ship`, `/compass:review-project`, `/compass:review-security` | `/compass:setup`, `/compass:setup-stack`, `/compass:implement`, `/compass:auto-implement`, `/compass:validate`, `/compass:create-stories`, `/compass:reflect` | `/compass:commit`, `/compass:worktree` |
+| **In this workflow** | `/compass:ideate`, `/compass:plan-feature`, `/compass:ship`, `/compass:review-project`, `/compass:review-security` | `/compass:setup`, `/compass:setup-stack`, `/compass:implement`, `/compass:auto-implement`, `/compass:validate`, `/compass:create-stories`, `/compass:reflect`, `/compass:debug` | `/compass:commit`, `/compass:worktree` |
 | **Latency** | Moderate | Fast | Fastest |
 | **Context window** | 1M tokens | 1M tokens | 200k tokens |
 | **Max output** | 128k tokens | 64k tokens | 64k tokens |
@@ -127,8 +127,22 @@ Full details — arguments, with/without behavior, when to run standalone: `COMM
 | `/compass:review-project` | PIV | Auto or User |
 | `/compass:review-code` | PIV | User |
 | `/compass:fix-ci-review` | PIV (Fix) | User |
+| `/compass:debug` | PIV (Fix) | User |
 | `/compass:review-security` | PIV | Auto or User |
 | `/compass:reflect` | Anytime | User |
+
+---
+
+## Verification before completion
+
+"Done" is a claim, and a claim needs evidence. Before reporting a task, a fix, or a feature as complete — or committing, or opening a PR — name the command that proves it, run it **fresh**, and read the actual output (exit code, pass/fail counts). Then report what the output showed, not what you expected.
+
+- **Hedge words are not a verdict.** "should pass", "looks right", "probably fine" describe an expectation, not an observation — they don't close a task.
+- **Run it now, in full.** A stale run from three edits ago, or a filtered subset, doesn't prove the current state. Re-run the real command.
+- **Read output, not a wrapper's summary.** A green tick in a tool is not the exit code — confirm the underlying result.
+- **An honest failure beats a blind success.** If the proof command fails, say so with the output; never paper over it.
+
+Used by `/compass:implement` (Steps 4 & 6), `/compass:ship` (the PR body), `/compass:validate`, and `/compass:fix-ci-review`. It is the same discipline behind why `/compass:status` is **derived live** from `git` + `gh` and never stored — state is re-proven, not remembered.
 
 ---
 
@@ -142,6 +156,8 @@ Used by `/compass:plan-feature` (when listing behaviors), `/compass:implement` (
 - **Prefer integration-style over heavy mocking.** Exercise real code paths; mock only true boundaries (network, clock, external services), not your own collaborators.
 
 Write tests one behavior at a time alongside the code (see `/compass:implement` Step 3) — not all tests up front, which tends to test imagined rather than actual behavior. Whether a test comes before or after the code, and whether one is forced at all, is set by `test_policy` in `.claude/compass.yml` (`first` / `after` / `none`); these quality rules apply whenever a test is written.
+
+Under `test_policy: first`, **watch the test fail before writing code** (verify-RED): a test that errors out or passes immediately isn't proving the behavior. See `/compass:implement` Step 3.
 
 ---
 

@@ -14,6 +14,13 @@ autofix_max_pushes: 0       # 0 = off                     — brake for native a
 
 Edit, commit, and the next PR run picks up the change. No reinstall, no second workflow.
 
+## Contents
+
+- [`autonomy_mode` — how much CI does](#autonomy_mode--how-much-ci-does) — what CI does per mode
+- [`ci_review_provider` / `ci_review_model` — who reviews](#ci_review_provider--ci_review_model--who-reviews) — provider, pinned model, your review guidelines
+- [Auto-fix the PR loop](#auto-fix-the-pr-loop) — native auto-fix, the `autofix-guard` brake, and [delegating to Codex](#delegating-review--fix-to-an-external-reviewer-codex)
+- [Setup](#setup) · [Cost](#cost) · [Security](#security) · [Notes](#notes) · [pre-commit hook](#optional-local-pre-commit-hook)
+
 ---
 
 ## `autonomy_mode` — how much CI does
@@ -70,7 +77,10 @@ ci_review_model: claude-sonnet-4-5-20250929
 
 `ci_review_guidelines` gives the review **your project's signature**: CI appends that file's content to the review prompt for **every** provider (Claude, OpenAI, Gemini) as higher-priority criteria. `/compass:setup-stack` drops a starter at `.github/review-guidelines.md` and sets this field to it by default — **edit that file** with your conventions. Set blank to disable; a missing file is harmless (the review runs without it).
 
-The file is read from the checked-out repo, so it must be **committed and pushed**, and its content is sent to the review provider's API — keep secrets out of it. This is the cross-provider stand-in for a review "skill": the external providers are a plain API call (no agent, no skill system), so the prompt is the only lever — this field is how you pull it. (`autonomy_mode: off` disables the review for every provider.)
+- The file is read from the checked-out repo → it must be **committed and pushed**; its content is sent to the review provider's API, so keep secrets out of it.
+- It's the cross-provider stand-in for a review "skill": the external providers are a plain API call (no agent, no skill system), so the prompt is the only lever — this field is how you pull it.
+
+(`autonomy_mode: off` disables the review for every provider.)
 
 ---
 
@@ -93,6 +103,8 @@ Native auto-fix has **no documented stop condition** — on a structural problem
 - It rests only on `gh` commit counts — never on auto-fix's internals, so it can't drift. `/compass:status` reports `escalated` once the comment exists.
 
 Pick `N` with headroom — e.g. `6` allows the first push plus a few rounds before calling the PR stuck.
+
+The push-count cap is the **blunt outer brake** — it counts commits, not reasoning. Its per-finding counterpart is the **3-fix boundary** (`references/DEBUGGING.md`): after three failed attempts at the *same* problem, stop patching and re-investigate the root cause (`/compass:debug`), because three misses mean the diagnosis is wrong. The boundary should stop a stuck fix well before the push cap trips.
 
 ### The loop end to end
 
