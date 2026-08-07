@@ -2,7 +2,7 @@
 
 A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement → Validate → Ship) to any project — file-level plans, per-task validation gates, browser smoke testing, and worktree isolation. Stack-agnostic, configured in one file. Commands are namespaced `/compass:<name>`.
 
-Eight commands, no more. Specs, tickets and code review are left to tools that are maintained for you — [`references/WORKFLOW.md`](references/WORKFLOW.md) names which.
+Eight workflow commands, no more — plus `/compass:help`, which tells you which one you want. Specs, tickets and code review are left to tools that are maintained for you — [`references/WORKFLOW.md`](references/WORKFLOW.md) names which.
 
 ---
 
@@ -80,5 +80,5 @@ Plans and outputs live in `.work/` (created on first use): `plans/` committed; `
 | Doc | What's inside |
 |-----|---------------|
 | [`references/WORKFLOW.md`](references/WORKFLOW.md) | The loops, with diagrams — and where compass stops |
-| [`references/COMMANDS.md`](references/COMMANDS.md) | All eight commands in detail — arguments, behaviour, when to run them standalone |
+| [`references/COMMANDS.md`](references/COMMANDS.md) | Every command in detail — arguments, behaviour, when to run them standalone |
 | [`references/HANDBOOK.md`](references/HANDBOOK.md) | `.work/` layout, the verification discipline, config, troubleshooting |

@@ -4,7 +4,7 @@ End-to-end test of the workflow this plugin ships, run against a throwaway **san
 
 ```
 Dry-run (static)       bash scripts/selftest.sh    (manifests, config table, doc links, shell — no human/GitHub needed)
-Stage 0 — Plugin check claude plugin details       (well-formed: 8 commands, 0 agents, 1 hook, 0 MCP servers)
+Stage 0 — Plugin check claude plugin details       (well-formed: 9 commands, 0 agents, 1 hook, 0 MCP servers)
 Stage 1 — Setup        /compass:setup
 Loop  — PIV            /compass:worktree → /compass:plan-feature → /compass:implement → /code-review → /compass:ship
 Fix   — after review   claude-code-action on the PR → /compass:fix-ci-review → push
@@ -63,7 +63,7 @@ For testing this branch, use **B**. Route **A** only works after the merge to `m
 claude plugin details compass
 ```
 
-- [ ] Inventory: **8 commands**, **0 agents**, 1 skill, 1 SessionStart hook, **0 MCP servers**
+- [ ] Inventory: **9 commands** (8 workflow + `help`), **0 agents**, 1 skill, 1 SessionStart hook, **0 MCP servers**
 - [ ] No command named `review-*`, `ideate`, `create-stories`, `setup-stack`, `setup-tracker`, `context`, `status`, `debug`, `onboard`, `reflect`, `update`, or `auto-implement` — those were dropped deliberately
 
 Uninstall again when done:
@@ -102,6 +102,12 @@ A fresh repo so the test never touches a real project.
 ---
 
 ## Stage 1 — Setup
+
+### `/compass:help`
+- [ ] Bare: prints the situation table **and** *The pairs people confuse* — nothing else, no summary, no suggested next step
+- [ ] `"the PR has review comments"` → names `/compass:fix-ci-review` with one sentence on why not `/code-review`
+- [ ] `"I want to rename a variable everywhere"` → nothing fits; it says so and names the closest thing instead of inventing a command
+- [ ] It **never executes** the command it names
 
 ### `/compass:setup`
 - [ ] One phase, one file: `.claude/CLAUDE.md`, with code-pattern sections marked `TODO: update after first feature`

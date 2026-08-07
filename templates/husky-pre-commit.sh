@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
-# Optional pre-commit hook for review-only autonomy.
+# Optional pre-commit hook — a gate for commits made outside compass.
+#
+# compass' own gates run when you invoke a compass command. This one fires on
+# every `git commit`, whatever triggered it: terminal, editor, another agent.
 #
 # This file is NOT installed automatically. To use it:
 #

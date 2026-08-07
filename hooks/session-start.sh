@@ -18,6 +18,9 @@ worktree isolation. Plugin commands are namespaced \`/compass:<name>\`:
   worktree -> plan-feature -> implement -> /code-review -> ship
   (+ validate, commit, fix-ci-review)
 
+Unsure which command fits a situation? \`/compass:help\` routes it — including
+the cases whose answer is a Claude Code built-in, a skill, or no command at all.
+
 compass covers the execution loop only. \`/code-review\` in that chain is Claude
 Code's own, not a compass command — run it on the branch before shipping, where a
 finding costs one edit instead of a review round. On the PR, review comes from

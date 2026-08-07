@@ -60,4 +60,8 @@ Optional, once per repo:
   /install-github-app   PR review (anthropics/claude-code-action). It offers two
                         workflows: "Claude Code Review" reviews every PR by itself,
                         "Claude PR Assistant" answers @claude mentions.
+  husky pre-commit      gates commits made outside compass — install steps in
+                        references/HANDBOOK.md. Not set up here.
 ```
+
+Print these as text only. **Do not install husky** — it would add a dev dependency and write `.husky/`, and this command touches nothing outside `.claude/`.

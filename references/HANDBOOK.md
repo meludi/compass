@@ -57,6 +57,26 @@ Worktrees read nothing at all: default branch from `origin/HEAD`, package manage
 
 **Guidance split.** The SessionStart hook injects workflow orientation and the doc index — it is **plugin-owned** and updates with the plugin. The generated `CLAUDE.md` stays **user-owned**: project facts, review conventions, and a "Project Context" table for your own docs.
 
+**Two CLAUDE.md files is normal.** Claude Code loads project memory from *both* `CLAUDE.md` at the repo root and `.claude/CLAUDE.md`; compass writes the second. mattpocock/skills' `/setup-matt-pocock-skills` only looks at the root one, so it will offer to create it — say yes. The sections do not collide (`## Agent skills` vs. `## Commands`), and neither tool edits a file the other wrote.
+
+One asymmetry to know: the `code-review` plugin instructs its reviewer to read `~/.claude/CLAUDE.md`, the **repo-root** `CLAUDE.md`, and any `CLAUDE.md` in a directory above a changed file — `.claude/CLAUDE.md` is not on that list. It still reaches the reviewer as loaded project memory, so *Review conventions* are honoured either way. If you want them in the explicitly-read set as well, move that one section to the root file.
+
+---
+
+## Gating commits made outside compass
+
+compass' gates run when you invoke a compass command. A commit made straight from the terminal, an editor, or another agent passes none of them.
+
+`${CLAUDE_PLUGIN_ROOT}/templates/husky-pre-commit.sh` closes that gap: it runs the test suite and prints a read-only Claude review of the staged diff. Findings are **printed, never applied** — it does not fix, stage or commit anything. Not installed automatically:
+
+```bash
+npm install --save-dev husky && npx husky init
+cp ${CLAUDE_PLUGIN_ROOT}/templates/husky-pre-commit.sh .husky/pre-commit
+chmod +x .husky/pre-commit
+```
+
+It hardcodes `npm test`; edit that line for a non-npm stack. Optional — `/compass:validate` covers the same ground whenever you go through compass.
+
 ---
 
 ## Troubleshooting

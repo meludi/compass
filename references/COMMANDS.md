@@ -1,11 +1,12 @@
 # Commands
 
-All eight, in detail — arguments, what they do, when to run them standalone. The
-flow they form is in `WORKFLOW.md`; each command file in `commands/` is the actual
-instruction set the agent executes.
+Eight workflow commands and a router, in detail — arguments, what they do, when to
+run them standalone. The flow they form is in `WORKFLOW.md`; each command file in
+`commands/` is the actual instruction set the agent executes.
 
 | | Command | Argument | Model |
 |---|---|---|---|
+| Help | [`/compass:help`](#compasshelp) | `[situation]` | haiku |
 | Setup | [`/compass:setup`](#compasssetup) | — | sonnet |
 | PIV | [`/compass:worktree`](#compassworktree) | `<name> [rm]` | haiku |
 | PIV | [`/compass:plan-feature`](#compassplan-feature) | `<spec \| issue-id \| description>` | opus |
@@ -14,6 +15,24 @@ instruction set the agent executes.
 | Ship | [`/compass:commit`](#compasscommit) | `[--push]` | haiku |
 | Ship | [`/compass:ship`](#compassship) | — | opus |
 | Fix | [`/compass:fix-ci-review`](#compassfix-ci-review) | `[PR-number]` | opus |
+
+---
+
+## Help
+
+### /compass:help
+
+Routes a situation to the command that fits — across compass, Claude Code's built-ins and mattpocock/skills.
+
+| | |
+|---|---|
+| **Argument** | `[what you are trying to do]` — optional; without one it prints the whole table |
+| **Trigger** | User |
+| **Writes** | nothing |
+
+It **names** a command and stops; it never runs one. Where `WORKFLOW.md` orders commands by flow and this file by ownership, `help` orders them by the question you actually have.
+
+Two sections carry most of the value: *The pairs people confuse* (`/code-review` vs `fix-ci-review` vs `/autofix-pr`, `validate` vs `code-review`, `plan-feature` vs `to-spec`) and *Nothing to run* — the situations whose correct answer is no command at all.
 
 ---
 
