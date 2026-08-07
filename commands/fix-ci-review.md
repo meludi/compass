@@ -1,17 +1,17 @@
 ---
-description: Fetch the CI review comments on the PR and apply the fixes locally, then validate
+description: Fetch the review comments on the PR and apply the fixes locally, then validate
 argument-hint: [PR-number]
 ---
 
-# /compass:fix-ci-review — Apply CI Review Findings
+# /compass:fix-ci-review — Apply PR Review Findings
 
 > **Model:** `/model opus` — applying review feedback needs careful editing.
 
-Consumes the comments the CI `ci-review` job posted on the PR and applies the fixes **locally**. This is the non-redundant fix path in `review-only` / `full` mode: act on the review that already ran, instead of re-reviewing the same diff with `/compass:review-code`.
+Consumes the review comments on the PR — posted by `anthropics/claude-code-action` or by a human — and applies the fixes **locally**, so each one passes `/compass:validate` before it goes back up. This is the bridge back from a review that ran elsewhere; it does not re-review the diff.
 
 **Input**: `$ARGUMENTS` — PR number (optional).
 
-Use `/compass:review-code --fix` instead when there is **no** CI review (mode `off`, or before the PR exists).
+Before the PR exists, use Claude Code's built-in `/code-review` instead.
 
 ## PR source — how it's resolved
 
@@ -19,9 +19,9 @@ Use `/compass:review-code --fix` instead when there is **no** CI review (mode `o
 |---|---|
 | `$ARGUMENTS` is a PR number | that PR |
 | No argument, PR exists for current branch | inferred via `gh pr view` |
-| No argument, no PR found | stop — nothing to apply (suggest `/compass:review-code --fix`) |
+| No argument, no PR found | stop — nothing to apply (suggest `/code-review`) |
 
-Read `repo` from `.claude/compass.yml`.
+Resolve the repo with `gh repo view --json nameWithOwner -q .nameWithOwner` — it reads the remote, so it stays right in worktrees and forks.
 
 ## Pre-flight — `gh` available?
 
@@ -30,8 +30,8 @@ command -v gh >/dev/null 2>&1 || echo "MISSING"
 ```
 
 This command reads PR comments via `gh`, so it can't run without it. If missing, stop:
-tell the user to install it (`brew install gh` → `gh auth login`), or use
-`/compass:review-code --fix` for a fresh local review instead.
+tell the user to install it (`brew install gh` → `gh auth login`), or use the built-in
+`/code-review` for a fresh local review instead.
 
 ## Steps
 
@@ -52,7 +52,7 @@ List the findings concisely (file · line · what to change), grouped by severit
 
 Edit the files to address each finding. Skip or flag any comment you disagree with (state why) rather than forcing a change — the author decides on contested points. Do not invent fixes for comments you cannot map to code.
 
-**3-fix boundary:** if the same finding resists three distinct fix attempts, stop patching it — switch to root-cause mode (`/compass:debug`) or hand it back to the author. Three misses means the diagnosis is wrong, not the patch; more variations just churn the PR. See `references/DEBUGGING.md`.
+**3-fix boundary:** if the same finding resists three distinct fix attempts, stop patching it — switch to root-cause mode (reproduce, isolate, one hypothesis at a time; the `diagnosing-bugs` skill if available) or hand it back to the author. Three misses means the diagnosis is wrong, not the patch; more variations just churn the PR.
 
 ### 4. Validate
 
@@ -64,9 +64,9 @@ Report what was fixed and what was left (with reasons). If a finding revealed so
 
 ## Rules
 
-- **Never auto-commit** — stop after `/compass:validate`; the author commits and pushes. (`/compass:auto-implement` is the only sanctioned auto-commit exception.)
+- **Never auto-commit** — stop after `/compass:validate`; the author commits and pushes.
 - **Never merge** — hand back after the fixes are validated.
 - **No secrets** — never log `.env.local`, `*.db`, or credential files.
 - **No AI attribution** — no `Co-Authored-By` trailers.
 - Don't force a change for a finding you disagree with — flag it for the author instead.
-- **Stop at three** — after three failed attempts on the same finding, re-investigate (`/compass:debug`) instead of patching again.
+- **Stop at three** — after three failed attempts on the same finding, re-investigate the cause instead of patching again.

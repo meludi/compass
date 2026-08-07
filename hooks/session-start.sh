@@ -12,26 +12,32 @@ cat <<ORIENTATION
 # compass — workflow orientation
 
 This Claude Code session has the **compass** plugin available: a PIV loop
-(Plan -> Implement -> Validate) with parallel subagent review and worktree
-isolation. Plugin commands and skills are namespaced \`/compass:<name>\`
-(e.g. \`/compass:plan-feature\`, \`/compass:implement\`, \`/compass:ship\`).
+(Plan -> Implement -> Validate -> Ship) with per-task validation gates and
+worktree isolation. Plugin commands are namespaced \`/compass:<name>\`:
+
+  worktree -> plan-feature -> implement -> /code-review -> ship
+  (+ validate, commit, fix-ci-review)
+
+compass covers the execution loop only. \`/code-review\` in that chain is Claude
+Code's own, not a compass command — run it on the branch before shipping, where a
+finding costs one edit instead of a review round. On the PR, review comes from
+\`anthropics/claude-code-action\`. Do not look for a compass review command.
 
 ## Framework docs — load on demand (not every session)
 
 | Topic                | File                                      |
 | -------------------- | ----------------------------------------- |
-| Workflow concepts    | $REF/CONCEPTS.md                          |
-| Command flow         | $REF/WORKFLOW.md                          |
-| Reference / handbook | $REF/HANDBOOK.md                          |
-| Debugging            | $REF/DEBUGGING.md                         |
-| Worktrees            | $REF/WORKTREES.md                         |
-| CI & autonomy        | $REF/AUTONOMY.md                          |
+| The two loops        | $REF/WORKFLOW.md                          |
+| Commands in detail   | $REF/COMMANDS.md                          |
+| Everything else      | $REF/HANDBOOK.md                          |
 
 ## Project-side files
 
-- Config: \`$PROJECT/.claude/compass.yml\` (stack, package manager, tracker).
-- Conventions: \`$PROJECT/.claude/CLAUDE.md\` (project facts + project-context table).
+- \`$PROJECT/.claude/CLAUDE.md\` — project facts, review conventions, the
+  project-context table, and the \`## Commands\` table. **That table is compass'
+  configuration**: gate commands plus test policy, dev port and base branch.
+  There is no compass config file.
 
-If \`.claude/compass.yml\` is missing, run \`/compass:setup\` to scaffold it.
+If \`.claude/CLAUDE.md\` is missing, run \`/compass:setup\` to scaffold it.
 Read the framework docs above only when a task actually needs them.
 ORIENTATION

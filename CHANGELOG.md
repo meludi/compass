@@ -1,5 +1,83 @@
 # Changelog
 
+## v0.10.0 — 2026-08-07
+
+**Compass is now eight commands.** It covers the execution loop — plan, implement, validate, ship — and nothing else. Everything that another maintained tool already does better was removed rather than kept in step with it. If you relied on a dropped command, see the migration table below.
+
+### Removed
+- **Code review inside compass** — `/compass:review-code`, `/compass:review-project`, `/compass:review-security` and all three agents (`code-reviewer`, `codebase-explorer`, `pr-test-analyzer`) are gone. Claude Code ships `/code-review` (and `/code-review ultra`) and `/security-review` natively; keeping a parallel implementation meant tracking a moving target for no gain. `/compass:plan-feature` now uses the built-in `Explore` agent instead of `codebase-explorer`.
+- **The CI autonomy layer** — `autonomy_mode`, `ci_review_provider`, `ci_review_model`, `ci_review_guidelines`, `autofix_max_pushes`, `references/AUTONOMY.md`, the `ci-review` / `ci-checklist` / `autofix-guard` / `auto-merge` jobs, and `templates/review-guidelines.md`. Automated PR review is now `anthropics/claude-code-action`, installed once per repo with `/install-github-app` — it owns its own workflow, reads `.claude/CLAUDE.md`, and is maintained for you. **This drops provider neutrality**: the Codex/OpenAI/Gemini review paths no longer exist.
+- **The CI workflow template** — `templates/pr-validation.yml` is gone. A workflow that runs your lint/type/test suite is generic CI your stack already has a template for, and `/compass:validate` runs the same checks locally before every ship. compass now ships no workflow at all; `/install-github-app` handles PR review and writes its own.
+- **The config file itself** — `.claude/compass.yml` and `compass.schema.json` are gone, along with `templates/compass.yml`, `scripts/read-config.sh`, the schema copy `/compass:setup` used to place in your project, and every key that only a script needed (`package_manager`, `install_cmd`, `dev_cmd`, `db_file`, `worktree_prefix`, `worktree_setup_cmd`, `worktree_teardown_cmd`, the dead `src_dir`). **Project config is now the `## Commands` table in `.claude/CLAUDE.md`** — the gate commands as table rows, plus `Test policy`, `Dev port` and `Base branch` lines beneath it. Nothing else parses project config, and the selftest fails if a machine consumer reappears. Rationale: only commands ever read the file, so it was already LLM-read prose in YAML clothing, while `CLAUDE.md` is loaded in every session anyway and is what claude-code-action reads on the PR. **Migration:** move your `compass.yml` values into that table; the row labels (`Dev`, `Build`, `Lint`, `Format`, `Type check`, `Test`) are the lookup keys and must stay spelled as generated. `repo` is no longer stored at all — `/compass:fix-ci-review` derives it from `gh repo view`, and `/compass:ship` falls back to `origin/HEAD` when no `Base branch` line exists. **What you lose:** schema validation and editor autocomplete. A misspelled policy value now falls back to `first` silently.
+- **The upstream half of the workflow** — `/compass:ideate`, `/compass:create-stories`, `/compass:setup-stack`, `/compass:setup-tracker`, `/compass:onboard`, `/compass:context`, `/compass:reflect`, `/compass:debug`, `/compass:status`, `/compass:update`, `/compass:auto-implement`, plus `references/CONCEPTS.md`, `references/DEBUGGING.md`, `references/COMMANDS.md` and `templates/mcp.json`. compass no longer produces specs, scaffolds stacks, or syncs trackers.
+- **Tracker config** — `tracker`, `tracker_get_issue_tool`, `tracker_create_issue_tool`, `tracker_get_team_tool`. `/compass:plan-feature` takes a spec file, an issue id, or a plain description; it does not need to know your tracker.
+- **`.work/prds/` and `.work/stories/`** — only `plans/`, `reports/` and `screenshots/` remain.
+
+### Changed
+- **`/compass:ship` checks that its evidence is current** — a new pre-flight lists source files touched after the implementation report was written and re-runs `/compass:validate` if any turn up. Without it, fixing `/code-review` findings and shipping straight after would push unproven code *and* a PR body claiming validation that never covered it. Uses `find -newer` rather than `stat`, whose flags differ between macOS and Linux.
+- **`/compass:ship` hands off instead of reviewing** — it commits, pushes, opens the PR, and names who reviews it. The "Run code review now?" fan-out is gone.
+- **Both loops are now numbered steps** — Loop 1 (build) ends when the PR opens; Loop 2 (fix) is everything after, as the same shape: diagram, numbered table, a few short notes. `/code-review` is **step 4 of Loop 1**, before `/compass:ship`, because a finding is cheaper to fix while no PR exists — it is Claude Code's command, not compass', and is marked as such. Loop 2 splits into two named paths: **CI Fix** (`/compass:fix-ci-review` — you confirm, fixes are validated locally before they leave your machine) and **Autofix** (`/autofix-pr` — the PR monitors itself and pushes its own fixes, skipping `/compass:validate`). `/code-review ultra` is no longer mentioned: compass cannot launch it, and listing every adjacent tool turned the review section into a decision tree instead of a workflow.
+- **PR review is documented as automatic** — `/install-github-app` installs two selectable workflows, and the docs previously named only one. *Claude Code Review* (`claude-code-review.yml`) triggers on `pull_request: opened, synchronize, ready_for_review, reopened` with no mention gate, so it reviews every PR and every push to it, running the same `/code-review` you run locally; *Claude PR Assistant* (`claude.yml`) is the `@claude`-triggered one. `@claude review this` is now described as the fallback for the second setup, not the normal path.
+- **`/compass:fix-ci-review` is now the only fix bridge** — it reads the review comments on a PR (from claude-code-action or a human) and applies them **locally**, so every fix passes `/compass:validate` before you push. It still never commits and never merges.
+- **The PIV core delegates doctrine instead of restating it** — `/compass:implement` and `/compass:validate` point at the `tdd` skill for what a good test is, and at `diagnosing-bugs` for root-cause method, keeping only the mechanics compass owns: the per-task gate, `test_policy`, verify-RED, the 3-fix boundary, the Loop log, and the report. The pointers are soft — compass runs fine without those skills, falling back to a one-line summary inline. `HANDBOOK.md` → *Test quality* shrank accordingly.
+- **`worktree.sh` reads no configuration** — it derives the base branch from `origin/HEAD` (falling back to the current branch), the package manager from the lockfile, and reserves the first free port from 3000 up. Per-worktree state moved from two config strings to project-owned hooks: if `.claude/worktree-setup.sh` or `.claude/worktree-teardown.sh` exist, they run in the worktree with `WT_NAME`, `WT_DIR`, `WT_BRANCH`, `WT_PORT` exported. This is **more** general than before — the old `db_file` key handled exactly one case (a single SQLite file), while a hook covers Postgres, Docker, migrations, per-worktree env, anything. A failing hook warns instead of aborting. **The port is no longer predictable** (`dev_port + N` before); read it from `.worktree-port`.
+- **`references/WORKTREES.md` folded into `/compass:worktree`** — a separate 178-line doc whose every example was a config key that no longer exists. The command now carries all of it: mental model, isolation scope, hooks, the stack recipes (Postgres, Mongo/Payload, Docker Compose, SQLite, non-JS installs) rewritten as hook scripts, multi-worktree editor setups, and session resuming. One file to open instead of two to keep in sync.
+- **Review conventions moved into `CLAUDE.md`** — the `CLAUDE.md` template scaffolds a *Review conventions* section, read by both `/code-review` locally and claude-code-action on the PR. It replaces `.github/review-guidelines.md`.
+- **Model guidance is tiers, not names** — `HANDBOOK.md` lists opus/sonnet/haiku with what each is for, dropping the pricing and context-window table that went stale every release.
+- **`scripts/selftest.sh` asserts the shape** — it now checks the eight core commands by name, fails on a ninth, and fails if an `agents/` directory reappears.
+- **Three reference docs, one job each** — `WORKFLOW.md` is the loops: Loop 0 (deciding what to build, entirely mattpocock/skills), Loop 1 (build), Loop 2 (fix), plus a dedicated `/install-github-app` section answering when and how often to run it, and a three-line *Where compass stops*. `COMMANDS.md` returns as the per-command reference — argument, trigger, what it writes, when to run it standalone. `HANDBOOK.md` keeps only what belongs to neither: `.work/`, the verification discipline, config mechanics, troubleshooting. The mattpocock/skills pointers, previously scattered across three files, now live in one place with the skill names spelled out per question.
+- **`HANDBOOK.md` cut from 237 to 71 lines** — it had become a grab-bag nobody reads. What's left is the part with no other home: the `.work/` layout, the *Verification before completion* discipline, config mechanics, and troubleshooting. Dropped: the model pricing/context table (every command names its own tier), *Test quality* (delegated to `tdd`), *Refactor candidates* (that's `/code-review`'s job), *Deploying* (not compass' business), and the glossary. *System Evolution* moved into this repo's own `CLAUDE.md` — it was advice for maintaining compass, not for using it, and it referenced the now-removed `/compass:reflect`.
+
+### Migration
+
+In each project, move the values from `.claude/compass.yml` into a `## Commands` table in `.claude/CLAUDE.md`, then delete `compass.yml` and `compass.schema.json`:
+
+```markdown
+## Commands
+
+| Step       | Command             |
+| ---------- | ------------------- |
+| Dev        | `npm run dev`       |
+| Build      | `npm run build`     |
+| Lint       | `npm run lint`      |
+| Format     | `npm run format`    |
+| Type check |                     |
+| Test       | `npm test`          |
+
+- **Test policy:** `first`
+- **Dev port:** `3000`
+- **Base branch:** `main`
+```
+
+`name` and `repo` have no replacement — nothing reads them. `/compass:setup` generates this table for a fresh project, but **will not overwrite an existing `CLAUDE.md`**, so this move is manual for projects you already set up. `.mcp.json` and `.github/review-guidelines.md` can go if compass was their only consumer. Keep `.github/workflows/pr-validation.yml` if you want it — compass no longer generates or updates it, so it is yours now.
+
+If you used `db_file` or the worktree hook keys, move them into a `.claude/worktree-setup.sh` (and `-teardown.sh`):
+
+```bash
+#!/usr/bin/env bash
+# was: db_file: myapp.db
+cp "$(git rev-parse --show-toplevel)/../$(basename "$PWD" | sed 's/-[^-]*$//')/myapp.db" . 2>/dev/null || true
+# was: worktree_setup_cmd: createdb "myapp_$WT_NAME"
+createdb "myapp_$WT_NAME"
+```
+
+| Dropped | Use instead |
+|---|---|
+| `/compass:review-code`, `/compass:review-project` | `/code-review` |
+| `/compass:review-security` | `/security-review` |
+| `autonomy_mode: review-only` / `full` | `/install-github-app` → `anthropics/claude-code-action` |
+| `autofix_max_pushes` | `/autofix-pr` and its own limits |
+| `/compass:ideate`, `/compass:create-stories` | [mattpocock/skills](https://github.com/mattpocock/skills) — `grill-with-docs`, `to-spec`, `to-tickets` |
+| `/compass:debug` | its `diagnosing-bugs` skill |
+| `/compass:setup-tracker` | your tracker directly; `/compass:plan-feature` accepts an issue id or a description |
+| `/compass:status` | `git status`, `gh pr view` |
+| `/compass:setup-stack` | no replacement — scaffold the stack yourself |
+| `templates/pr-validation.yml` | your stack's own CI template; `/compass:validate` already gates locally |
+| `db_file`, `worktree_setup_cmd`, `worktree_teardown_cmd` | `.claude/worktree-setup.sh` / `-teardown.sh` in your project |
+| `package_manager`, `install_cmd`, `dev_cmd` | derived from the lockfile; a non-JS stack installs in its setup hook |
+| `.claude/compass.yml`, `compass.schema.json` | the `## Commands` table in `.claude/CLAUDE.md` |
+| `name`, `repo` | nothing reads them; `repo` comes from `gh repo view` |
+
 ## v0.9.0 — 2026-06-11
 
 ### Added

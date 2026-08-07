@@ -7,25 +7,25 @@
 #                                        refuses on uncommitted or unmerged work)
 #   worktree.sh feature-name rm -f    -> force removal (skips the guards)
 #
-# Reads from .claude/compass.yml:
-#   package_manager        — npm | pnpm | yarn | bun (used when install_cmd is blank)
-#   install_cmd            — custom install command for any stack; overrides package_manager
-#   db_file                — optional file DB to copy per worktree (e.g. myapp.db, SQLite)
-#   worktree_setup_cmd     — hook run in the new worktree after install (e.g. createdb myapp_$WT_NAME)
-#   worktree_teardown_cmd  — hook run before removal (e.g. dropdb myapp_$WT_NAME)
-#   dev_port               — base dev server port (default 3000); worktrees get dev_port + N
-#   dev_cmd                — dev server start command (default: npm run dev)
+# Reads no configuration. Everything is derived from the repo:
+#   base branch      — origin's HEAD, else the current branch
+#   package manager  — the lockfile present (pnpm/yarn/bun/npm); skipped if none
+#   port             — first free port from 3000 up, written to .worktree-port
 #
-# Hooks run with CWD = the worktree dir and these vars exported:
+# Project-owned isolation hooks (optional, both skipped when absent):
+#   .claude/worktree-setup.sh     — run in the new worktree after install
+#   .claude/worktree-teardown.sh  — run before removal
+# Both run with CWD = the worktree dir and these vars exported:
 #   WT_NAME  WT_DIR  WT_BRANCH  WT_PORT
-# For anything non-trivial, point a hook at a script file (avoids YAML quoting pitfalls).
+# Use them for anything stateful: create/drop a database, seed a schema, write a
+# per-worktree .env. compass does not know what your project needs — the hook does.
 #
-# Isolation scope: dir + branch + port are universal. Dependency install needs
-# package_manager or install_cmd. State isolation: db_file copy handles a single
-# file DB (SQLite); server DBs (Postgres/MySQL/…) need worktree_setup_cmd/teardown_cmd.
+# Isolation scope: dir + branch + port are universal and handled here. State
+# isolation is the hooks' job.
 #   - .env.local and .claude/settings.local.json are symlinked from main (shared
-#     config) — per-worktree env must be written by worktree_setup_cmd.
-#   - No manual file copying across worktrees — all changes via git commit on feature branch.
+#     config) — per-worktree env must be written by the setup hook.
+#   - No manual file copying across worktrees — all changes via git commit on the
+#     feature branch.
 
 set -euo pipefail
 
@@ -36,40 +36,38 @@ PARENT="$(dirname "$ROOT")"
 TARGET="$PARENT/$(basename "$ROOT")-$NAME"
 BRANCH="feat/$NAME"
 
-# Read from .claude/compass.yml via the shared reader (scripts/read-config.sh) so
-# the parsing rules live in one place (also used by CI). read_config strips a
-# trailing " # comment", trims whitespace, and removes one surrounding quote pair —
-# internal quotes are preserved so command values (install_cmd, hooks) survive intact.
-export PROJECT_YML="$ROOT/.claude/compass.yml"
-# shellcheck source=read-config.sh
-# Source the reader relative to this script (it ships beside us in the plugin),
-# not via the project $ROOT — the plugin lives outside the user's repo.
-source "$(dirname "${BASH_SOURCE[0]}")/read-config.sh"
-PM=$(read_config package_manager)
-INSTALL_CMD=$(read_config install_cmd)
-DB=$(read_config db_file)
-WT_SETUP_CMD=$(read_config worktree_setup_cmd)
-WT_TEARDOWN_CMD=$(read_config worktree_teardown_cmd)
-DEV_PORT=$(read_config dev_port)
-DEV_CMD=$(read_config dev_cmd)
-BASE=$(read_config base_branch)
-PM="${PM:-npm}"
-DEV_PORT="${DEV_PORT:-3000}"
-DEV_CMD="${DEV_CMD:-npm run dev}"
-BASE="${BASE:-main}"
+# Base branch: whatever origin points HEAD at, else the branch we're standing on.
+# Both lookups must tolerate failure (no origin, detached HEAD) — under `set -e`
+# with pipefail a bare command substitution would abort the script.
+BASE="$(git -C "$ROOT" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || true)"
+[ -z "$BASE" ] && BASE="$(git -C "$ROOT" symbolic-ref --short HEAD 2>/dev/null || true)"
+[ -z "$BASE" ] && BASE="main"
 
-# Run a compass.yml hook (setup/teardown) with worktree env exported.
-# Non-fatal: a failing hook warns but does not abort the script.
+# Run a project isolation hook if the project ships one. Non-fatal: a failing
+# hook warns but does not abort — losing a worktree to a bad hook is worse than
+# an unseeded database.
 run_hook() {
-  local cmd="$1" label="$2" rc=0
-  [ -z "$cmd" ] && return 0
-  echo "[worktree] $label hook: $cmd"
+  local script="$ROOT/.claude/worktree-$1.sh" rc=0
+  [ -f "$script" ] || return 0
+  echo "[worktree] $1 hook: .claude/worktree-$1.sh"
   ( cd "$TARGET" 2>/dev/null \
       && WT_NAME="$NAME" WT_DIR="$TARGET" WT_BRANCH="$BRANCH" \
          WT_PORT="$(cat "$TARGET/.worktree-port" 2>/dev/null || echo "")" \
-         bash -c "$cmd" ) || rc=$?
-  [ "$rc" -ne 0 ] && echo "[worktree] WARNING: $label hook exited $rc — continuing"
+         bash "$script" ) || rc=$?
+  [ "$rc" -ne 0 ] && echo "[worktree] WARNING: $1 hook exited $rc — continuing"
   return 0
+}
+
+# First free TCP port from $1 upward. Falls back to the start port after 100
+# tries so a locked-down box still gets a worktree.
+free_port() {
+  local p="$1" limit=$(( $1 + 100 ))
+  while [ "$p" -lt "$limit" ]; do
+    if ! (exec 3<>"/dev/tcp/127.0.0.1/$p") 2>/dev/null; then echo "$p"; return; fi
+    exec 3>&- 2>/dev/null || true
+    p=$((p + 1))
+  done
+  echo "$1"
 }
 
 # rm supports a force flag: worktree.sh <name> rm [-f|--force]
@@ -121,7 +119,7 @@ if [ "$ACTION" = "rm" ]; then
   fi
 
   # Guards passed (or --force) → teardown hook, then remove
-  run_hook "$WT_TEARDOWN_CMD" "teardown"
+  run_hook teardown
   if [ -n "$FORCE" ]; then
     git -C "$ROOT" worktree remove --force "$TARGET" 2>/dev/null || true
   else
@@ -141,9 +139,6 @@ if [ "$ACTION" = "rm" ]; then
 fi
 
 if [ ! -d "$TARGET" ]; then
-  WORKTREE_COUNT=$(git -C "$ROOT" worktree list | wc -l | tr -d ' ')
-  WORKTREE_PORT=$((DEV_PORT + WORKTREE_COUNT))
-
   git -C "$ROOT" worktree add "$TARGET" -b "$BRANCH"
 
   # .env.local + settings.local.json: symlink from main (config, not state)
@@ -155,37 +150,25 @@ if [ ! -d "$TARGET" ]; then
     ln -sf "$ROOT/.claude/settings.local.json" "$TARGET/.claude/settings.local.json"
   fi
 
-  echo "$WORKTREE_PORT" > "$TARGET/.worktree-port"
+  free_port 3000 > "$TARGET/.worktree-port"
 
-  # DB: copy from main so each worktree has an isolated DB
-  if [ -n "$DB" ] && [ -f "$ROOT/$DB" ]; then
-    cp "$ROOT/$DB" "$TARGET/$DB"
-    echo "[worktree] copied $DB to $TARGET"
-  elif [ -n "$DB" ]; then
-    echo "[worktree] db_file=$DB configured but not found in $ROOT — skipping"
-  fi
-
-  # Install dependencies — custom install_cmd wins, else the package manager.
-  if [ -n "$INSTALL_CMD" ]; then
-    echo "[worktree] install: $INSTALL_CMD"
-    ( cd "$TARGET" && bash -c "$INSTALL_CMD" )
-  else
-    case "$PM" in
-      pnpm) pnpm --dir "$TARGET" install --frozen-lockfile --prefer-offline ;;
-      yarn) yarn --cwd "$TARGET" install --frozen-lockfile ;;
-      bun)  bun install --cwd "$TARGET" ;;
-      *)    npm --prefix "$TARGET" ci ;;
-    esac
+  # Install dependencies — the lockfile decides. No lockfile, no install: a
+  # non-JS project brings its own setup hook.
+  if   [ -f "$TARGET/pnpm-lock.yaml" ]; then pnpm --dir "$TARGET" install --frozen-lockfile --prefer-offline
+  elif [ -f "$TARGET/yarn.lock" ];      then yarn --cwd "$TARGET" install --frozen-lockfile
+  elif [ -f "$TARGET/bun.lockb" ];      then bun install --cwd "$TARGET"
+  elif [ -f "$TARGET/package-lock.json" ]; then npm --prefix "$TARGET" ci
+  else echo "[worktree] no lockfile — skipping install (use .claude/worktree-setup.sh if your stack needs one)"
   fi
 
   # Per-worktree setup hook (DB/schema/env) — runs after install.
-  run_hook "$WT_SETUP_CMD" "setup"
+  run_hook setup
 fi
 
-echo "[worktree] worktree: $TARGET  branch: $BRANCH"
+echo "[worktree] worktree: $TARGET  branch: $BRANCH  base: $BASE"
 echo "[worktree] open in editor: code $TARGET"
 if [ -f "$TARGET/.worktree-port" ]; then
-  echo "[worktree] dev server:  PORT=$(cat "$TARGET/.worktree-port") $DEV_CMD"
+  echo "[worktree] free port reserved: $(cat "$TARGET/.worktree-port") (start your dev server with PORT=\$(cat .worktree-port))"
 fi
 if [ "$ACTION" = "open" ]; then
   cd "$TARGET" && claude 2>/dev/null || \

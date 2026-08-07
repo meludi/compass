@@ -14,12 +14,14 @@ Run all validation checks and report results.
 
 ## Checks to Run
 
-Read `.claude/compass.yml` for the commands, then run in order:
+Read the `## Commands` table in `.claude/CLAUDE.md` — that table is the configuration. Run its rows in order:
 
-1. `lint_cmd && format_cmd`
-2. `type_check_cmd` — skip if blank
-3. `test_cmd` — when a failure points at a weak test (passes despite broken behavior, or breaks on a pure refactor), judge it against `references/HANDBOOK.md` → *Test quality*
-4. Browser smoke test — only if `dev_port` is set and dev server is reachable
+1. **Lint**, then **Format**
+2. **Type check** — skip if the row is blank or absent
+3. **Test** — when a failure points at a weak test (passes despite broken behavior, or breaks on a pure refactor), say so: the test asserts implementation, not behavior. The `tdd` skill, if available, is the reference for what a good test is
+4. Browser smoke test — only if **Dev port** is set and the dev server is reachable
+
+**A blank or missing row is skipped, never guessed.** Do not substitute a command you inferred from `package.json`: the table is the project's statement of which gates exist. If `.claude/CLAUDE.md` has no `## Commands` table at all, say so and suggest `/compass:setup` rather than inventing one.
 
 ---
 
@@ -34,16 +36,16 @@ Read `.claude/compass.yml` for the commands, then run in order:
 
 ## Browser Smoke Test
 
-Only run if `dev_port` is set in `compass.yml`. Check if the dev server is reachable:
+Only run if **Dev port** is set in `.claude/CLAUDE.md`. Check if the dev server is reachable:
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:{dev_port}
+curl -s -o /dev/null -w "%{http_code}" http://localhost:{dev port}
 ```
 
 **If server responds (2xx/3xx):** use the `agent-browser` skill to verify the UI:
 
 ```bash
-agent-browser open http://localhost:{dev_port}
+agent-browser open http://localhost:{dev port}
 agent-browser snapshot -i                                         # check interactive elements load
 agent-browser screenshot .work/screenshots/validate-{timestamp}.png
 agent-browser close
@@ -53,7 +55,7 @@ Report: screenshot path + any console errors found (`agent-browser errors`).
 
 **If server is not running:** skip silently — add note "Browser: skipped (dev server not running)" to output.
 
-**If `dev_port` is blank:** skip entirely — project has no UI.
+**If the Dev port row is blank:** skip entirely — project has no UI.
 
 ---
 

@@ -6,14 +6,14 @@ allowed-tools: Bash(agent-browser:*)
 
 # Browser Automation with agent-browser
 
-Used by `/compass:validate` to verify UI before opening a PR. The dev server must be running (see `dev_cmd` and `dev_port` in `.claude/compass.yml`).
+Used by `/compass:validate` to verify UI before opening a PR. The dev server must be running — start it with the `Dev` command from `.claude/CLAUDE.md` → `## Commands`, on the port named in the **Dev port** line below that table.
 
 **Screenshot path convention:** always save to `.work/screenshots/{name}.png` — this directory is gitignored.
 
 ## Quick start
 
 ```bash
-agent-browser open http://localhost:{dev_port}   # Open app (dev_port from `.claude/compass.yml`)
+agent-browser open http://localhost:{dev port}   # Open app (Dev port from CLAUDE.md)
 agent-browser snapshot -i                  # Get interactive elements
 agent-browser screenshot                   # Take screenshot
 agent-browser close                        # Close browser

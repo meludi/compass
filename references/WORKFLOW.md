@@ -1,195 +1,140 @@
 # Workflow
 
-The map of how work flows through this starter: **one setup, two loops, one axis.**
+Two compass loops, split by the PR: **Loop 1 ends when the PR is open, Loop 2 is everything after.** Loop 0 is not compass' — it is what you do before there is anything to plan.
 
 ```
-STAGE 0 — Setup (once per initiative)   /compass:setup → [/compass:setup-tracker] → /compass:ideate → [/compass:setup-stack] → /compass:create-stories
-LOOP 1 — PIV (per story)                /compass:worktree → /compass:plan-feature → /compass:implement → /compass:ship → /compass:reflect
-LOOP 2 — Fix (until the PR is clean)    review → fix → /compass:validate → /compass:commit [--push] → (repeat) → merge → cleanup
-AXIS — autonomy_mode                    off = Loop 2 stays local · review-only = CI re-reviews each push
+LOOP 0  decide what to build                                        → a spec
+LOOP 1  worktree → plan-feature → implement → code-review → ship    → PR open
+LOOP 2  review lands → fix-ci-review → push → repeat                → merge
 ```
 
-Each step is one command. The *why* behind the structure: `CONCEPTS.md`. Full command details: `COMMANDS.md`. `.work/` layout, models, glossary, troubleshooting: `HANDBOOK.md`.
+Per-command detail: `COMMANDS.md`. Config, `.work/`, troubleshooting: `HANDBOOK.md`.
+
+---
+
+## Once per project
+
+```
+/compass:setup                 config, conventions, schema
+/install-github-app            optional — everything GitHub-side, see below
+```
+
+### /install-github-app
+
+**Once per repository**, from the repo root, before your first PR. Not per feature, not per PR, not per worktree. Claude Code's command — compass never runs it for you.
+
+It installs the Claude GitHub app and offers two workflows, independently selectable:
+
+| Choice | Effect |
+|---|---|
+| *Claude Code Review* (`claude-code-review.yml`) | reviews every PR and every push to it, automatically — step 1 of Loop 2 |
+| *Claude PR Assistant* (`claude.yml`) | stays quiet until someone comments `@claude` |
+
+Take the first. Take the second too if you also want to ask the PR questions.
+
+The app itself — separate from the workflows — is what lets `/autofix-pr` receive webhooks. It also sets `ANTHROPIC_API_KEY` as a repo secret.
+
+**Re-run it** to add the workflow you skipped, or to update an existing one; it detects what is already there and asks. Skipping it entirely costs you nothing local: Loop 1, `/code-review` and `/compass:validate` all work without it.
+
+---
+
+## Loop 0 — Think
+
+compass starts at the plan. Deciding *what* to build comes first and belongs to [mattpocock/skills](https://github.com/mattpocock/skills) — `npx skills@latest add mattpocock/skills`, once:
+
+| Question | Skill |
+|---|---|
+| What are we actually building? | `grill-with-docs` |
+| Write it down as a spec | `to-spec` |
+| Cut it into shippable slices | `to-tickets` |
+| Too big for one session? | `wayfinder` |
+| What's the right module boundary? | `codebase-design`, `domain-modeling` |
+
+Whatever comes out — a spec file, a ticket, a sentence — is the argument for step 2 of Loop 1.
+
+Three more from the same source are references, not steps: `tdd` (what makes a good test), `diagnosing-bugs` (a bug that won't die), `improve-codebase-architecture`. compass' commands point at the first two **softly** — not installed, and they fall back to a one-line summary inline.
+
+Skip all of it if you already know what to build.
+
+---
+
+## Loop 1 — Build
 
 ```mermaid
 flowchart LR
-  subgraph S0["Stage 0 — Setup (once)"]
-    direction LR
-    A[setup] --> B[ideate] --> C[create-stories]
-  end
-  subgraph L1["Loop 1 — PIV (per story)"]
-    direction LR
-    D[worktree] --> E[plan-feature] --> F[implement] --> G[ship] --> H[reflect]
-  end
-  subgraph L2["Loop 2 — Fix (until clean)"]
-    direction LR
-    I[review] --> J[fix] --> K[validate] --> M[commit/push] --> N{clean?}
-    N -- no --> I
-    N -- yes --> O([merge])
-  end
-  S0 --> L1
-  G -. opens PR .-> L2
+    W[worktree] --> P[plan-feature] --> I[implement] --> C["/code-review"] --> S[ship] --> PR([PR open])
+    I -. gate after every task .-> I
+    C -. findings .-> I
 ```
 
----
-
-## Stage 0 — Setup (once per initiative)
-
-Run once when starting a project or a new initiative.
-
-| Step | Command | Details |
+| # | Command | Produces |
 |---|---|---|
-| 1 | `/compass:setup` | [→ details](COMMANDS.md#compasssetup) |
-| 1b | `/compass:onboard` _(brownfield)_ | [→ details](COMMANDS.md#compassonboard) |
-| 1c | `/compass:setup-tracker` _(optional)_ | [→ details](COMMANDS.md#compasssetup-tracker) |
-| 2 | `/compass:ideate "<initiative>"` | [→ details](COMMANDS.md#compassideate) |
-| 2b | `/compass:setup-stack <prd>` _(greenfield only — needs the PRD)_ | [→ details](COMMANDS.md#compasssetup-stack) |
-| 3 | `/compass:create-stories <prd>` | [→ details](COMMANDS.md#compasscreate-stories) |
+| 1 | `/compass:worktree <name>` | isolated dir + branch + port. Skip it if you build one feature at a time |
+| 2 | `/compass:plan-feature <spec>` | a file-level plan in `.work/plans/`. **No code.** The spec is whatever you have — an issue, a file, a sentence |
+| 3 | `/compass:implement <plan>` | the code, one task at a time. Each task is validated before the next starts, so broken state never accumulates |
+| 4 | `/code-review` | findings on the branch — the cheapest place to fix, no PR exists yet. **Fixed something? Re-run `/compass:validate`.** Claude Code's command, not compass' |
+| 5 | `/compass:ship` | commit, push, PR |
 
 ---
 
-## Loop 1 — PIV (per story)
+## Loop 2 — Fix
 
-Pick a story from `.work/stories/` (or your tracker), then run this loop once per story.
+Everything **after** `/compass:ship`. Runs until the PR is clean. Two ways to get there — you drive, or the PR drives itself. Pick one per PR.
 
-| Step | Command | Details |
-|---|---|---|
-| 1 | `/compass:worktree <story-name>` | [→ details](COMMANDS.md#compassworktree) |
-| 2 | `/compass:plan-feature <story>` | [→ details](COMMANDS.md#compassplan-feature) |
-| 3 | `/compass:implement <plan>` | [→ details](COMMANDS.md#compassimplement) |
-| 4 | `/compass:ship` | [→ details](COMMANDS.md#compassship) |
-| 5 | `/compass:reflect` | [→ details](COMMANDS.md#compassreflect) |
+### CI Fix
 
-**Shortcuts:**
-
-| Situation | Command | Replaces |
-|---|---|---|
-| Single task, no initiative (bug, small addition) | `/compass:plan-feature "description"` | Steps 2 with a free-text description — no story file, no Ideate needed |
-| Plan already reviewed and stable | `/compass:auto-implement <plan>` | Steps 3–4 — implement → commit → push → PR-open without confirmation. Hard-stops at PR-open; never merges. Not for DB migrations, auth changes, or first use of a new pattern. |
+You stay in the loop. Every fix passes `/compass:validate` before it leaves your machine.
 
 ```mermaid
-flowchart TD
-  W[worktree<br/>new branch + session] --> P[plan-feature<br/>writes .work/plans/*.plan.md]
-  P --> I[implement<br/>code + tests, validate each task]
-  I --> V{validate<br/>lint · types · tests}
-  V -- fail --> I
-  V -- pass --> S[ship<br/>commit · push · open PR · review]
-  S --> R[reflect<br/>capture learnings]
-  S -. PR open .-> L2([Loop 2 — Fix])
-  AI[/auto-implement<br/>automates implement→ship/]
-  P -. shortcut .-> AI -.-> L2
+flowchart LR
+  PR([PR open]) --> R[review lands] --> F[fix-ci-review] --> C[push]
+  C --> R
+  R -. nothing left .-> M([merge])
 ```
 
----
+| # | Step | Command |
+|---|---|---|
+| 1 | A review lands on the PR | claude-code-action, or a human — **not compass**. None yet? `/install-github-app` and pick *Claude Code Review* — it reviews every PR and every push to it |
+| 2 | Apply those findings locally | `/compass:fix-ci-review` — fetches, lists, waits for your go, then validates |
+| 3 | Commit and push | `/compass:commit --push` |
 
-## Loop 2 — Fix (until the PR is clean)
+**Step 3 restarts step 1.** Repeat until nothing comes back, then merge — compass never merges for you.
 
-A PR is open. The reviewer points, **you** fix, CI never commits — repeat until clean, then merge. Same loop whether the review is local or in CI; only the trigger differs.
+Step 2 needs a command because the findings live on GitHub, outside your session — nothing in your context knows they are there.
 
-**Step 1 — review** (pick one):
+### Autofix
 
-| Command | Details |
-|---|---|
-| `/compass:review-code [low→ultra]` | [→ details](COMMANDS.md#compassreview-code) |
-| `/compass:review-project` | [→ details](COMMANDS.md#compassreview-project) |
-| CI `ci-review` | automatic on push in `review-only`/`full` — nothing to invoke |
-
-**Step 2 — fix** (pick one):
-
-| Command | Details |
-|---|---|
-| `/compass:review-code --fix` | [→ details](COMMANDS.md#compassreview-code) |
-| `/compass:fix-ci-review` | [→ details](COMMANDS.md#compassfix-ci-review) |
-| `/compass:debug` _(when a fix isn't obvious or has bounced)_ | [→ details](COMMANDS.md#compassdebug) |
-| Edit by hand | — |
-
-**Step 3 — verify:** `/compass:validate` — re-run lint/types/tests (a fix can break them).
-
-**Step 4 — publish:** `/compass:commit [--push]` — commit, then push. The push updates the open PR and triggers CI re-review in `review-only`/`full`.
-
-**Step 5 — merge:** `gh pr merge --squash`, then `/compass:worktree <name> rm` (guarded — refuses on unmerged/uncommitted work).
+The PR watches itself and pushes its own fixes. Claude Code's command, not compass'.
 
 ```mermaid
-flowchart TD
-  PR([PR open]) --> RV[1 · review<br/>review-code · review-project · CI ci-review]
-  RV --> FX{findings?}
-  FX -- yes --> FIX[2 · fix<br/>review-code --fix · fix-ci-review · by hand]
-  FIX --> VAL[3 · validate<br/>lint · types · tests]
-  VAL --> PUB[4 · commit/push<br/>updates PR · re-triggers CI review]
-  PUB --> RV
-  FX -- none --> MRG[5 · merge<br/>gh pr merge --squash]
-  MRG --> CLN[worktree rm — guarded]
+flowchart LR
+  PR([PR open]) --> A["/autofix-pr"] --> W[webhook: CI red or review] --> X[fixes, pushes] --> W
+  W -. nothing left .-> M([merge])
 ```
 
-> CI never commits — every fix is a deliberate step you take, then push. `/compass:status` reports which of these states the PR is in.
-
-### Two axes decide your Loop 2
-
-The loop shape never changes. Two **independent** choices decide how you run it — keep them apart and the many review commands fall into place.
-
-**Axis 1 — where it runs** (set by `autonomy_mode`): local in your chat, or in CI on the PR. Not a competition — same loop, different trigger; you can run both.
-
-| | `off` (local) | `review-only` / `full` (CI) |
+| # | Step | Command |
 |---|---|---|
-| Who triggers the review | you, each round | CI, automatically on every push |
-| Fix entry | `/compass:review-code --fix` (or by hand) | `/compass:fix-ci-review` |
-| Re-review after a fix | manual (run it again) | automatic on push |
-| "Clean" signal | your judgement | `## Review Summary` with no findings |
-| Findings live | in chat (ephemeral) | PR comments (audit trail) |
+| 1 | Stand on the PR branch with the PR open | it refuses on the default branch, and needs `gh` plus an open PR. Push first — it warns on unpushed commits |
+| 2 | Turn monitoring on | `/autofix-pr` — choose **this session** (events arrive as messages here) or **a cloud session** (runs without you) |
+| 3 | Nothing | CI failures and review comments arrive as webhooks; it investigates and pushes fixes to the PR branch. A 30-minute cron catches what the webhooks miss |
+| 4 | Read what it pushed, then merge | it stops on its own when the PR is merged or closed |
 
-**Axis 2 — what it checks** (pick per change):
+Two channels feed it: webhooks fire the moment something happens, the cron polls every 30 minutes regardless. Webhooks need the **Claude GitHub app** on the repo — already there if you ran `/install-github-app`. Without it only the cron is left, so a red CI run can sit unnoticed for half an hour.
 
-| Command | Checks |
-|---|---|
-| `/compass:review-code [low→ultra]` | generic bug hunt, tunable effort |
-| `/compass:review-project` | project conventions, pattern reuse, test gaps (+ security on risky diffs) — this is what `/compass:ship` runs |
-| `ci-review` (CI) | the diff on the PR — inline (claude) or one summary (openai/gemini) |
-
-**Which command when:**
-
-- CI already reviewed the PR? → `/compass:fix-ci-review` — don't re-review the same diff locally.
-- No CI (`off`), or before the PR exists? → `/compass:review-code --fix`.
-- Specifically "does this fit the project?" (not generic bugs) → `/compass:review-project`.
-- The fix entry follows **where the findings live**: chat → `--fix` / by hand; PR → `/compass:fix-ci-review`.
-- A failure whose cause isn't obvious, or a fix that already bounced? → `/compass:debug` — root-cause it (four phases, 3-fix boundary) instead of guessing. See `DEBUGGING.md`.
+**The trade:** it pushes without asking, so `/compass:validate` never gates those commits. Use it for the PRs you would otherwise leave sitting — a green CI run and a clean review are its bar, not yours.
 
 ---
 
-## Axis — `autonomy_mode`
+## Quick Path
 
-A cross-cutting setting (`.claude/compass.yml`), not a step — it decides how Loop 2 runs (see **Axis 1** above): `off` keeps the loop local; `review-only` adds CI review on each push, consumed via `/compass:fix-ci-review`. A third mode, **`full`**, additionally auto-merges on green CI — ⚠️ no human merge gate unless a label gate is configured.
-
-Comparison matrix, cost, and security notes: `AUTONOMY.md`.
-
----
-
-## Quick Path — trivial changes
-
-For typos, one-line bugfixes, CSS/copy tweaks, config values — a PRD/story/plan is pure ceremony:
+Typo, one-liner, obvious fix — no plan needed:
 
 ```
-/compass:worktree <name>  →  make the edit by hand  →  /compass:validate  →  /compass:ship   (answer "no" to the review)
+/compass:worktree → edit → /compass:validate → /compass:ship
 ```
 
-**Not for** anything with logic, new files, or acceptance criteria — that goes through Loop 1.
-
 ---
 
-## Other commands (folded or on-demand)
+## Where compass stops
 
-These run automatically inside the steps above but can also be invoked directly.
-
-| Command | Auto-runs in | Details |
-|---|---|---|
-| `/compass:context` | step 1 of `plan-feature` + `implement` | [→ details](COMMANDS.md#compasscontext) |
-| `/compass:validate` | end of `implement` | [→ details](COMMANDS.md#compassvalidate) |
-| `/compass:commit` | `ship` | [→ details](COMMANDS.md#compasscommit) |
-| `/compass:review-security` | `ship` on risky diffs | [→ details](COMMANDS.md#compassreview-security) |
-| `/compass:status` | on demand — "where does this feature stand?" | [→ details](COMMANDS.md#compassstatus) |
-
-**Feature state is derived, not stored.** There is no status file to maintain: `/compass:status` recomputes phase/PR/CI/findings live from `git` + `gh` each time you ask. The only durable per-feature notes — decisions and snags hit *during* the loop — live in the plan's `## Loop log` section.
-
----
-
-Reference: `COMMANDS.md` (every command in detail) · `HANDBOOK.md` (models, `.work/`, glossary, troubleshooting) ·
-`CONCEPTS.md` (the why) · `WORKTREES.md` (worktree detail) · `AUTONOMY.md` (CI + `autonomy_mode`) · `DEBUGGING.md` (root-cause method).
+compass owns Loop 1 and `/compass:fix-ci-review`. Loop 0 is mattpocock/skills, `/code-review` and `/autofix-pr` are Claude Code's, PR review is claude-code-action's. Shipping a worse copy of any of them was the whole problem.

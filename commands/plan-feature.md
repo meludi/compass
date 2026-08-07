@@ -1,6 +1,6 @@
 ---
 description: Load context, then create an implementation plan for a feature — plan only, no code written
-argument-hint: <path to .work/stories/*.md | issue-id | feature description>
+argument-hint: <spec file | issue-id | feature description>
 ---
 
 # /compass:plan-feature — Create Implementation Plan
@@ -13,28 +13,32 @@ This command loads project context itself, so it is the first thing you run in a
 
 ## Input
 
-`/compass:plan-feature <path to .work/stories/*.md | issue-id | feature description>`
+`/compass:plan-feature <spec file | issue-id | feature description>`
 
 ## Steps
 
 ### 1. Load context
 
-Execute the loading procedure from `${CLAUDE_PLUGIN_ROOT}/commands/context.md` (Steps 1–5). That file is the canonical home of loading logic — keeping it here would cause drift with `/compass:context` and `/compass:implement`.
+Build the mental model before planning:
 
-**If the recap from `/compass:context` shows a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/compass:implement` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
+- `.claude/CLAUDE.md` — conventions, stack, patterns, review conventions, and `## Commands`: the gate commands, test policy, base branch
+- Git state: `git branch --show-current`, `git log --oneline -5`, `git status --short`
+- `ls .work/plans/ .work/reports/ 2>/dev/null` — existing plan or report for this story
+
+**If a complete plan for this story already exists in `.work/plans/`:** do not re-plan. Report the current status — the plan, git state, what looks done vs. open — and recommend `/compass:implement` to continue. Proceed to step 2 only if the user explicitly asks for a new or revised plan.
 
 ### 2. Understand the request
 
-- Read the story file from `.work/stories/` (or the issue, or parse the feature description)
+- Read the spec: a markdown file, an issue fetched via `gh issue view`, or the feature description as given
 - Identify: what changes, what is new, what must not break
 
 ### 3. Explore the codebase
 
-Use the `codebase-explorer` subagent to find:
+Use the built-in `Explore` subagent to find:
 
 - Existing components, hooks, utilities that can be reused
 - Naming patterns and file structure conventions
-- Existing tests for similar features — note the patterns so planned behaviors follow `references/HANDBOOK.md` → *Test quality* (behavior over implementation, public interface)
+- Existing tests for similar features — note the patterns so planned behaviors are stated as observable behavior through the public interface, not implementation
 
 If the feature requires an unknown library or pattern: spawn a web-search agent for isolated research. Only the summary returns to main context.
 
@@ -47,7 +51,7 @@ If the feature requires an unknown library or pattern: spawn a web-search agent 
 
 ### 5. Write the plan
 
-Read `.claude/compass.yml` for `type_check_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`. Save to `.work/plans/{kebab-case-feature-name}.plan.md`:
+Read the `## Commands` table in `.claude/CLAUDE.md` for the gate commands. Save to `.work/plans/{kebab-case-feature-name}.plan.md`:
 
 ```markdown
 # Plan: {Feature Name}
@@ -80,7 +84,7 @@ One sentence: what this plan achieves.
 - **Implement**: {what to do}
 - **Behavior**: {observable behavior to verify with a test — include for logic-bearing tasks; omit for pure UI/glue/config}
 - **Mirror**: `src/path/to/example.tsx:10-30` — follow this pattern
-- **Validate**: `type_check_cmd` from `.claude/compass.yml`
+- **Validate**: the `Type check` command from `.claude/CLAUDE.md`
 
 ### Task 2: {Description}
 
@@ -88,17 +92,17 @@ One sentence: what this plan achieves.
 - **Action**: CREATE / UPDATE
 - **Implement**: {what to do}
 - **Mirror**: `src/path/to/example.ts:5-20`
-- **Validate**: `type_check_cmd` from `.claude/compass.yml`
+- **Validate**: the `Type check` command from `.claude/CLAUDE.md`
 
 {...repeat for each task}
 
-The `Behavior` line marks a logic-bearing task and describes the observable behavior to verify. Add it only for tasks with real logic; leave it off for pure UI/glue/config tasks. Whether and when `/compass:implement` writes a test against it is set by `test_policy` in `.claude/compass.yml` — `first` (test-first, RED→GREEN), `after` (test-after), or `none` (no forced test).
+The `Behavior` line marks a logic-bearing task and describes the observable behavior to verify. Add it only for tasks with real logic; leave it off for pure UI/glue/config tasks. Whether and when `/compass:implement` writes a test against it is set by the **Test policy** line in `.claude/CLAUDE.md` — `first` (test-first, RED→GREEN), `after` (test-after), or `none` (no forced test).
 
 ## Validation
 
-- `type_check_cmd` — types must pass
-- `test_cmd` — all tests pass
-- `lint_cmd && format_cmd` — no lint errors
+- `Type check` — types must pass
+- `Test` — all tests pass
+- `Lint` + `Format` — no lint errors
 
 ## Acceptance criteria
 
@@ -111,7 +115,7 @@ The `Behavior` line marks a logic-bearing task and describes the observable beha
      above does NOT already say: decisions made while coding, snags hit,
      "tried X — failed because Y" landmines, and any handover note. Deltas only,
      never a restatement of the plan. This is the feature's only durable scratch
-     space — status (PR/CI/findings) is derived live by /compass:status. -->
+     space — live status (PR/CI/findings) comes from git and gh, not a file. -->
 ```
 
 ### 6. Output

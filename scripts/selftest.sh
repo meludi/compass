@@ -55,45 +55,34 @@ fi
 
 # 1. JSON manifests parse
 sec "JSON manifests"
-for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json compass.schema.json templates/mcp.json; do
+for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json; do
   if ruby -rjson -e "JSON.parse(File.read(ARGV[0]))" "$f" 2>/dev/null; then pass "$f"; else fail "$f — invalid JSON"; fi
 done
 
-# 2. Template YAML parses
-sec "Template YAML"
-for f in templates/compass.yml templates/pr-validation.yml; do
-  if ruby -ryaml -e "YAML.load_file(ARGV[0])" "$f" 2>/dev/null; then pass "$f"; else fail "$f — invalid YAML"; fi
-done
-
-# 3. Every compass.yml key is declared in the schema (additionalProperties:false)
-sec "compass.yml keys declared in schema"
-missing=$(ruby -ryaml -rjson -e '
-  y = YAML.load_file("templates/compass.yml").keys
-  s = JSON.parse(File.read("compass.schema.json"))["properties"].keys
-  puts (y - s).join(",")' 2>/dev/null)
-if [ -z "$missing" ]; then pass "all keys declared"; else fail "keys missing from schema: $missing"; fi
-
-# 4. read-config.sh parser sanity (a few representative keys)
-sec "read-config.sh parser"
-chk_cfg() {
-  local k="$1" exp="$2" got
-  got=$(bash scripts/read-config.sh "$k" templates/compass.yml)
-  if [ "$got" = "$exp" ]; then pass "read $k=$got"; else fail "read $k => '$got' (expected '$exp')"; fi
-}
-chk_cfg autonomy_mode off
-chk_cfg ci_review_provider claude
-chk_cfg autofix_max_pushes 0
-chk_cfg ci_review_guidelines .github/review-guidelines.md
-
-# 5. CI workflow: lint if possible, and assert the expected jobs exist
-sec "CI workflow"
-if command -v actionlint >/dev/null 2>&1; then
-  if actionlint templates/pr-validation.yml >/dev/null 2>&1; then pass "actionlint clean"; else fail "actionlint reported issues"; fi
+# 2. compass has no config file of its own. Project config is the ## Commands table
+#    in the generated CLAUDE.md — nothing else, or the truth has two copies again.
+sec "No config file"
+stale=$(grep -rl 'compass\.yml\|compass\.schema\.json' commands references skills templates scripts hooks README.md TESTING.md 2>/dev/null \
+        | grep -v '^scripts/selftest.sh$' || true)
+if [ -e templates/compass.yml ] || [ -e compass.schema.json ]; then
+  fail "compass.yml/compass.schema.json are back — config lives in CLAUDE.md"
+elif [ -n "$stale" ]; then
+  fail "stale config references: $(echo "$stale" | tr '\n' ' ')"
+else
+  pass "no config file, no stale references"
 fi
-jobs=$(ruby -ryaml -e 'puts YAML.load_file("templates/pr-validation.yml")["jobs"].keys.join(",")' 2>/dev/null)
-for j in config test ci-review ci-checklist autofix-guard auto-merge; do
-  case ",$jobs," in *",$j,"*) pass "job $j";; *) fail "job $j missing";; esac
+
+# 3. The row labels ARE the interface: commands look them up by name in the
+#    generated CLAUDE.md. Renaming one here silently disables its gate.
+sec "CLAUDE template carries the config table"
+missing=""
+for label in Dev Build Lint Format "Type check" Test; do
+  grep -qE "^\| *$label *\|" templates/CLAUDE-template.md || missing="$missing $label"
 done
+for line in "Test policy" "Dev port" "Base branch"; do
+  grep -q "\*\*$line:\*\*" templates/CLAUDE-template.md || missing="$missing $line"
+done
+if [ -z "$missing" ]; then pass "all config rows present"; else fail "missing from template:$missing"; fi
 
 # 6. Shell scripts: syntax (+ shellcheck if present)
 sec "Shell scripts"
@@ -145,30 +134,45 @@ done
 # 11. Component inventory
 sec "Inventory"
 c=$(find commands -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
-a=$(find agents -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
 s=$(find skills -maxdepth 2 -name 'SKILL.md' | wc -l | tr -d ' ')
-echo "  commands=$c agents=$a skills=$s"; log "- commands=$c agents=$a skills=$s"
+echo "  commands=$c skills=$s"; log "- commands=$c skills=$s"
 [ -f hooks/hooks.json ] && pass "SessionStart hook present" || fail "hooks/hooks.json missing"
-{ [ "$c" -ge 1 ] && [ "$a" -ge 1 ]; } && pass "components present ($c cmds, $a agents, $s skills)" || fail "inventory looks empty"
+
+# The PIV core is the plugin's reason to exist — assert it by name, not by count.
+bad=0
+for cmd in setup plan-feature implement validate commit ship fix-ci-review worktree; do
+  [ -f "commands/$cmd.md" ] || { fail "commands/$cmd.md missing"; bad=1; }
+done
+[ $bad -eq 0 ] && pass "all 8 core commands present"
+[ "$c" -eq 8 ] && pass "no stray commands ($c)" || fail "expected 8 commands, found $c"
+
+# Review belongs to /code-review and claude-code-action — compass must not grow
+# its own review command or reviewer agents back.
+[ -d agents ] && fail "agents/ is back — review agents were dropped deliberately" \
+              || pass "no agents/ directory"
 
 # 12. Functional worktree.sh test (--full) — throwaway temp repo, removed after
 if [ "$FULL" -eq 1 ]; then
   sec "worktree.sh functional (temp repo)"
   WT="$(mktemp -d)/wt"; mkdir -p "$WT"
-  ( # build a minimal repo (install_cmd:true avoids a real install)
+  ( # No compass.yml and no lockfile: worktree.sh must work off the repo alone.
+    # No origin either — the base-branch lookup has to survive that.
     cd "$WT" && git init -q repo && cd repo \
       && git config user.email t@t.dev && git config user.name tester && git branch -M main \
       && mkdir -p .claude \
-      && printf 'base_branch: main\npackage_manager: npm\ninstall_cmd: "true"\ndev_port: 3000\ndev_cmd: echo dev\n' > .claude/compass.yml \
+      && printf '#!/usr/bin/env bash\necho "hook:$WT_NAME:$WT_PORT" > .hook-ran\n' > .claude/worktree-setup.sh \
       && echo SECRET > .env.local && echo "# repo" > README.md \
       && git add -A && git commit -qm init
   )
   TARGET="$WT/repo-test"
   ( cd "$WT/repo" && bash "$ROOT/scripts/worktree.sh" test ) >/dev/null 2>&1 || true
-  [ -d "$TARGET" ] && pass "worktree created" || fail "worktree not created"
+  [ -d "$TARGET" ] && pass "worktree created (no config, no origin)" || fail "worktree not created"
   ( cd "$WT/repo" && git show-ref --verify --quiet refs/heads/feat/test ) && pass "branch feat/test exists" || fail "branch missing"
-  [ "$(cat "$TARGET/.worktree-port" 2>/dev/null)" = "3001" ] && pass ".worktree-port = dev_port+1 (3001)" || fail ".worktree-port wrong"
+  port=$(cat "$TARGET/.worktree-port" 2>/dev/null || echo "")
+  case "$port" in [0-9]*) pass ".worktree-port reserved ($port)";; *) fail ".worktree-port missing or not numeric";; esac
   [ -L "$TARGET/.env.local" ] && pass ".env.local symlinked" || fail ".env.local not symlinked"
+  grep -q "^hook:test:$port$" "$TARGET/.hook-ran" 2>/dev/null \
+    && pass "setup hook ran with WT_NAME/WT_PORT" || fail "setup hook did not run correctly"
   echo dirty > "$TARGET/x.txt"
   ( cd "$WT/repo" && bash "$ROOT/scripts/worktree.sh" test rm ) >/dev/null 2>&1 && rc=0 || rc=1
   { [ "$rc" -ne 0 ] && [ -d "$TARGET" ]; } && pass "rm refuses on uncommitted changes" || fail "rm did not guard uncommitted"

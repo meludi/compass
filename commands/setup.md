@@ -6,125 +6,58 @@ description: Set up compass for a new project
 
 > **Model:** `/model sonnet` — balanced model for this command.
 
-Configure the compass workflow for your project. Run once after installing the plugin. Runs in two phases — same command both times.
-
-**What it does:**
-1. Phase 1 — generates the project's `.claude/compass.yml` (+ schema copy) from the plugin templates, asks you to fill it in
-2. Phase 2 — validates `.claude/compass.yml`, generates `.claude/CLAUDE.md`
+Generates `.claude/CLAUDE.md` from the plugin template: project conventions, the commands compass runs, and the review conventions every reviewer reads. Run once per project after installing the plugin. One phase, one file — compass has no config file of its own.
 
 ---
 
-## Phase Detection
+## Steps
 
-Read `.claude/compass.yml` (create `.claude/` if it does not exist).
+### 1. Scan the project
 
-- File missing **or** `name: ""` (empty) → **run Phase 1**
-- `name` has a value → **run Phase 2**
+Gather what the template needs. Never guess — a value you cannot detect stays a placeholder.
 
----
+- **Commands** — from `package.json` scripts when they exist: set `npm run lint` only if a `lint` script is present, and leave the row **blank** otherwise. A blank command is a gate that does not run, which is correct for a project that has no such gate. For non-JS projects (no `package.json`), leave the rows for the user.
+- **Dev port** — from the dev script when it names one; else `3000`.
+- **Base branch** — `git symbolic-ref --short refs/remotes/origin/HEAD` with the `origin/` prefix stripped; fall back to the current branch.
+- **Tech stack, directory structure, key files** — scan the repo (brownfield); leave placeholders on an empty one.
 
-## Phase 1 — Generate the config
+### 2. Generate `.claude/CLAUDE.md`
 
-Nothing is copied wholesale anymore — generate the project files from the plugin
-templates (they live in the installed plugin, referenced via `${CLAUDE_PLUGIN_ROOT}`):
+Read `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE-template.md` and write the filled result to `.claude/CLAUDE.md` (create `.claude/` if needed).
 
-1. If `.claude/compass.yml` does not exist, copy `${CLAUDE_PLUGIN_ROOT}/templates/compass.yml`
-   → `.claude/compass.yml`. It carries the schema reference
-   (`# yaml-language-server: $schema=./compass.schema.json`) and inline docs.
-   **Do not** rewrite or embed a copy of it here — read it from the plugin.
-2. Copy `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` → `.claude/compass.schema.json`
-   (overwrite if present). The `$schema` line above resolves against this local copy,
-   so the editor gets autocomplete + validation without knowing the plugin cache path.
-   Re-running `/compass:setup` refreshes it after a plugin update.
-3. If the project has no `.mcp.json` and you want issue-tracker sync, copy
-   `${CLAUDE_PLUGIN_ROOT}/templates/mcp.json` → `.mcp.json` (Linear by default; run
-   `/compass:setup-tracker` to switch). Skip if the user does not use a tracker.
+**Never overwrite an existing `.claude/CLAUDE.md`.** If one is there, report what a fresh scan would have put in the `## Commands` table, and let the user merge. Their file may carry weeks of hand-written conventions.
 
-**Pre-fill what can be detected** — leave the rest for the user:
+**Do not** inline the compass workflow guidance or the framework doc index — the SessionStart hook injects both. The only on-demand table in `CLAUDE.md` is the project-specific *Project Context* one.
 
-- `package_manager` — from the lockfile (`pnpm-lock.yaml`→pnpm, `yarn.lock`→yarn, `bun.lockb`→bun, else npm).
-- `dev_cmd` / `test_cmd` / `lint_cmd` / `format_cmd` / `type_check_cmd` — from the matching `package.json` script when it exists (e.g. set `npm run lint` only if a `lint` script is present); **blank** the field if there is no matching script. This keeps `compass.yml` an accurate snapshot instead of guessing. Skip for non-JS projects (no `package.json`) — the user fills `install_cmd` and commands manually.
-- `repo` — from `git remote get-url origin` (as `owner/repo`).
-- `base_branch` — the repo's current default branch.
+**Fill immediately:** project description, tech stack, the `## Commands` table, directory structure, key files.
 
-Then output:
+**Mark as `TODO: update after first feature`:** code patterns (naming, error handling, file organization), architecture details, testing patterns. Do not invent them and do not leave them blank.
+
+Keep the `## Commands` table's row labels exactly as the template spells them — `Dev`, `Build`, `Lint`, `Format`, `Type check`, `Test`. `/compass:validate` and `/compass:implement` look them up by name.
+
+Do not modify `CLAUDE-template.md` — it stays the reusable source.
+
+**No CI workflow and no `.mcp.json`.** compass ships neither. The checks run locally in `/compass:validate` before every ship, and a workflow that runs your test suite on the PR is generic CI your stack already has a template for. PR *review* comes from claude-code-action — mention `/install-github-app` in the closing output, but do not set it up here.
+
+### 3. Confirm
 
 ```
-.claude/compass.yml is ready (schema-validated, commands taken from package.json).
-Fill in: name, description — and anything detection left blank.
-Then run /compass:setup again.
-```
-
-Stop. Do not proceed to Phase 2.
-
----
-
-## Phase 2 — Validate + Generate
-
-### Step 1 — Validate against the schema
-
-Validate `.claude/compass.yml` against `${CLAUDE_PLUGIN_ROOT}/compass.schema.json` — that file
-is the single source of validation rules (required keys, enums, types, the
-`repo` `owner/repo` pattern, `dev_port` integer). Collect **all** violations
-before reporting; do not stop at the first.
-
-If any errors exist, output them all at once and stop:
-
-```
-Validation failed — fix the following in .claude/compass.yml:
-
-  - package_manager: "npmp" is not valid. Must be one of: npm, pnpm, yarn, bun
-  - dev_port: "abc" is not an integer
-  - repo: "my-app" must match owner/repo
-```
-
-Do not generate CLAUDE.md until all errors are resolved.
-
-### Step 2 — Sanity-check commands
-
-The command fields were taken from `package.json` in Phase 1, but the schema
-cannot confirm they actually run. Briefly confirm they look right:
-
-```
-Commands (from package.json — verify they run):
-  dev: {dev_cmd} · test: {test_cmd} · lint: {lint_cmd} · format: {format_cmd} · types: {type_check_cmd or "—"}
-```
-
-### Step 3 — Generate `.claude/CLAUDE.md`
-
-Read `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE-template.md`. Generate `CLAUDE.md` in two phases.
-
-**Do not** inline the compass workflow guidance or framework doc index into `CLAUDE.md` — those are injected automatically by the compass plugin's SessionStart hook. The only on-demand table in `CLAUDE.md` is the project-specific "Project Context" one.
-
-**Fill immediately** (from `compass.yml` + codebase scan):
-- Project description — from `description` field
-- Tech stack — scan existing files (package.json, lock files, config files)
-- Commands — from `dev_cmd`, `test_cmd`, `lint_cmd`, `format_cmd`, `type_check_cmd`
-- Directory structure, key files — scan existing files (brownfield); leave as placeholder (greenfield)
-
-**Mark as TODO** (not enough context yet):
-- Code Patterns (Naming, Error Handling, File Organization)
-- Architecture details
-- Testing patterns
-
-Mark these sections explicitly as `TODO: update after first feature` — do not invent or leave blank.
-
-Do not modify `CLAUDE-template.md` — it stays as the reusable source.
-
-### Step 4 — Confirm
-
-```
-Project configured:
-  Name:     {name}
-  Repo:     {repo}
-  Branch:   {base_branch}
-  Test:     {test_cmd}
-  Dev:      {dev_cmd} on :{dev_port}
-
 Generated: .claude/CLAUDE.md
+  Branch:   {base branch}
+  Test:     {test command}
+  Dev port: {dev port}
+
   ✓ Filled:  description, tech stack, commands, directory structure
   ~ TODO:    code patterns, architecture details, testing patterns
              → update after your first feature
 
-Next: run /compass:ideate — brain dump with the agent; it writes the spec.
+Everything compass reads lives in that file. Edit it directly — the ## Commands
+table is the configuration.
+
+Next: /compass:plan-feature <your spec> — describe the feature, get a plan.
+
+Optional, once per repo:
+  /install-github-app   PR review (anthropics/claude-code-action). It offers two
+                        workflows: "Claude Code Review" reviews every PR by itself,
+                        "Claude PR Assistant" answers @claude mentions.
 ```

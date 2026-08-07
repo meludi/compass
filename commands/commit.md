@@ -50,5 +50,5 @@ Pushing updates the open PR (if any) and — in `review-only`/`full` mode — tr
 
 ## Rules
 
-- **Never auto-commit** — always show state and wait for confirmation. The only sanctioned exception is `/compass:auto-implement`, which runs on a `feat/*` branch with a pre-approved plan and stops at PR-open.
+- **Never auto-commit** — always show state and wait for confirmation.
 - **No Co-Authored-By** — no AI attribution

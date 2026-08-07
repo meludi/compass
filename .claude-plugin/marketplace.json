@@ -7,7 +7,7 @@
     {
       "name": "compass",
       "source": "./",
-      "description": "Structured PIV workflow (Plan -> Implement -> Validate) for Claude Code: namespaced /compass:* commands, parallel subagent review, worktree isolation, and optional issue-tracker sync. Stack-agnostic, configured in one file."
+      "description": "Structured PIV workflow (Plan -> Implement -> Validate -> Ship) for Claude Code: eight namespaced /compass:* commands with file-level plans, per-task validation gates, browser smoke testing, and worktree isolation. Code review is left to the built-in /code-review and claude-code-action. Stack-agnostic; configuration is the ## Commands table in your project CLAUDE.md."
     }
   ]
 }

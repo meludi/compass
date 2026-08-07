@@ -32,6 +32,18 @@ git tag -a vX.Y.Z -m "vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
+## Fix the system, not the bug
+
+Every deviation the agent makes in a compass-driven project is a defect in *this* repo, not a one-off:
+
+| Symptom | Fix here |
+|---|---|
+| Agent deviated from the plan | Tighten the relevant file in `commands/` — a concrete "Always X. Never Y." rule, not prose |
+| Agent repeated a mistake across sessions | The rule belongs in `templates/CLAUDE-template.md` so every project gets it |
+| Agent lacked context it needed | Add it to `references/` — but only if no existing doc should have carried it |
+
+Resist the fourth reference doc. compass ships three on purpose; a rule that fits in the command it governs belongs there, not in a doc nobody loads.
+
 ## What this repo is
 
 A **Claude Code plugin** — the repo root *is* the plugin root, installed (not copied) into user projects via the marketplace. Every change here ships to users on plugin update.

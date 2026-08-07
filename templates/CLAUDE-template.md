@@ -30,21 +30,24 @@ Compass workflow guidance and the framework doc index are injected automatically
 
 ## Commands
 
-<!-- Common commands for this project. Adjust based on your package manager and setup -->
+<!-- This table is compass' configuration. /compass:validate, /compass:implement and
+     /compass:plan-feature look rows up by the labels in the left column — keep them
+     spelled exactly as they are. A blank command is skipped, never guessed: leave
+     "Type check" empty if the project has no type checker, and that gate disappears.
+     Add your own rows freely; compass ignores what it does not know. -->
 
-```bash
-# Development
-{dev-command}
+| Step       | Command             |
+| ---------- | ------------------- |
+| Dev        | `{dev-command}`        |
+| Build      | `{build-command}`      |
+| Lint       | `{lint-command}`       |
+| Format     | `{format-command}`     |
+| Type check | `{type-check-command}` |
+| Test       | `{test-command}`       |
 
-# Build
-{build-command}
-
-# Test
-{test-command}
-
-# Lint
-{lint-command}
-```
+- **Test policy:** `first` — how `/compass:implement` writes tests for logic tasks. `first` = test first, watch it fail, then the code (TDD) · `after` = code, then a test that pins the behaviour · `none` = no forced test.
+- **Dev port:** `3000` — used by the browser smoke test in `/compass:validate`. Blank skips it.
+- **Base branch:** `{base-branch}` — what PRs are opened against. Delete this line to let compass read it from `origin/HEAD`.
 
 ---
 
@@ -89,21 +92,41 @@ Compass workflow guidance and the framework doc index are injected automatically
 
 ## Testing
 
-<!-- How to test and what patterns to follow -->
+<!-- Where tests live and what they look like. The command itself is in ## Commands -->
 
-- **Run tests**: `{test-command}`
 - **Test location**: `{test-directory}`
 - **Pattern**: {describe test approach}
 
 ---
 
-## Validation
+## Review conventions
 
-<!-- Commands to run before committing -->
+<!-- Read by every reviewer of this project: Claude Code's built-in /code-review
+     locally, and anthropics/claude-code-action on the PR. Edit to taste — the
+     items below are a starting point, not a finished policy. -->
 
-```bash
-{validation-commands}
-```
+**Always flag**
+
+- Public API / exported-signature changes not reflected in callers, types, or docs.
+- New I/O (network, filesystem, DB) without error handling or a timeout.
+- Swallowed errors (empty catch, ignored rejected promises) or debug logging left in.
+- Secrets, tokens, or credentials in code or fixtures.
+- A new dependency for something the stack can already do.
+
+**Prefer**
+
+- Clarity over cleverness — a reviewer should grasp the change without the author.
+- Reuse of existing utilities and patterns over reinventing them.
+- Small, focused functions and narrow public interfaces.
+
+**Tests**
+
+- New behaviour has a test that asserts observable behaviour, not implementation.
+- A bug fix has a test that fails without the fix.
+
+**This project**
+
+- {naming conventions, preferred libraries, patterns reviewers here always check}
 
 ---
 
@@ -120,15 +143,15 @@ Compass workflow guidance and the framework doc index are injected automatically
 ## Project Context (on-demand)
 
 <!-- YOUR project's docs — load only when relevant. Grow this as the project does.
-     Framework/workflow docs (CONCEPTS, WORKFLOW, HANDBOOK, WORKTREES, AUTONOMY)
-     are indexed by the compass SessionStart hook — do not duplicate them here. -->
+     Framework/workflow docs (WORKFLOW, HANDBOOK) are indexed by the compass
+     SessionStart hook — do not duplicate them here. -->
 
 | Topic            | File                                |
 | ---------------- | ----------------------------------- |
 | {component area} | `docs/{component}.md` (your own docs) |
 
 <!-- Pattern: when a domain area becomes complex, extract its rules into a doc and
-     add it here. /compass:context and /compass:plan-feature pull from this table + the
+     add it here. /compass:plan-feature and /compass:implement pull from this table + the
      framework index from the compass SessionStart hook — agents load only what they need. -->
 
 ---

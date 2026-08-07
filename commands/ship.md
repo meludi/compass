@@ -1,12 +1,12 @@
 ---
-description: Commit, push, open a PR, then optionally run parallel code review
+description: Commit, push, and open a PR, then hand off to review
 ---
 
 # /compass:ship — Commit, PR, and Review
 
-> **Model:** `/model opus` — the review step needs deep analysis.
+> **Model:** `/model opus` — the PR body must reflect what was actually verified.
 
-Closes the PIV Loop: commits the work, opens a PR, and runs the parallel code review — all in one command.
+Closes the PIV Loop: commits the work, pushes, and opens the PR. Review happens elsewhere — see step 5.
 
 ## When to run
 
@@ -30,6 +30,24 @@ If `gh` is missing, **stop before committing** and tell the user:
 
 Do not commit or push until `gh` is available or the user chooses the manual path.
 
+### 0b. Pre-flight — is the validation still current?
+
+The report from `/compass:implement` proves the state **at the time it ran**. Anything
+edited since — most often fixes for `/code-review` findings — is unproven, and the PR
+body must not claim otherwise.
+
+List source files touched after the report was written (portable — no `stat` flags,
+which differ between macOS and Linux):
+
+```bash
+REPORT=$(ls -t .work/reports/*.md 2>/dev/null | head -1)
+[ -n "$REPORT" ] && find . -newer "$REPORT" -type f \
+  -not -path './.git/*' -not -path './.work/*' -not -path './node_modules/*' | head
+```
+
+Re-run `/compass:validate` if that prints anything, or if there is no report at all.
+It is cheap; shipping an unproven claim is not.
+
 ### 1. Read the implementation report
 
 Find the most recent report in `.work/reports/` — extract what was built and which files changed.
@@ -48,14 +66,17 @@ Run `/compass:commit` — shows state, proposes message, waits for confirmation,
 git push -u origin <current-branch>
 ```
 
-Never push to `base_branch` (from `.claude/compass.yml`) directly.
+Never push to the base branch directly.
 
 ### 4. Open PR
 
-Read `base_branch` from `.claude/compass.yml`, then:
+Resolve the base branch, in this order — the first that yields a value wins:
+
+1. The **Base branch** line under `## Commands` in `.claude/CLAUDE.md`, if present
+2. `git symbolic-ref --short refs/remotes/origin/HEAD` with the `origin/` prefix stripped
 
 ```bash
-gh pr create --base {base_branch} \
+gh pr create --base {base branch} \
   --title "<meaningful PR title>" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -77,44 +98,44 @@ EOF
 
 Print the PR URL.
 
-### 5. Offer the review
+### 5. Hand off to review
 
-Ask the user:
+Print the PR URL and state who reviews it:
 
 ```
 PR open: <url>
 
-Run code review now? (yes/no)
-  yes — fan out 3 parallel review subagents on the diff
-  no  — stop here; you can run /compass:ship's review later, or test manually first
+Review this PR — compass does not:
+  - Didn't run /code-review before shipping? Run it now.
+  - On GitHub: claude-code-action reviews the PR by itself if installed;
+    otherwise comment "@claude review this"
 
-Note: for yes — run /clear first so the subagents start with a clean context.
+Then apply what comes back:
+  /compass:fix-ci-review
 ```
 
-**If "no":** stop. Remind the user to test manually using the PR checklist, and that `/compass:reflect` is available after merge.
-
-**If "yes":** run `/compass:review-project <PR-number>` — it handles the full 3-subagent fan-out, aggregation, security check, and verdict.
-
-> For a trivial change (Quick Path — typo, 1-line fix), answer **no**: the 3-subagent review is overkill for a one-line diff.
+Print exactly these options — no others. **Stop here**; the user decides when to merge.
 
 ---
 
 ## Rules
 
-- **Never auto-commit** — always show state and wait for confirmation. The only sanctioned exception is `/compass:auto-implement`, which runs on a `feat/*` branch with a pre-approved plan and stops at PR-open.
+- **Never auto-commit** — always show state and wait for confirmation.
 - **Verified state only** — the PR body (Summary, Changes, Manual Test Plan) reflects what validation actually confirmed in `/compass:implement`, not what was intended. See `references/HANDBOOK.md` → *Verification before completion*.
 - **No Co-Authored-By** — no AI attribution in commits or PR body
 - **Never push to base branch** — feature branch only
-- **Never merge the PR** — hand back to the user after the review
+- **Never merge the PR** — hand back to the user
 - **No secrets** — never stage `.env.local`, `*.db`, or credential files
 
 ---
 
-## Note on CI / auto-merge
+## Note on CI
 
-If `autonomy_mode` in `.claude/compass.yml` is `review-only` or `full`, the CI
-workflow `.github/workflows/pr-validation.yml` adds inline PR comments and a
-dynamic test checklist on PR open. In `full` mode, the PR auto-merges once all
-required checks pass.
+compass ships no CI workflow. The same checks run locally in `/compass:validate`
+before the commit; a workflow that runs your test suite on the PR is generic CI
+your stack already has a template for.
 
-See `${CLAUDE_PLUGIN_ROOT}/references/AUTONOMY.md` for full details.
+PR review comes from `anthropics/claude-code-action`, installed with
+`/install-github-app`. It writes and owns its own workflows; compass does not
+generate or update them. Findings come back into the loop via
+`/compass:fix-ci-review`.
