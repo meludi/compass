@@ -32,6 +32,8 @@ It installs the Claude GitHub app and offers two workflows, independently select
 
 Take the first. Take the second too if you also want to ask the PR questions.
 
+**Check the first run.** The generated workflow needs `pull-requests: write` to post at all, and the `code-review` plugin it invokes has an open defect that can burn the run's budget before anything is posted — `HANDBOOK.md` → *Troubleshooting* has both. Neither is compass', and neither announces itself: the workflow goes green either way.
+
 The app itself — separate from the workflows — is what lets `/autofix-pr` receive webhooks. It also sets `ANTHROPIC_API_KEY` as a repo secret.
 
 **Re-run it** to add the workflow you skipped, or to update an existing one; it detects what is already there and asks. Skipping it entirely costs you nothing local: Loop 1, `/code-review` and `/compass:validate` all work without it.
