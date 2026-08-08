@@ -138,9 +138,7 @@ Step 2 needs a command because the findings live on GitHub, outside your session
 
 ### Autofix — optional
 
-Run `/autofix-pr` from the PR branch and stop there: it watches for red CI and review comments — from any reviewer, a human included — pushes fixes, and stops when the PR is merged or closed.
-
-A Claude session watches the PR and pushes fixes without asking you — Claude Code's command, not compass'.
+Run `/autofix-pr` from the PR branch and stop there — a Claude session then watches for red CI and review comments (from any reviewer, a human included), pushes fixes without asking you, and stops when the PR is merged or closed. Claude Code's command, not compass'.
 
 ```mermaid
 flowchart LR
