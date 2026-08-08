@@ -104,7 +104,7 @@ A fresh repo so the test never touches a real project.
 ## Stage 1 — Setup
 
 ### `/compass:help`
-- [ ] Bare: prints the situation table **and** *The pairs people confuse* — nothing else, no summary, no suggested next step
+- [ ] Bare: prints all three sections — situation table, *The pairs people confuse*, *Nothing to run* — then stops, with no summary and no suggested next step
 - [ ] `"the PR has review comments"` → names `/compass:fix-ci-review` with one sentence on why not `/code-review`
 - [ ] `"I want to rename a variable everywhere"` → nothing fits; it says so and names the closest thing instead of inventing a command
 - [ ] It **never executes** the command it names
@@ -132,7 +132,9 @@ Run it with a plain description — no story file, no tracker. That is the suppo
 - [ ] Notice asks for `/model opus` + plan mode
 - [ ] Context loads inline (CLAUDE.md incl. the `## Commands` table, git state) — **no** `/compass:context` call
 - [ ] The built-in `Explore` subagent spawns — **no** `codebase-explorer`
-- [ ] Plan written to `.work/plans/…`; **no code written**; sections: Goal, Patterns, Files (table), Tasks (File/Action/Implement/Mirror/Validate), Validation, Acceptance criteria, Loop log
+- [ ] Plan written to `.work/plans/…`; **no code written**; sections: Goal, Patterns, Files (table), Tasks (File/Action/Implement/Behavior/Mirror/Validate), Validation, Acceptance criteria, Loop log
+- [ ] The version helper task carries a **`Behavior`** line (it is logic-bearing) — without it `/compass:implement` treats it as UI/glue and **Test policy** never fires
+- [ ] Every task's **`Mirror`** points at a `file:line` that actually exists — open one and check. Exploration is not done until each planned file has one, or the plan says why none exists
 
 ### `/compass:implement .work/plans/<plan>.md`
 **Deliberate-failure check:** before running, add an obvious error to a file the plan lists as **UPDATE** (typed stack: `const _x: number = 'no';`; otherwise a line that fails `{lint_cmd}`/`{test_cmd}`).
@@ -146,7 +148,7 @@ Run it with a plain description — no story file, no tracker. That is the suppo
 
 ### `/code-review` (before shipping)
 - [ ] `/compass:implement`'s closing output points at `/code-review` **before** `/compass:ship`
-- [ ] It picks up the project's *Review conventions* from `.claude/CLAUDE.md`
+- [ ] It reflects the project's *Review conventions* — they reach it as loaded project memory, not as a file it opens (`.claude/CLAUDE.md` is not in its explicitly-read set; see `references/HANDBOOK.md` → *Project config*). If a convention is ignored, move that section to the repo-root `CLAUDE.md` and re-run before calling it a bug
 - [ ] Findings are fixed on the branch, then `/compass:validate` is re-run — no PR exists yet
 - [ ] **Staleness guard:** edit a source file *without* re-validating, then run `/compass:ship` — its pre-flight must notice the file is newer than the report and re-run `/compass:validate` before committing
 
@@ -219,8 +221,8 @@ Local commands cost normal session tokens. compass ships no CI, so it triggers n
 
 ```bash
 # worktrees (guarded; --force if you mean it)
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/worktree.sh self-test-piv rm
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/worktree.sh self-test-quick rm
+bash <compass>/scripts/worktree.sh self-test-piv rm
+bash <compass>/scripts/worktree.sh self-test-quick rm
 
 # close test PRs instead of merging
 gh pr list --search "head:feat/self-test" --state open

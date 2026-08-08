@@ -101,9 +101,11 @@ Compass workflow guidance and the framework doc index are injected automatically
 
 ## Review conventions
 
-<!-- Read by every reviewer of this project: Claude Code's built-in /code-review
-     locally, and anthropics/claude-code-action on the PR. Edit to taste — the
-     items below are a starting point, not a finished policy. -->
+<!-- Reaches both reviewers — Claude Code's built-in /code-review locally, and
+     anthropics/claude-code-action on the PR — as loaded project memory. Move
+     this section to the repo-root CLAUDE.md to put it in /code-review's
+     explicitly-read set as well (see references/HANDBOOK.md → Project config).
+     Edit to taste — the items below are a starting point, not a policy. -->
 
 **Always flag**
 

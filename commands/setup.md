@@ -6,7 +6,7 @@ description: Set up compass for a new project
 
 > **Model:** `/model sonnet` — balanced model for this command.
 
-Generates `.claude/CLAUDE.md` from the plugin template: project conventions, the commands compass runs, and the review conventions every reviewer reads. Run once per project after installing the plugin. One phase, one file — compass has no config file of its own.
+Generates `.claude/CLAUDE.md` from the plugin template: project conventions, the commands compass runs, and the review conventions. Run once per project after installing the plugin. One phase, one file — compass has no config file of its own.
 
 ---
 

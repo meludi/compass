@@ -40,7 +40,7 @@ Two sections carry most of the value: *The pairs people confuse* (`/code-review`
 
 ### /compass:setup
 
-Scaffolds `.claude/CLAUDE.md` — project conventions, the *Review conventions* section both reviewers read, and the `## Commands` table that **is** compass' configuration.
+Scaffolds `.claude/CLAUDE.md` — project conventions, the *Review conventions* section, and the `## Commands` table that **is** compass' configuration.
 
 | | |
 |---|---|

@@ -8,14 +8,14 @@ LOOP 1  worktree → plan-feature → implement → code-review → ship    → 
 LOOP 2  review lands → fix-ci-review → push → repeat                → merge
 ```
 
-Per-command detail: `COMMANDS.md`. Config, `.work/`, troubleshooting: `HANDBOOK.md`.
+Per-command detail: `COMMANDS.md`. What "done" has to prove, why there is no config file, and what to do when something breaks: `HANDBOOK.md`.
 
 ---
 
 ## Once per project
 
 ```
-/compass:setup                 config, conventions, schema
+/compass:setup                 one file: .claude/CLAUDE.md
 /install-github-app            optional — everything GitHub-side, see below
 ```
 

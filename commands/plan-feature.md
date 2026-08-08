@@ -42,6 +42,8 @@ Use the built-in `Explore` subagent to find:
 
 If the feature requires an unknown library or pattern: spawn a web-search agent for isolated research. Only the summary returns to main context.
 
+**Done when every file the plan will touch has a real `Mirror:` target** — a `file:line` you have opened, not a path you assume exists. A task with no mirror means the exploration stopped early: go find the closest existing example, or state in the plan that none exists and why.
+
 ### 4. Design the changes
 
 - List files to CREATE with their purpose

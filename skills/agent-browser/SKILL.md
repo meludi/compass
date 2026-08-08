@@ -6,90 +6,29 @@ allowed-tools: Bash(agent-browser:*)
 
 # Browser Automation with agent-browser
 
-Used by `/compass:validate` to verify UI before opening a PR. The dev server must be running — start it with the `Dev` command from `.claude/CLAUDE.md` → `## Commands`, on the port named in the **Dev port** line below that table.
+Used by `/compass:validate` to verify UI before opening a PR.
 
-**Screenshot path convention:** always save to `.work/screenshots/{name}.png` — this directory is gitignored.
+`agent-browser --help` is the command reference — read it there rather than from memory. What follows is what the CLI does not tell you.
 
-## Quick start
+## Before you start
 
-```bash
-agent-browser open http://localhost:{dev port}   # Open app (Dev port from CLAUDE.md)
-agent-browser snapshot -i                  # Get interactive elements
-agent-browser screenshot                   # Take screenshot
-agent-browser close                        # Close browser
-```
+The dev server must already be running. Start it with the `Dev` command from `.claude/CLAUDE.md` → `## Commands`, on the port named in the **Dev port** line beneath that table. That port is also the one to open.
 
-## Core workflow
-
-1. Navigate: `agent-browser open <url>`
-2. Snapshot: `agent-browser snapshot -i` (returns refs like `@e1`, `@e2`)
-3. Interact using refs
-4. Re-snapshot after navigation or DOM changes
-
-## Commands
-
-### Navigation
+## The loop
 
 ```bash
-agent-browser open <url>
-agent-browser back / forward / reload / close
+agent-browser open http://localhost:{dev port}
+agent-browser snapshot -i     # interactive elements, returns refs: @e1, @e2, …
+agent-browser click @e1       # interact by ref, never by selector
+agent-browser close
 ```
 
-### Snapshot
+**Re-snapshot after every navigation or DOM change.** Refs are bound to the snapshot that produced them — acting on a stale `@e1` hits whatever now occupies that slot, which fails silently rather than erroring.
 
-```bash
-agent-browser snapshot -i         # Interactive elements (recommended)
-agent-browser snapshot -c         # Compact output
-agent-browser snapshot -s "#main" # Scope to selector
-```
+## Screenshots
 
-### Interactions
+Always save to `.work/screenshots/{name}.png` — that directory is gitignored. A screenshot written anywhere else lands in the user's commit.
 
-```bash
-agent-browser click @e1
-agent-browser fill @e2 "text"
-agent-browser press Enter
-agent-browser hover @e1
-agent-browser scroll down 500
-```
+## When something looks wrong
 
-### Get information
-
-```bash
-agent-browser get text @e1
-agent-browser get url
-agent-browser get title
-```
-
-### Screenshots
-
-```bash
-agent-browser screenshot                              # To stdout
-agent-browser screenshot .work/screenshots/{name}.png # Save to file (use this path)
-agent-browser screenshot --full                       # Full page
-```
-
-### Wait
-
-```bash
-agent-browser wait @e1                     # Wait for element
-agent-browser wait 2000                    # Wait ms
-agent-browser wait --text "Success"        # Wait for text
-agent-browser wait --load networkidle      # Wait for network idle
-```
-
-### Semantic locators
-
-```bash
-agent-browser find role button click --name "Submit"
-agent-browser find text "Sign In" click
-agent-browser find label "Email" fill "user@test.com"
-```
-
-## Debugging
-
-```bash
-agent-browser open <url> --headed  # Show browser window
-agent-browser console              # View console messages
-agent-browser errors               # View page errors
-```
+`--headed` shows the browser window, `console` prints console messages, `errors` prints page errors. Read the console before concluding the UI is broken — a failed request explains more than a screenshot does.

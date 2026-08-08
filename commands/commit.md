@@ -20,8 +20,6 @@ git status
 git diff
 ```
 
-Never commit blind. Show what is changed before doing anything.
-
 ### 2. Propose a commit message
 
 Based on the changes, propose a Conventional Commit message:
@@ -46,7 +44,7 @@ git commit -m "<confirmed message>"
 - **`--push` was passed** → run `git push` immediately. Report the result.
 - **No `--push`** → ask: `Push to origin now? (yes / no)`. On yes: `git push`. On no: done.
 
-Pushing updates the open PR (if any) and — in `review-only`/`full` mode — triggers a CI re-review.
+Pushing updates the open PR, if one exists — claude-code-action re-reviews it when installed.
 
 ## Rules
 

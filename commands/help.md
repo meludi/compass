@@ -15,7 +15,7 @@ You know the eight compass commands. What is easy to forget is the **boundary**:
 
 With `$ARGUMENTS`: find the matching row, name the command, say in one sentence why that one and not its neighbour. Stop there — do not run it.
 
-Without arguments: print the situation table, then the boundary table below it. Nothing else — no summary, no next-step suggestion.
+Without arguments: print all three sections below — the situation table, *The pairs people confuse*, and *Nothing to run*. Stop there: no summary, no next-step suggestion.
 
 **Never** invent a command. If nothing fits, say so and name the closest thing.
 

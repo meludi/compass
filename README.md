@@ -31,7 +31,7 @@ Run in a Claude Code session (or prefix each with `claude` in your terminal):
 Restart Claude Code afterwards (or `/reload-plugins`).
 
 - **Project-only install** (terminal): add `--scope local` (private, gitignored) or `--scope project` (shared via git) to `claude plugin install compass@compass`.
-- **Update:** `/plugin update compass`, then re-run `/compass:setup` in each project to refresh the local schema copy.
+- **Update:** `/plugin update compass`. Nothing to re-run in your projects — the `## Commands` table is yours, and a plugin update never touches it.
 
 The plugin installs centrally — nothing is copied into your repo. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
 
@@ -45,7 +45,7 @@ From your project root:
 /compass:setup
 ```
 
-Generates one file: `.claude/CLAUDE.md` — project conventions, the review conventions both reviewers read, and the `## Commands` table. **compass has no config file of its own**; that table is the configuration, and you edit it directly.
+Generates one file: `.claude/CLAUDE.md` — project conventions, the review conventions, and the `## Commands` table. **compass has no config file of its own**; that table is the configuration, and you edit it directly.
 
 | Row | Default | Controls |
 |---|---|---|
@@ -81,4 +81,4 @@ Plans and outputs live in `.work/` (created on first use): `plans/` committed; `
 |-----|---------------|
 | [`references/WORKFLOW.md`](references/WORKFLOW.md) | The loops, with diagrams — and where compass stops |
 | [`references/COMMANDS.md`](references/COMMANDS.md) | Every command in detail — arguments, behaviour, when to run them standalone |
-| [`references/HANDBOOK.md`](references/HANDBOOK.md) | `.work/` layout, the verification discipline, config, troubleshooting |
+| [`references/HANDBOOK.md`](references/HANDBOOK.md) | What "done" has to prove, why there is no config file, troubleshooting |

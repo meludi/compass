@@ -28,11 +28,11 @@ finding costs one edit instead of a review round. On the PR, review comes from
 
 ## Framework docs — load on demand (not every session)
 
-| Topic                | File                                      |
-| -------------------- | ----------------------------------------- |
-| The two loops        | $REF/WORKFLOW.md                          |
-| Commands in detail   | $REF/COMMANDS.md                          |
-| Everything else      | $REF/HANDBOOK.md                          |
+| Topic                  | File                                    |
+| ---------------------- | --------------------------------------- |
+| The two loops          | $REF/WORKFLOW.md                        |
+| Commands in detail     | $REF/COMMANDS.md                        |
+| Proving "done", config | $REF/HANDBOOK.md                        |
 
 ## Project-side files
 
