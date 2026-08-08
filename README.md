@@ -56,7 +56,7 @@ Generates one file: `.claude/CLAUDE.md` — project conventions, the review conv
 
 Keep the row labels as generated — commands look them up by name. Nothing validates the table, so a typo fails quietly; the trade is no schema to refresh after a plugin update.
 
-No CI workflow — that's not compass' job. For review on the PR, run `/install-github-app` once per repo (Claude Code's command): [`references/WORKFLOW.md`](references/WORKFLOW.md) → */install-github-app*.
+No CI workflow — that's not compass' job. For review on the PR, pick a reviewer once per repo — claude-code-action via `/install-github-app`, or Codex code review: [`references/WORKFLOW.md`](references/WORKFLOW.md) → *Automated PR review*.
 
 Deployment is not compass' business — point Vercel, Netlify or your own host at your base branch and keep secrets in the host's env vars.
 

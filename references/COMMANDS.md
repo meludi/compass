@@ -55,7 +55,7 @@ One phase, one file — rows it cannot detect stay blank rather than guessed.
 
 **It never overwrites an existing `CLAUDE.md`** — it reports what a fresh scan would have written and lets you merge, so re-running it is safe. There is nothing to refresh after a plugin update.
 
-No CI workflow is written. For review on the PR, run `/install-github-app` once per repo — `WORKFLOW.md` → */install-github-app* covers which workflow to pick.
+No CI workflow is written. For review on the PR, pick a reviewer once per repo — `WORKFLOW.md` → *Automated PR review* covers both options.
 
 ---
 
@@ -199,8 +199,9 @@ You will type these in the same sessions, but they belong to tools compass does 
 
 | Command | Owner | Where |
 |---|---|---|
-| `/install-github-app` | Claude Code | `WORKFLOW.md` → *Once per project* |
+| `/install-github-app` | Claude Code | `WORKFLOW.md` → *Automated PR review* |
 | `/code-review` | Claude Code | `WORKFLOW.md` → Loop 1, step 4 |
 | `/autofix-pr` | Claude Code | `WORKFLOW.md` → Loop 2, *Autofix* |
 | `/security-review` | Claude Code | not part of either loop — run it when the change touches auth, input handling or secrets |
+| `@codex review` | OpenAI Codex | `WORKFLOW.md` → *Automated PR review* — typed in a PR comment, not a session |
 | `mattpocock-skills:to-spec`, `…:to-tickets`, `…:tdd`, … | [mattpocock/skills](https://github.com/mattpocock/skills) | `WORKFLOW.md` → Loop 0 |

@@ -7,7 +7,7 @@ argument-hint: [PR-number]
 
 > **Model:** `/model opus` — applying review feedback needs careful editing.
 
-Consumes the review comments on the PR — posted by `anthropics/claude-code-action` or by a human — and applies the fixes **locally**, so each one passes `/compass:validate` before it goes back up. This is the bridge back from a review that ran elsewhere; it does not re-review the diff.
+Consumes whatever review is on the PR — claude-code-action, Codex, a human, any bot that comments — and applies the fixes **locally**, so each one passes `/compass:validate` before it goes back up. This is the bridge back from a review that ran elsewhere; it does not re-review the diff.
 
 **Input**: `$ARGUMENTS` — PR number (optional).
 

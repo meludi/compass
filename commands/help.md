@@ -48,7 +48,7 @@ Not installed? mattpocock's skills come from `claude plugins install mattpocock-
 | | |
 |---|---|
 | `/code-review` **vs** `/compass:fix-ci-review` | Where the findings live. In this session → `/code-review`, fix them directly. On GitHub, outside your context → `fix-ci-review` fetches them. Before a PR exists there is nothing to fetch. |
-| `/compass:fix-ci-review` **vs** `/autofix-pr` | Who decides. `fix-ci-review` lists findings, waits for your go, validates locally, and leaves the push to you. `/autofix-pr` watches the PR and pushes its own fixes — `/compass:validate` never sees those commits. Pick one per PR. |
+| `/compass:fix-ci-review` **vs** `/autofix-pr` | Who decides. `fix-ci-review` lists findings, waits for your go, validates locally, and leaves the push to you. `/autofix-pr` hands the watching to a Claude session that pushes fixes without asking — `/compass:validate` never sees those commits. Pick one per PR. |
 | `/compass:validate` **vs** `/code-review` | Machines vs judgement. `validate` runs your lint, types and tests. `/code-review` reads the diff for the things no command can check. |
 | `/compass:commit` **vs** `/compass:ship` | `ship` is commit + push + PR + handoff. Use `commit` when you are not opening a PR yet. |
 | `/compass:plan-feature` **vs** `mattpocock-skills:to-spec` | Altitude. `to-spec` decides what to build and deliberately names no files. `plan-feature` names the files, in dependency order. The spec is its input. |

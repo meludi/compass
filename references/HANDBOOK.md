@@ -43,6 +43,8 @@ The trade is that nothing validates it. A misspelled **Test policy** value falls
 
 One asymmetry to know: the `code-review` plugin instructs its reviewer to read `~/.claude/CLAUDE.md`, the **repo-root** `CLAUDE.md`, and any `CLAUDE.md` above a changed file — `.claude/CLAUDE.md` is not on that list. It still arrives as loaded project memory, so *Review conventions* are honoured either way. To put them in the explicitly-read set, move that one section to the root file.
 
+**Codex code review reads neither** — its repo guidance is `AGENTS.md`. If you use it, mirror *Review conventions* there; nothing propagates between the two files.
+
 ---
 
 ## Gating commits made outside compass
