@@ -212,4 +212,4 @@ You will type these in the same sessions, but they belong to tools compass does 
 | `/code-review` | Claude Code | `WORKFLOW.md` → Loop 1, step 4 |
 | `/autofix-pr` | Claude Code | `WORKFLOW.md` → Loop 2, *Autofix* |
 | `/security-review` | Claude Code | not part of either loop — run it when the change touches auth, input handling or secrets |
-| `to-spec`, `to-tickets`, `tdd`, … | [mattpocock/skills](https://github.com/mattpocock/skills) | `WORKFLOW.md` → Loop 0 |
+| `mattpocock-skills:to-spec`, `…:to-tickets`, `…:tdd`, … | [mattpocock/skills](https://github.com/mattpocock/skills) | `WORKFLOW.md` → Loop 0 |

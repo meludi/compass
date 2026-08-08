@@ -25,7 +25,7 @@ Without arguments: print the situation table, then the boundary table below it. 
 
 | You are here | Run | Whose |
 |---|---|---|
-| Not sure yet what to build | `/grill-with-docs` | mattpocock |
+| Not sure yet what to build | `/mattpocock-skills:grill-with-docs` | mattpocock |
 | Know the what, not the where in the code | `/compass:plan-feature <spec>` | compass |
 | Plan exists, build it | `/compass:implement <plan>` | compass |
 | Is everything still green? | `/compass:validate` | compass |
@@ -35,11 +35,11 @@ Without arguments: print the situation table, then the boundary table below it. 
 | Review comments are sitting on the PR | `/compass:fix-ci-review` | compass |
 | CI is red and you would rather not deal with it | `/autofix-pr` | Claude Code |
 | Building two things at once | `/compass:worktree <name>` | compass |
-| A bug that survived three attempts | `/diagnosing-bugs` | mattpocock |
+| A bug that survived three attempts | `/mattpocock-skills:diagnosing-bugs` | mattpocock |
 | The change touches auth, input handling or secrets | `/security-review` | Claude Code |
 | New project, nothing set up | `/compass:setup`, then `/install-github-app` | compass, Claude Code |
 
-Not installed? mattpocock's skills come from `npx skills@latest add mattpocock/skills`; everything marked *Claude Code* is already there.
+Not installed? mattpocock's skills come from `claude plugins install mattpocock-skills` — take the plugin, not the `npx skills` copy, which loads them unprefixed and puts a second `code-review` beside Claude Code's. Everything marked *Claude Code* is already there. For mattpocock's set specifically, `/mattpocock-skills:ask-matt` routes deeper than this file does.
 
 ---
 
@@ -51,7 +51,7 @@ Not installed? mattpocock's skills come from `npx skills@latest add mattpocock/s
 | `/compass:fix-ci-review` **vs** `/autofix-pr` | Who decides. `fix-ci-review` lists findings, waits for your go, validates locally, and leaves the push to you. `/autofix-pr` watches the PR and pushes its own fixes — `/compass:validate` never sees those commits. Pick one per PR. |
 | `/compass:validate` **vs** `/code-review` | Machines vs judgement. `validate` runs your lint, types and tests. `/code-review` reads the diff for the things no command can check. |
 | `/compass:commit` **vs** `/compass:ship` | `ship` is commit + push + PR + handoff. Use `commit` when you are not opening a PR yet. |
-| `/compass:plan-feature` **vs** `to-spec` | Altitude. `to-spec` decides what to build and deliberately names no files. `plan-feature` names the files, in dependency order. The spec is its input. |
+| `/compass:plan-feature` **vs** `mattpocock-skills:to-spec` | Altitude. `to-spec` decides what to build and deliberately names no files. `plan-feature` names the files, in dependency order. The spec is its input. |
 | `/compass:worktree` **vs** just branching | Only worth it in parallel. One feature at a time needs no worktree; nothing downstream depends on it. |
 
 ---
@@ -60,4 +60,4 @@ Not installed? mattpocock's skills come from `npx skills@latest add mattpocock/s
 
 - **After `/compass:ship`, waiting on review** — the PR is not yours to push on. Merging is manual, always.
 - **A finding you disagree with** — flag it for the author with a reason. There is no command for being overruled.
-- **Three failed attempts at the same cause** — stop patching. The diagnosis is wrong, not the fix; `/diagnosing-bugs` if you have it.
+- **Three failed attempts at the same cause** — stop patching. The diagnosis is wrong, not the fix; `/mattpocock-skills:diagnosing-bugs` if you have it.

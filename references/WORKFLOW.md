@@ -40,19 +40,26 @@ The app itself — separate from the workflows — is what lets `/autofix-pr` re
 
 ## Loop 0 — Think
 
-compass starts at the plan. Deciding *what* to build comes first and belongs to [mattpocock/skills](https://github.com/mattpocock/skills) — `npx skills@latest add mattpocock/skills`, once:
+compass starts at the plan. Deciding *what* to build comes first and belongs to [mattpocock/skills](https://github.com/mattpocock/skills) — install it as a plugin, once:
+
+```bash
+claude plugins install mattpocock-skills
+```
 
 | Question | Skill |
 |---|---|
-| What are we actually building? | `grill-with-docs` |
-| Write it down as a spec | `to-spec` |
-| Cut it into shippable slices | `to-tickets` |
-| Too big for one session? | `wayfinder` |
-| What's the right module boundary? | `codebase-design`, `domain-modeling` |
+| What are we actually building? | `mattpocock-skills:grill-with-docs` |
+| Write it down as a spec | `mattpocock-skills:to-spec` |
+| Cut it into shippable slices | `mattpocock-skills:to-tickets` |
+| Too big for one session? | `mattpocock-skills:wayfinder` |
+| What's the right module boundary? | `mattpocock-skills:codebase-design`, `…:domain-modeling` |
+| Which of these, though? | `mattpocock-skills:ask-matt` |
 
-Whatever comes out — a spec file, a ticket, a sentence — is the argument for step 2 of Loop 1.
+Whatever comes out — a spec file, a ticket, a sentence — is the argument for step 2 of Loop 1. That is also where you leave mattpocock's flow: `ask-matt` routes its own tickets onward into `mattpocock-skills:implement`, which is his Loop 1, not compass'. Take compass' — the plan file and the per-task gate are the whole point.
 
 Three more from the same source are references, not steps: `tdd` (what makes a good test), `diagnosing-bugs` (a bug that won't die), `improve-codebase-architecture`. compass' commands point at the first two **softly** — not installed, and they fall back to a one-line summary inline.
+
+**Not `npx skills@latest add`** — that route copies the skills in unprefixed, and its `code-review` then shares a name with Claude Code's built-in, silently. Use it only to fork them, and rename that one.
 
 Skip all of it if you already know what to build.
 
@@ -132,6 +139,29 @@ Typo, one-liner, obvious fix — no plan needed:
 ```
 /compass:worktree → edit → /compass:validate → /compass:ship
 ```
+
+---
+
+## `mattpocock-skills:code-review` — the spec axis
+
+The one mattpocock/skills command that isn't Loop 0. Step 4 finds bugs; this finds drift — a Spec axis (missing requirements, scope creep) plus a Fowler-smell axis. An addition to step 4, never a replacement.
+
+| | Where | Why there |
+|---|---|---|
+| **A** | Loop 1, between step 4 and step 5 | scope creep is cheap to cut before the PR exists |
+| **B** | Loop 2, once the PR has stopped moving | every fix round added code nobody re-checked against the spec |
+
+A **or** B, not both. **Fixed point is the branch point** either way — against the last push you see the fixes, not the feature.
+
+Worth it only when all three hold:
+
+| | |
+|---|---|
+| A written spec exists | issue, `to-spec` output, ticket — without it the Spec axis skips and only unverified smells are left |
+| The feature is large | several tasks or sessions; drift needs room to happen |
+| `docs/agents/issue-tracker.md` exists | `mattpocock-skills:setup-matt-pocock-skills`, else it can't resolve the issue from commit messages |
+
+Skip it on the Quick Path, and whenever you skipped Loop 0 — no spec, no axis.
 
 ---
 
