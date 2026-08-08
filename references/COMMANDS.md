@@ -1,8 +1,11 @@
 # Commands
 
-Eight workflow commands and a router, in detail — arguments, what they do, when to
-run them standalone. The flow they form is in `WORKFLOW.md`; each command file in
-`commands/` is the actual instruction set the agent executes.
+Eight workflow commands and a router — what each one takes, what it writes, and
+when to reach for it. The flow they form is in `WORKFLOW.md`.
+
+**This file answers *whether* to run a command, never *how* it runs.** The files
+in `commands/` are the instruction set the agent executes and the only place a
+rule lives; restating one here would give it a second copy to drift from.
 
 | | Command | Argument | Model |
 |---|---|---|---|
@@ -48,9 +51,9 @@ Scaffolds `.claude/CLAUDE.md` — project conventions, the *Review conventions* 
 | **Trigger** | User — once per project |
 | **Writes** | `.claude/CLAUDE.md` |
 
-One phase, one file. Command rows are pre-filled from `package.json`; a script that doesn't exist leaves its row **blank**, and a blank command is skipped rather than guessed. Base branch comes from `origin/HEAD`.
+One phase, one file — rows it cannot detect stay blank rather than guessed.
 
-**It never overwrites an existing `CLAUDE.md`** — it reports what a fresh scan would have written and lets you merge. There is nothing to refresh after a plugin update.
+**It never overwrites an existing `CLAUDE.md`** — it reports what a fresh scan would have written and lets you merge, so re-running it is safe. There is nothing to refresh after a plugin update.
 
 No CI workflow is written. For review on the PR, run `/install-github-app` once per repo — `WORKFLOW.md` → */install-github-app* covers which workflow to pick.
 
@@ -70,7 +73,7 @@ Creates an isolated worktree on `feat/<name>`, installs dependencies, and opens 
 
 The script reserves a free port in `.worktree-port` and symlinks `.env.local` plus `.claude/settings.local.json` from main. Per-worktree **state** is yours: drop a `.claude/worktree-setup.sh` (and `-teardown.sh`) into the project and it runs with `WT_NAME`, `WT_DIR`, `WT_BRANCH`, `WT_PORT` exported. The command file carries recipes for Postgres, Mongo, Docker Compose, SQLite and non-JS stacks.
 
-**Removal is guarded** — it refuses on uncommitted changes, on commits not merged into the base branch, and if you are standing inside the worktree. Never force automatically; surface the reason and ask.
+**Removal is guarded** — it refuses on uncommitted changes, on commits not merged into the base branch, and if you are standing inside the worktree, so `rm` cannot lose work by accident.
 
 **Skip it** if you work one feature at a time. Nothing downstream depends on it.
 
@@ -104,19 +107,9 @@ Executes a plan task by task. Each task passes its own gate before the next star
 | **Calls** | `/compass:validate` at the end |
 | **Writes** | `.work/reports/<feature>-report.md`, plus `## Loop log` entries in the plan |
 
-**Golden rule:** if validation fails, fix it before moving on. Never accumulate broken state.
+Because every task is gated before the next starts, this is **safe to interrupt** — stop after any task and the tree is consistent. Resume by re-running it against the same plan; completed tasks are ticked off in the file.
 
-For a logic-bearing task, the **Test policy** line in `.claude/CLAUDE.md` decides how the test relates to the code:
-
-| Policy | Behaviour |
-|---|---|
-| `first` (default) | Write the test, **run it, watch it fail for the right reason**, then the minimal code to pass |
-| `after` | Code first, then one test that pins the behaviour — still required |
-| `none` | No forced test |
-
-UI, glue and config tasks skip the test regardless and gate on the type check alone.
-
-**3-fix boundary (binding):** after three distinct failed attempts at the same cause, stop patching — a fourth blind change is not allowed. The diagnosis is wrong, not the fix.
+Whether a logic-bearing task gets a test, and whether the test comes first, is the **Test policy** line in `.claude/CLAUDE.md` (README → *Configure*).
 
 ### /compass:validate
 
@@ -147,7 +140,7 @@ Stages, shows you the state, proposes a Conventional Commit message, and waits.
 | **Argument** | `[--push]` — also push after committing |
 | **Trigger** | Auto (from `ship`) or User |
 
-**Never commits without confirmation.** No `Co-Authored-By` trailer. Never stages `.env.local`, `*.db`, or credential files.
+**Never commits without confirmation** — safe to run just to see the proposed message.
 
 ### /compass:ship
 
@@ -195,8 +188,6 @@ Reads the review comments on a PR and applies the fixes **locally**.
 The point is the bridge: pulling in findings that were produced **outside your context window**. When the finding is already in the chat, the detour through GitHub is pure friction.
 
 Fixes land locally and go through `/compass:validate` before anything is pushed, so a fix that breaks the type check never reaches the PR. The command **stops there**: you commit and push, and that push re-triggers the review.
-
-A finding you disagree with gets flagged for the author with a reason, not forced into a change. The same 3-fix boundary applies per finding.
 
 **Before the PR exists**, use the built-in `/code-review` instead.
 
