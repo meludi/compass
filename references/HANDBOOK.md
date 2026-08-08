@@ -71,6 +71,7 @@ Only the symptoms whose fix is not already in the command that caused them.
 | DB state missing in worktree | compass isolates dir, branch and port only. Per-worktree state is your `.claude/worktree-setup.sh` — see `/compass:worktree`. |
 | Fork won't push `base_branch` | Use `git push origin <base_branch>` from the terminal instead. |
 | Claude session feels slow/confused | Start a fresh session and re-run `/compass:plan-feature` — it reloads the mental model first. |
+| The review workflow runs green but posts nothing | `permissions:` in `.github/workflows/claude-code-review.yml` needs `pull-requests: write`. With `read` the run succeeds and the comments are buffered and dropped — the log says so, the PR does not. |
 | No review appears on the PR | `/install-github-app` offers two workflows. If you installed only *Claude PR Assistant* (`claude.yml`), it waits for an `@claude` mention — comment `@claude review this`, or re-run the setup and add *Claude Code Review* (`claude-code-review.yml`). Also check `ANTHROPIC_API_KEY`. |
 
 > **Git host.** compass targets **GitHub** — `gh` for PRs, GitHub Actions for CI, and claude-code-action for PR review (GitHub-only). The local loop (plan → implement → validate → commit) is host-agnostic; on GitLab/Bitbucket, push works and you open the MR/PR yourself. There is no `glab`/`.gitlab-ci.yml` path by design.
