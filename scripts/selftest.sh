@@ -139,13 +139,13 @@ echo "  commands=$c skills=$s"; log "- commands=$c skills=$s"
 [ -f hooks/hooks.json ] && pass "SessionStart hook present" || fail "hooks/hooks.json missing"
 
 # The PIV core is the plugin's reason to exist — assert it by name, not by count.
-# help is the ninth: a router, not workflow. Everything else is a regression.
+# help is the tenth: a router, not workflow. Everything else is a regression.
 bad=0
-for cmd in setup plan-feature implement validate commit ship fix-ci-review worktree help; do
+for cmd in setup plan-feature implement plan-to-pr validate commit ship fix-ci-review worktree help; do
   [ -f "commands/$cmd.md" ] || { fail "commands/$cmd.md missing"; bad=1; }
 done
-[ $bad -eq 0 ] && pass "all 8 workflow commands + help present"
-[ "$c" -eq 9 ] && pass "no stray commands ($c)" || fail "expected 9 commands, found $c"
+[ $bad -eq 0 ] && pass "all 9 workflow commands + help present"
+[ "$c" -eq 10 ] && pass "no stray commands ($c)" || fail "expected 10 commands, found $c"
 
 # Review belongs to /code-review and claude-code-action — compass must not grow
 # its own review command or reviewer agents back.

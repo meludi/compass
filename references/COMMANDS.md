@@ -1,6 +1,6 @@
 # Commands
 
-Eight workflow commands and a router — what each one takes, what it writes, and
+Nine workflow commands and a router — what each one takes, what it writes, and
 when to reach for it. The flow they form is in `WORKFLOW.md`.
 
 **This file answers *whether* to run a command, never *how* it runs.** The files
@@ -14,6 +14,7 @@ rule lives; restating one here would give it a second copy to drift from.
 | PIV | [`/compass:worktree`](#compassworktree) | `<name> [rm]` | haiku |
 | PIV | [`/compass:plan-feature`](#compassplan-feature) | `<spec \| issue-id \| description>` | opus |
 | PIV | [`/compass:implement`](#compassimplement) | `<plan path>` | sonnet |
+| PIV | [`/compass:plan-to-pr`](#compassplan-to-pr) | `<plan path>` | sonnet |
 | PIV | [`/compass:validate`](#compassvalidate) | — | sonnet |
 | Ship | [`/compass:commit`](#compasscommit) | `[--push]` | haiku |
 | Ship | [`/compass:ship`](#compassship) | — | opus |
@@ -110,6 +111,24 @@ Executes a plan task by task. Each task passes its own gate before the next star
 Because every task is gated before the next starts, this is **safe to interrupt** — stop after any task and the tree is consistent. Resume by re-running it against the same plan; completed tasks are ticked off in the file.
 
 Whether a logic-bearing task gets a test, and whether the test comes first, is the **Test policy** line in `.claude/CLAUDE.md` (README → *Configure*).
+
+### /compass:plan-to-pr
+
+Runs `implement` → `/code-review` → `ship` as one unattended pass, from a confirmed plan to an open PR.
+
+| | |
+|---|---|
+| **Argument** | `<path to .work/plans/*.plan.md>` — required |
+| **Trigger** | User |
+| **Calls** | `/compass:implement`, `/code-review`, `/compass:validate`, `/compass:ship` |
+| **Writes** | what `implement` writes, plus a commit, a pushed branch and a PR |
+| **Needs** | `gh` — checked up front, before any code is written |
+
+**Reach for it when all three hold:** the plan is reviewed and stable, the change is small to medium, and it follows patterns already in the codebase. **Not** for migrations, auth or security boundaries, or the first use of a library here — those want the per-task look that `/compass:implement` gives you.
+
+The plan is the only human gate, which is why `plan-feature` stays outside the chain. Everything downstream is guarded automatically: a failed validation aborts before the commit, and it never merges.
+
+It is the **one** compass command that commits without asking. That exception is the reason to pick it deliberately rather than by default.
 
 ### /compass:validate
 

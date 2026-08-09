@@ -109,6 +109,8 @@ flowchart LR
 | 4 | `/code-review` | findings on the branch — the cheapest place to fix, no PR exists yet. **Fixed something? Re-run `/compass:validate`.** Claude Code's command, not compass' |
 | 5 | `/compass:ship` | commit, push, PR |
 
+Steps 3–5 also run unattended as one command — *Automated Loop 1*, below.
+
 ---
 
 ## Loop 2 — Fix
@@ -156,6 +158,28 @@ flowchart LR
 **Latency:** webhooks are immediate but need the Claude GitHub app *and* Remote Control connected from the mobile or web app. Without both it polls every 30 minutes, so a red run can sit unnoticed that long.
 
 **The trade:** it pushes without asking, so `/compass:validate` never gates those commits. Use it for the PRs you would otherwise leave sitting — a green CI run and a clean review are its bar, not yours.
+
+---
+
+## Automated Loop 1
+
+`/compass:plan-to-pr <plan>` collapses steps 3–5 into one unattended run. Loop 2 already has `/autofix-pr`; this is its counterpart on the near side of the PR.
+
+```mermaid
+flowchart LR
+  PL([plan reviewed]) --> A["/compass:plan-to-pr"] --> I[implement + gates] --> R["/code-review + re-validate"] --> S[commit, push] --> PR([PR open])
+```
+
+| # | Step | Who |
+|---|---|---|
+| 1 | Read the plan `/compass:plan-feature` wrote | **you** — this is the gate, and the only one |
+| 2 | Start the run | `/compass:plan-to-pr .work/plans/<feature>.plan.md` |
+| 3 | Nothing | it implements task by task, validates, reviews the branch, applies what matters, commits, pushes, opens the PR |
+| 4 | Read the PR, then Loop 2 | it stops at the URL and never merges |
+
+**Why `plan-feature` is not in the chain.** Every guard in the command checks the *state* it runs in — branch, clean tree, `gh`. None of them can check whether the plan is right. Automating the plan too would leave the run with no human gate at all.
+
+**The trade:** you give up the per-task look and the commit confirmation, and `/code-review` findings get applied without you seeing them. You keep every validation gate — a failing check aborts before the commit, so a broken state cannot reach the PR. Use it when the plan is stable and the change is routine; stay with `/compass:implement` for anything touching migrations, auth or a library you have not used here before.
 
 ---
 

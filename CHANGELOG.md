@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.11.0 — 2026-08-08
+
+### Added
+- **`/compass:plan-to-pr` — a confirmed plan to an open PR, unattended.** Loop 2 already had an automated path (`/autofix-pr`); Loop 1 had none, so the only way to skip the per-task confirmations was the Quick Path, which assumes no plan at all. The command chains what already exists — `/compass:implement` with its per-task gates, the full validation suite, `/code-review` on the branch, a re-validate of the fixes it applied, then commit, push and PR — and **stops at the PR URL**. It never merges, never force-pushes, and aborts before the commit on any failed check, so a broken state cannot reach the PR. Pre-flight refuses to start on the base branch, on a working tree with changes outside the plan's scope, on an unreadable plan path, or without `gh` — the `gh` check runs *first* so a run cannot implement its way into a missing CLI. A tripped 3-fix boundary aborts rather than asking, since nobody is watching.
+
+  **`/compass:plan-feature` is deliberately not in the chain.** Every guard checks the state the run happens in; none can check whether the plan is right. The plan you read is the only human gate, which is what makes the rest safe to automate — and what makes this the wrong command for migrations, auth boundaries, or the first use of a library in your codebase. Reach for it when the plan is stable and the change follows patterns already there; otherwise stay with `/compass:implement`.
+
+  This is the **one** compass command that commits without confirmation. `Never auto-commit` still holds everywhere else. A version of this command existed before v0.10.0 under the name **`/compass:auto-implement`** and was dropped with the config layer it depended on; this one is rebuilt on the `## Commands` table and git alone — no `compass.yml`, no reviewer agent. The new name states both endpoints because the old one named only the start of the chain, while the part worth knowing about is where it ends.
+
+  **Compass is now nine workflow commands plus the router.** The selftest asserts the new count and still fails if an `agents/` directory reappears.
+
 ## v0.10.0 — 2026-08-07
 
 **Compass is now eight workflow commands plus a router.** It covers the execution loop — plan, implement, validate, ship — and nothing else. Everything that another maintained tool already does better was removed rather than kept in step with it. If you relied on a dropped command, see the migration table below.

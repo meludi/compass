@@ -7,7 +7,7 @@ argument-hint: "[what you are trying to do]"
 
 > **Model:** `/model haiku` — this command routes, it does not think.
 
-You know the eight compass commands. What is easy to forget is the **boundary**: when a job belongs to compass, when to Claude Code, when to a skill, and when to nobody.
+You know the nine compass commands. What is easy to forget is the **boundary**: when a job belongs to compass, when to Claude Code, when to a skill, and when to nobody.
 
 `WORKFLOW.md` orders these by flow. This orders them by the situation you are in.
 
@@ -28,6 +28,7 @@ Without arguments: print all three sections below — the situation table, *The 
 | Not sure yet what to build | `/mattpocock-skills:grill-with-docs` | mattpocock |
 | Know the what, not the where in the code | `/compass:plan-feature <spec>` | compass |
 | Plan exists, build it | `/compass:implement <plan>` | compass |
+| Plan is read and routine, and you would rather not watch it run | `/compass:plan-to-pr <plan>` | compass |
 | Is everything still green? | `/compass:validate` | compass |
 | Built it, want a look before the PR | `/code-review` | Claude Code |
 | Ready to open the PR | `/compass:ship` | compass |
@@ -50,6 +51,7 @@ Not installed? mattpocock's skills come from `claude plugins install mattpocock-
 | `/code-review` **vs** `/compass:fix-ci-review` | Where the findings live. In this session → `/code-review`, fix them directly. On GitHub, outside your context → `fix-ci-review` fetches them. Before a PR exists there is nothing to fetch. |
 | `/compass:fix-ci-review` **vs** `/autofix-pr` | Who decides. `fix-ci-review` lists findings, waits for your go, validates locally, and leaves the push to you. `/autofix-pr` hands the watching to a Claude session that pushes fixes without asking — `/compass:validate` never sees those commits. Pick one per PR. |
 | `/compass:validate` **vs** `/code-review` | Machines vs judgement. `validate` runs your lint, types and tests. `/code-review` reads the diff for the things no command can check. |
+| `/compass:implement` **vs** `/compass:plan-to-pr` | How many gates you keep. `implement` stops at every task boundary and asks before the commit. `plan-to-pr` gates on the plan you already read and nothing after it — same validation, no confirmations, straight to an open PR. Reviewed plan and a routine change → the second; anything you would want to watch → the first. |
 | `/compass:commit` **vs** `/compass:ship` | `ship` is commit + push + PR + handoff. Use `commit` when you are not opening a PR yet. |
 | `/compass:plan-feature` **vs** `mattpocock-skills:to-spec` | Altitude. `to-spec` decides what to build and deliberately names no files. `plan-feature` names the files, in dependency order. The spec is its input. |
 | `/compass:worktree` **vs** just branching | Only worth it in parallel. One feature at a time needs no worktree; nothing downstream depends on it. |

@@ -16,7 +16,7 @@ This Claude Code session has the **compass** plugin available: a PIV loop
 worktree isolation. Plugin commands are namespaced \`/compass:<name>\`:
 
   worktree -> plan-feature -> implement -> /code-review -> ship
-  (+ validate, commit, fix-ci-review)
+  (+ validate, commit, fix-ci-review, plan-to-pr)
 
 Unsure which command fits a situation? \`/compass:help\` routes it — including
 the cases whose answer is a Claude Code built-in, a skill, or no command at all.
