@@ -2,9 +2,10 @@
 # selftest.sh — read-only static dry-run of the compass plugin.
 #
 # Validates everything that does NOT need a human, GitHub, or an external AI:
-# manifests, templates, config-vs-schema, scripts, doc links, inventory. It is the
-# "lint" to TESTING.md's "E2E" — the behavioural workflow (slash commands, CI,
-# native auto-fix / Codex) is covered there.
+# manifests, templates, config-vs-schema, scripts, doc links, cross-references,
+# doc coverage, version-vs-CHANGELOG, inventory. It is the "lint" to TESTING.md's
+# "E2E" — the behavioural workflow (slash commands, CI, native auto-fix / Codex)
+# is covered there.
 #
 #   bash scripts/selftest.sh                  # static checks, stdout only
 #   bash scripts/selftest.sh --full           # + functional worktree.sh test (temp repo)
@@ -84,7 +85,7 @@ for line in "Test policy" "Dev port" "Base branch"; do
 done
 if [ -z "$missing" ]; then pass "all config rows present"; else fail "missing from template:$missing"; fi
 
-# 6. Shell scripts: syntax (+ shellcheck if present)
+# 4. Shell scripts: syntax (+ shellcheck if present)
 sec "Shell scripts"
 for f in scripts/*.sh; do
   if bash -n "$f" 2>/dev/null; then pass "bash -n $f"; else fail "bash -n $f"; fi
@@ -93,7 +94,7 @@ if command -v shellcheck >/dev/null 2>&1; then
   if shellcheck -S error scripts/*.sh >/dev/null 2>&1; then pass "shellcheck (errors) clean"; else fail "shellcheck reported errors"; fi
 fi
 
-# 7. Mermaid / code fences balanced in docs
+# 5. Mermaid / code fences balanced in docs
 sec "Doc code fences balanced"
 bad=0
 for f in references/*.md README.md TESTING.md; do
@@ -102,7 +103,7 @@ for f in references/*.md README.md TESTING.md; do
 done
 [ $bad -eq 0 ] && pass "all fences balanced"
 
-# 8. ${CLAUDE_PLUGIN_ROOT}/… references resolve to real files
+# 6. ${CLAUDE_PLUGIN_ROOT}/… references resolve to real files
 sec "Plugin-root references"
 bad=0
 while read -r ref; do
@@ -111,7 +112,7 @@ while read -r ref; do
 done < <(grep -rhoE '\$\{CLAUDE_PLUGIN_ROOT\}/[A-Za-z0-9_./-]+' commands references hooks 2>/dev/null | sort -u)
 [ $bad -eq 0 ] && pass "all plugin-root references resolve"
 
-# 9. Relative *.md links resolve
+# 7. Relative *.md links resolve
 sec "Relative doc links"
 bad=0
 for f in references/*.md README.md; do
@@ -123,15 +124,77 @@ for f in references/*.md README.md; do
 done
 [ $bad -eq 0 ] && pass "all relative .md links resolve"
 
-# 10. Command frontmatter present
+# 8. "FILE.md -> Section" cross-references hit a real heading. A renamed section
+#    leaves the pointer valid as a link and wrong as a direction — invisible to
+#    check 7, which only resolves paths.
+sec "Cross-reference sections"
+# Written to a temp file rather than captured with $( ): bash 3.2 (macOS) mis-parses
+# a heredoc inside command substitution when the body contains unbalanced parens.
+XREF_TMP="${TMPDIR:-/tmp}/compass-selftest-xref.$$"
+ruby - > "$XREF_TMP" <<'RUBY'
+BT = 0x60.chr   # a literal backtick would break bash 3.2's $( ) heredoc parsing
+
+# A pointer names a section, sometimes only its head ("Loop 2, Autofix" -> "Loop 2 — Fix").
+# Normalise both sides to that head: drop emphasis, backticks, table pipes, and
+# everything after the first comma or em dash.
+def head(s)
+  s.to_s.delete(BT).delete('*').split(/,| — | – | -- /).first.to_s
+   .strip.sub(/[.,;:|)\]]+\z/, '').downcase
+end
+
+bad = []
+sources = Dir['{commands,references,templates,hooks,skills}/**/*.md'] + Dir['*.md']
+sources -= ['CHANGELOG.md']   # a historical record; its pointers describe past releases
+sources.each do |f|
+  File.read(f).scan(/([A-Za-z][\w-]*)\.md\x60?\]?(?:\([^)]*\))?[ ]*(?:→|->)[ ]*(?:\*([^*\n]+)\*|([^|)\n]{3,60}?)[|)\n])/) do |name, emph, plain|
+    target = "references/#{name}.md"
+    next unless File.exist?(target)   # only our own reference docs; check 7 owns paths
+    section = head(emph || plain)
+    next if section.empty?
+    heads = File.read(target).scan(/^#+\s+(.+?)\s*$/).flatten.map { |h| head(h) }
+    bad << "#{f} -> #{name}.md, no section '#{section}'" unless heads.include?(section)
+  end
+end
+puts bad.uniq
+RUBY
+if [ -s "$XREF_TMP" ]; then
+  while IFS= read -r line; do [ -n "$line" ] && fail "$line"; done < "$XREF_TMP"
+else
+  pass "all section cross-references resolve"
+fi
+rm -f "$XREF_TMP"
+
+# 9. Command frontmatter present
 sec "Command frontmatter"
 bad=0
 for f in commands/*.md; do
   head -1 "$f" | grep -q '^---$' || { fail "$f — no frontmatter"; bad=1; }
+  grep -q '^description:' "$f" || { fail "$f — no description: in frontmatter"; bad=1; }
 done
-[ $bad -eq 0 ] && pass "all commands start with frontmatter"
+[ $bad -eq 0 ] && pass "all commands carry frontmatter with a description"
 
-# 11. Component inventory
+# 10. A command nobody documents is a command nobody tests. This is how
+#     plan-to-pr shipped while TESTING.md still said "9 commands".
+sec "Every command is documented"
+bad=0
+for f in commands/*.md; do
+  name=$(basename "$f" .md)
+  grep -q "/compass:$name" references/COMMANDS.md || { fail "$name missing from references/COMMANDS.md"; bad=1; }
+  grep -q "/compass:$name" TESTING.md            || { fail "$name missing from TESTING.md"; bad=1; }
+  [ "$name" = "help" ] && continue   # the router does not route to itself
+  grep -q "/compass:$name" commands/help.md      || { fail "$name missing from commands/help.md"; bad=1; }
+done
+[ $bad -eq 0 ] && pass "every command appears in COMMANDS.md, help.md and TESTING.md"
+
+# 11. plugin.json version is what /plugin shows; the CHANGELOG is what says why.
+#     CLAUDE.md requires them bumped in the same commit — so check they match.
+sec "Version matches CHANGELOG"
+pv=$(ruby -rjson -e 'print JSON.parse(File.read(".claude-plugin/plugin.json"))["version"]' 2>/dev/null)
+cv=$(grep -m1 -oE '^## v?[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+if [ -n "$pv" ] && [ "$pv" = "$cv" ]; then pass "plugin.json $pv == CHANGELOG $cv"
+else fail "plugin.json '$pv' != newest CHANGELOG entry '$cv'"; fi
+
+# 12. Component inventory
 sec "Inventory"
 c=$(find commands -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
 s=$(find skills -maxdepth 2 -name 'SKILL.md' | wc -l | tr -d ' ')

@@ -23,6 +23,15 @@ Read the `## Commands` table in `.claude/CLAUDE.md` — that table is the config
 
 **A blank or missing row is skipped, never guessed.** Do not substitute a command you inferred from `package.json`: the table is the project's statement of which gates exist. If `.claude/CLAUDE.md` has no `## Commands` table at all, say so and suggest `/compass:setup` rather than inventing one.
 
+**A row that is absent is not the same as a row that is blank.** Nothing validates that table, so a renamed or misspelled label silently deletes its gate — the one failure mode of having no config file. Before running, compare the labels you found against `Lint`, `Format`, `Type check`, `Test`. Any that is missing entirely, print once, above the results:
+
+```
+Note: no "Type check" row in .claude/CLAUDE.md — that gate did not run.
+      Blank on purpose? Then this is correct. Renamed or typo'd? Fix the label.
+```
+
+Deliberately blank rows are silent; only a **missing label** earns the note. Say it once, then run what you have — this is a warning, never a refusal.
+
 ---
 
 ## Process

@@ -23,7 +23,7 @@ Binding in `/compass:implement` (Steps 4 & 6), `/compass:ship` (the PR body), `/
 
 ## `.work/`
 
-`plans/` is committed; `reports/` and `screenshots/` are generated output and gitignored.
+`plans/` is committed; `reports/` and `screenshots/` are generated output, ignored via the `.work/.gitignore` that `/compass:setup` writes. Set compass up on an existing project by hand? Create that file yourself, or the first screenshot lands in a commit.
 
 Each plan ends with a `## Loop log`, filled in *during* implementation: decisions made while coding, snags, and "tried X — failed because Y" landmines. Deltas only, never a restatement of the plan. It is the feature's durable scratch space across sessions and handovers.
 
@@ -35,7 +35,7 @@ Each plan ends with a `## Loop log`, filled in *during* implementation: decision
 
 The `## Commands` table in `.claude/CLAUDE.md` *is* the configuration — the README documents the rows. What it does not say is why they live there: only commands ever read them. No script and no workflow parses project config, and the selftest fails if one starts to. A file read exclusively by an LLM does not need to be YAML, and `CLAUDE.md` is already loaded every session and read by claude-code-action on the PR. A separate file was a second copy of the same truth.
 
-The trade is that nothing validates it. A misspelled **Test policy** value falls back to `first`, silently, and a renamed row label stops its gate from running.
+The trade is that no schema validates it: a misspelled **Test policy** value still falls back to `first`, and a renamed row label still stops its gate from running. What changed is that neither happens *silently* — `/compass:validate` and `/compass:implement` name a missing label or an unrecognised policy value once, before they run, and continue. A reader saying what it read is the only check a file with no schema can have; it costs one line and turns a disabled gate into something you notice.
 
 **Guidance is split by owner.** The SessionStart hook injects workflow orientation and the doc index — **plugin-owned**, updates with the plugin. The generated `CLAUDE.md` stays **user-owned**: project facts, review conventions, your own context table.
 

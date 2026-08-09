@@ -36,11 +36,24 @@ The report from `/compass:implement` proves the state **at the time it ran**. An
 edited since — most often fixes for `/code-review` findings — is unproven, and the PR
 body must not claim otherwise.
 
-List source files touched after the report was written (portable — no `stat` flags,
+**Resolve the report by branch, not by timestamp.** `/compass:implement` names it after the
+feature; the branch is named after the same feature. Two features in one checkout make
+"newest file" the wrong answer, and the PR body would then describe someone else's work:
+
+```bash
+FEATURE=$(git branch --show-current | sed 's|^feat/||')
+REPORT=".work/reports/$FEATURE-report.md"
+[ -f "$REPORT" ] || REPORT=$(ls -t .work/reports/*.md 2>/dev/null | head -1)
+echo "$REPORT"
+```
+
+The `ls -t` line is a fallback, not the rule. When it is what answers, **say so** — the
+report you are about to quote may belong to another feature.
+
+Then list source files touched after that report was written (portable — no `stat` flags,
 which differ between macOS and Linux):
 
 ```bash
-REPORT=$(ls -t .work/reports/*.md 2>/dev/null | head -1)
 [ -n "$REPORT" ] && find . -newer "$REPORT" -type f \
   -not -path './.git/*' -not -path './.work/*' -not -path './node_modules/*' | head
 ```
@@ -50,11 +63,7 @@ It is cheap; shipping an unproven claim is not.
 
 ### 1. Read the implementation report
 
-Find the most recent report in `.work/reports/` — extract what was built and which files changed.
-
-```bash
-ls -t .work/reports/*.md | head -1
-```
+Read the `$REPORT` resolved in step 0b — extract what was built and which files changed.
 
 ### 2. Commit
 
@@ -74,6 +83,11 @@ Resolve the base branch, in this order — the first that yields a value wins:
 
 1. The **Base branch** line under `## Commands` in `.claude/CLAUDE.md`, if present
 2. `git symbolic-ref --short refs/remotes/origin/HEAD` with the `origin/` prefix stripped
+3. If that errors, `git remote set-head origin --auto` once, then retry it — a repo created
+   with `gh repo create --source=.` has no `origin/HEAD` until something sets it
+
+Never fall back to the current branch here: that is the feature branch, and a PR cannot
+open against itself. If all three fail, stop and ask which branch to target.
 
 ```bash
 gh pr create --base {base branch} \

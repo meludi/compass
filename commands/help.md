@@ -28,6 +28,7 @@ Without arguments: print all three sections below — the situation table, *The 
 | Not sure yet what to build | `/mattpocock-skills:grill-with-docs` | mattpocock |
 | Know the what, not the where in the code | `/compass:plan-feature <spec>` | compass |
 | Plan exists, build it | `/compass:implement <plan>` | compass |
+| The plan turned out wrong halfway through | `/compass:plan-feature <spec>` — say **revise** | compass |
 | Plan is read and routine, and you would rather not watch it run | `/compass:plan-to-pr <plan>` | compass |
 | Is everything still green? | `/compass:validate` | compass |
 | Built it, want a look before the PR | `/code-review` | Claude Code |

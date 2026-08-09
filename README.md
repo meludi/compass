@@ -45,7 +45,7 @@ From your project root:
 /compass:setup
 ```
 
-Generates one file: `.claude/CLAUDE.md` — project conventions, the review conventions, and the `## Commands` table. **compass has no config file of its own**; that table is the configuration, and you edit it directly.
+Generates one file you edit: `.claude/CLAUDE.md` — project conventions, the review conventions, and the `## Commands` table. **compass has no config file of its own**; that table is the configuration, and you edit it directly. (It also drops a two-line `.work/.gitignore` so generated reports and screenshots stay out of your commits.)
 
 | Row | Default | Controls |
 |---|---|---|
@@ -54,7 +54,7 @@ Generates one file: `.claude/CLAUDE.md` — project conventions, the review conv
 | **Dev port** | `3000` | dev server port; blank disables the browser smoke test |
 | **Base branch** | `origin/HEAD` | what PRs open against; delete the line to derive it |
 
-Keep the row labels as generated — commands look them up by name. Nothing validates the table, so a typo fails quietly; the trade is no schema to refresh after a plugin update.
+Keep the row labels as generated — commands look them up by name. No schema validates the table (that is the point: nothing to refresh after a plugin update), but `/compass:validate` and `/compass:implement` say so once when a label is missing or a **Test policy** value is not one of the three — a typo does not quietly disable a gate.
 
 No CI workflow — that's not compass' job. For review on the PR, pick a reviewer once per repo — claude-code-action via `/install-github-app`, or Codex code review: [`references/WORKFLOW.md`](references/WORKFLOW.md) → *Automated PR review*.
 
@@ -75,7 +75,7 @@ Both loops in full — steps, diagrams, what runs before Loop 1, and where compa
 
 ## Documentation
 
-Plans and outputs live in `.work/` (created on first use): `plans/` committed; `reports/`, `screenshots/` gitignored.
+Plans and outputs live in `.work/` (created on first use): `plans/` committed; `reports/` and `screenshots/` gitignored by the `.work/.gitignore` that `/compass:setup` writes.
 
 | Doc | What's inside |
 |-----|---------------|

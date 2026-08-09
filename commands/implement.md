@@ -32,6 +32,15 @@ Refresh the mental model before touching an existing plan — critical for mid-s
 - Extract: goal, files to change, tasks, acceptance criteria
 - Confirm branch is correct (`git branch --show-current`)
 
+**Say what you found before you rely on it.** Nothing validates that table, so a silent
+fallback is indistinguishable from a deliberate choice. Print one line before Task 1, and
+only when something is off:
+
+- **Test policy** present but not one of `first` / `after` / `none` → `Test policy "<value>" is not first/after/none — using first.` A typo must not look like a decision.
+- No **Type check** or **Test** *label* at all (as opposed to a label with a blank command) → name it, and note the gate will not run.
+
+One line, then continue. Neither case stops the run.
+
 ### 3. Execute tasks
 
 For each task in the plan:

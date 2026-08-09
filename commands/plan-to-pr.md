@@ -46,12 +46,27 @@ Any failure in step 4's full validation is a hard stop: no commit, no push. Repo
 1. Run `/code-review` on the branch.
 2. Apply Critical and Important findings. Skip nits — an unattended run is the wrong place to spend edits on taste.
 3. Re-run `/compass:validate`. Those fixes are unproven code, and the PR body is about to claim otherwise.
+4. **Append what happened to the report** — `.work/reports/{feature}-report.md`, the file Phase 1 wrote and Phase 3 turns into the PR body:
 
-No findings → say so and continue.
+   ```markdown
+   ## Review findings applied
+
+   - {file:line} — {finding} → {what changed}
+
+   ## Validation after review
+
+   - {check}: PASS / FAIL — from the Step 3 run
+   ```
+
+   Without this the PR body describes the code as it stood *before* the review fixes, while the branch carries them. `HANDBOOK.md` → *Verification before completion* is what forbids that gap; nobody is watching here to catch it.
+
+No findings → say so, write `Review findings applied: none` to the report, and continue.
 
 ## Phase 3 — Commit, push, PR
 
 Steps 1–4 of `${CLAUDE_PLUGIN_ROOT}/commands/ship.md`, with one waiver: **the confirmation gate in `commit.md` step 2 does not apply to this command.** Show `git status` and `git diff` anyway — as a record, not a gate.
+
+Step 0b's staleness check is already satisfied by Phase 2 step 3 — skip it rather than re-validating a third time. Step 1 reads the report **including** the two sections Phase 2 just appended, so the PR body covers the review fixes too.
 
 Stage only what the plan's *Files to change* table lists, cross-checked against the implementation report. Never `git add -A`.
 

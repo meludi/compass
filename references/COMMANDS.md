@@ -50,9 +50,9 @@ Scaffolds `.claude/CLAUDE.md` — project conventions, the *Review conventions* 
 |---|---|
 | **Argument** | none |
 | **Trigger** | User — once per project |
-| **Writes** | `.claude/CLAUDE.md` |
+| **Writes** | `.claude/CLAUDE.md`, `.work/.gitignore` |
 
-One phase, one file — rows it cannot detect stay blank rather than guessed.
+One phase, one file to edit — rows it cannot detect stay blank rather than guessed. The second file is two lines that keep generated reports and screenshots out of git; it is written once and never read by compass.
 
 **It never overwrites an existing `CLAUDE.md`** — it reports what a fresh scan would have written and lets you merge, so re-running it is safe. There is nothing to refresh after a plugin update.
 

@@ -3,11 +3,12 @@
 End-to-end test of the workflow this plugin ships, run against a throwaway **sandbox project** with a real GitHub remote:
 
 ```
-Dry-run (static)       bash scripts/selftest.sh    (manifests, config table, doc links, shell — no human/GitHub needed)
-Stage 0 — Plugin check claude plugin details       (well-formed: 9 commands, 0 agents, 1 hook, 0 MCP servers)
+Dry-run (static)       bash scripts/selftest.sh    (manifests, config table, doc links + coverage, version, shell)
+Stage 0 — Plugin check claude plugin details       (well-formed: 10 commands, 0 agents, 1 hook, 0 MCP servers)
 Stage 1 — Setup        /compass:setup
 Loop  — PIV            /compass:worktree → /compass:plan-feature → /compass:implement → /code-review → /compass:ship
 Fix   — after review   claude-code-action on the PR → /compass:fix-ci-review → push
+Automated Loop 1       /compass:plan-to-pr            (unattended: plan → open PR)
 Quick Path             /compass:worktree → edit → /compass:validate → /compass:ship
 + worktree lifecycle   /compass:worktree <name> rm   (guarded)
 ```
@@ -63,7 +64,7 @@ For testing this branch, use **B**. Route **A** only works after the merge to `m
 claude plugin details compass
 ```
 
-- [ ] Inventory: **9 commands** (8 workflow + `help`), **0 agents**, 1 skill, 1 SessionStart hook, **0 MCP servers**
+- [ ] Inventory: **10 commands** (9 workflow + `help`), **0 agents**, 1 skill, 1 SessionStart hook, **0 MCP servers**
 - [ ] No command named `review-*`, `ideate`, `create-stories`, `setup-stack`, `setup-tracker`, `context`, `status`, `debug`, `onboard`, `reflect`, `update`, or `auto-implement` — those were dropped deliberately
 
 Uninstall again when done:
@@ -95,9 +96,10 @@ A fresh repo so the test never touches a real project.
 
 - [ ] Sandbox repo exists on GitHub, `main` pushed
 - [ ] Plugin loaded (`/compass:*` commands + SessionStart hook present)
-- [ ] `/compass:setup` produced `.claude/CLAUDE.md` — and nothing else
+- [ ] `/compass:setup` produced `.claude/CLAUDE.md` and `.work/.gitignore` — and nothing else
 - [ ] The generated `CLAUDE.md` contains a **Review conventions** section
 - [ ] **No** CI workflow is written — compass ships none
+- [ ] After the first `/compass:validate`, `git status` is clean — the screenshot and the report are ignored, not untracked
 
 ---
 
@@ -110,7 +112,8 @@ A fresh repo so the test never touches a real project.
 - [ ] It **never executes** the command it names
 
 ### `/compass:setup`
-- [ ] One phase, one file: `.claude/CLAUDE.md`, with code-pattern sections marked `TODO: update after first feature`
+- [ ] One phase, one file to edit: `.claude/CLAUDE.md`, with code-pattern sections marked `TODO: update after first feature`; plus `.work/.gitignore` carrying `reports/` and `screenshots/`
+- [ ] With `origin/HEAD` unset (`git remote set-head origin --delete`), it still resolves the base branch — and does **not** silently take the current branch
 - [ ] The `## Commands` table carries `Dev`, `Build`, `Lint`, `Format`, `Type check`, `Test` with the row labels intact, filled from `package.json` — a script that does not exist leaves its row **blank**, not guessed
 - [ ] **Test policy**, **Dev port** and **Base branch** lines are present; base branch matches `origin/HEAD`
 - [ ] Re-running it does **not** overwrite the existing `CLAUDE.md` — it reports what a fresh scan would have written
@@ -136,7 +139,7 @@ Run it with a plain description — no story file, no tracker. That is the suppo
 - [ ] The version helper task carries a **`Behavior`** line (it is logic-bearing) — without it `/compass:implement` treats it as UI/glue and **Test policy** never fires
 - [ ] Every task's **`Mirror`** points at a `file:line` that actually exists — open one and check. Exploration is not done until each planned file has one, or the plan says why none exists
 
-### `/compass:implement .work/plans/<plan>.md`
+### `/compass:implement .work/plans/<plan>.plan.md`
 **Deliberate-failure check:** before running, add an obvious error to a file the plan lists as **UPDATE** (typed stack: `const _x: number = 'no';`; otherwise a line that fails `{lint_cmd}`/`{test_cmd}`).
 - [ ] Per task: read target + verify plan refs → implement → `{type_check_cmd}`/`{test_cmd}`; pass → task `[x]`
 - [ ] Under **Test policy** `first`, the test is run and **watched to fail** before the code is written
@@ -148,7 +151,7 @@ Run it with a plain description — no story file, no tracker. That is the suppo
 
 ### `/code-review` (before shipping)
 - [ ] `/compass:implement`'s closing output points at `/code-review` **before** `/compass:ship`
-- [ ] It reflects the project's *Review conventions* — they reach it as loaded project memory, not as a file it opens (`.claude/CLAUDE.md` is not in its explicitly-read set; see `references/HANDBOOK.md` → *Project config*). If a convention is ignored, move that section to the repo-root `CLAUDE.md` and re-run before calling it a bug
+- [ ] It reflects the project's *Review conventions* — they reach it as loaded project memory, not as a file it opens (`.claude/CLAUDE.md` is not in its explicitly-read set; see `references/HANDBOOK.md` → *Why there is no config file*). If a convention is ignored, move that section to the repo-root `CLAUDE.md` and re-run before calling it a bug
 - [ ] Findings are fixed on the branch, then `/compass:validate` is re-run — no PR exists yet
 - [ ] **Staleness guard:** edit a source file *without* re-validating, then run `/compass:ship` — its pre-flight must notice the file is newer than the report and re-run `/compass:validate` before committing
 
@@ -174,6 +177,33 @@ Requires `/install-github-app` and the `ANTHROPIC_API_KEY` secret. Push a change
 - [ ] Fixes are applied **locally**; `/compass:validate` runs; the command **stops** without committing
 - [ ] Disagreeing with a finding flags it for the author instead of forcing a change
 - [ ] **Stop at three:** a finding that resists three attempts switches to root-cause mode instead of a fourth patch
+
+---
+
+## Automated Loop 1 — `/compass:plan-to-pr`
+
+The one command that commits without asking, so the guards matter more than the happy path.
+Plan a second trivial feature (`/compass:plan-feature "…"`), **read the plan**, then work the
+refusals before the real run.
+
+### Pre-flight refusals — each must change nothing
+- [ ] From the base branch → refuses, names the branch check, writes no file
+- [ ] With an unrelated modified file in the tree (not in the plan's *Files to change*) → refuses; a dirty path that **is** in the table is accepted
+- [ ] With a plan path that does not exist → refuses on the plan check
+- [ ] With `gh` off `PATH` → refuses **before** the first edit, not after implementing
+
+### The run
+- [ ] Implements task by task with the same per-task gates as `/compass:implement`, and does **not** ask for the commit checkpoint
+- [ ] Break the build mid-run (edit a file it already finished): the full validation in Phase 1 fails → **no commit, no push**, and the run reports what failed
+- [ ] `/code-review` runs on the branch; Critical/Important findings are applied, nits are skipped; `/compass:validate` runs again afterwards
+- [ ] The report in `.work/reports/` gained **Review findings applied** and **Validation after review** sections — and the PR body reflects them, not just Phase 1
+- [ ] Only files from the plan's table are staged — no `git add -A`, no `.work/reports/…` in the commit
+- [ ] Stops at the PR URL: no merge, no auto-merge, no follow-up question
+- [ ] No `Co-Authored-By` in the commit or the PR body
+
+### `/compass:commit` guards
+- [ ] On the base branch, `/compass:commit --push` **asks before pushing** instead of taking the `--push` waiver
+- [ ] With an `.env.local` in the tree, it refuses to stage it and says which path — it does not quietly skip it
 
 ---
 
@@ -205,7 +235,8 @@ From the main dir, after the PRs are merged (or to abort):
 
 - [ ] `git worktree list` → only main
 - [ ] `.work/{plans,reports,screenshots}` populated; **no** `prds/` or `stories/` directory was created
-- [ ] `gh pr list --state all` → the PIV PR and the Quick-Path PR are visible
+- [ ] `git status` is clean and `git ls-files .work` lists **only** plans — no report, no screenshot ever got committed
+- [ ] `gh pr list --state all` → the PIV PR, the Quick-Path PR and the `plan-to-pr` PR are visible
 - [ ] No compass-generated workflow appears in `.github/workflows/`
 - [ ] `bash scripts/selftest.sh` still exits 0 against the plugin clone
 

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "compass",
   "displayName": "Compass",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Structured PIV workflow (Plan -> Implement -> Validate -> Ship) for Claude Code: nine namespaced /compass:* workflow commands (plus /compass:help) with file-level plans, per-task validation gates, browser smoke testing, and worktree isolation. Code review is left to the built-in /code-review and claude-code-action. Stack-agnostic; configuration is the ## Commands table in your project CLAUDE.md.",
   "author": {
     "name": "Milad Al-Ani",

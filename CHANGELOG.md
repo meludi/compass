@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.12.0 — 2026-08-09
+
+### Added
+- **`/compass:setup` writes `.work/.gitignore`.** The README and the handbook had said for several versions that `reports/` and `screenshots/` were gitignored, and nothing ever wrote the rule — `setup` touched nothing outside `.claude/`. So the first implementation report and the first browser screenshot sat there untracked, waiting to be swept into a commit. Two lines, inside `.work/` rather than in the `.gitignore` you maintain, and an existing file is left alone. Plans stay committed; they are the feature's record.
+- **A misread `## Commands` table now says so.** No config file means no schema, and no schema meant a renamed row label silently deleted its gate while a typo in **Test policy** silently became `first`. `/compass:validate` and `/compass:implement` now print one line when a label is missing entirely or a policy value is not `first`/`after`/`none`, then carry on. A deliberately blank command stays silent — that is a gate you chose not to have, and it was never the problem. This is not validation; it is the reader saying out loud what it read, which is the only check a schemaless file can carry.
+- **Three coherence checks in `scripts/selftest.sh`** (now 17 static checks): every command must appear in `references/COMMANDS.md`, `commands/help.md` and `TESTING.md`; `plugin.json`'s version must match the newest CHANGELOG heading; and every `FILE.md → *Section*` pointer must hit a heading that exists. The first exists because `/compass:plan-to-pr` shipped in v0.11.0 while `TESTING.md` still said "9 commands" and had no test for it — an untested command is what a missing doc entry looks like from the outside.
+- **`TESTING.md` covers `/compass:plan-to-pr`**, guards first: each pre-flight refusal, an aborted run on a broken build, the report and PR body carrying the Phase 2 review fixes, and the staging rules. The command that commits without asking is the one whose refusals need proving.
+
+### Fixed
+- **`/compass:commit` gained the two guards the other shipping commands already had.** `--push` on the base branch now asks instead of pushing straight to `main` with no PR and no review, and a path matching `.env*`, `*.db` or a credential shape aborts the commit by name rather than being quietly staged. `ship.md` and `plan-to-pr.md` both carried these rules; the one command routed as "just commit, no PR" did not.
+- **`/compass:plan-to-pr` writes its review round into the report.** Phase 2 applied `/code-review` findings and re-validated, then Phase 3 built the PR body from a report written before any of that happened — so the PR described older code than the branch carried, in a command whose whole premise is that nobody is watching. Phase 2 now appends *Review findings applied* and *Validation after review* before the commit.
+- **`/compass:ship` picks the report that belongs to the branch**, matching `feat/<name>` against `.work/reports/<name>-report.md` instead of taking whatever file is newest. With two features in one checkout, "newest" was a PR body describing someone else's work; `ls -t` remains as a fallback that now announces itself.
+- **`origin/HEAD` is repaired rather than worked around.** `gh repo create --source=.` leaves it unset, and the lookup in `/compass:setup` and `/compass:ship` then failed into the current branch — which, in a worktree, is the feature branch a PR cannot open against. Both now run `git remote set-head origin --auto` once and retry; `ship` asks rather than guessing if that fails too.
+- **Dead cross-reference `HANDBOOK.md → Project config`** in the CLAUDE.md template and `TESTING.md`; the section is called *Why there is no config file*. The template ships into every project that runs `/compass:setup`. The new selftest check is what keeps the next rename from doing this again.
+- **`/setup` → `/compass:setup`** in the template header, the last unnamespaced command name in the repo.
+
+### Changed
+- **`/compass:help` routes "the plan turned out wrong halfway through"** to `/compass:plan-feature` with an explicit revision request. The command has always refused to silently overwrite a complete plan and always accepted being asked; nothing told you the door was there.
+
 ## v0.11.0 — 2026-08-08
 
 ### Added
