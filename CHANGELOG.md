@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.13.0 — 2026-08-10
+
+### Added
+- **Plans record where they came from.** The plan template gained a `## Source` line — the issue reference, the spec path, or `conversation` — with the instruction not to restate what it points at. Everything below that line is what the plan *adds*: the `Mirror:` targets, the ordered tasks, the gates. Without it, a plan read three sessions later gave no way back to the issue it was built against, and the pull request had nothing to close.
+
+### Fixed
+- **`/compass:plan-feature <issue-id>` confirms which issue it found.** The command mentioned `gh issue view` but required nothing, so a bare `#2` was resolved against whatever numbered list was in view — a todo file, a checklist, another repository — confidently rather than fail-closed, and the mistake only surfaced once a plan for the wrong work existed. It now fetches the issue and prints the title back before planning.
+
 ## v0.12.0 — 2026-08-09
 
 ### Added

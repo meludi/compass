@@ -29,7 +29,7 @@ Build the mental model before planning:
 
 ### 2. Understand the request
 
-- Read the spec: a markdown file, an issue fetched via `gh issue view`, or the feature description as given
+- Read the spec. A **file path** is read as given — that is the ordinary case, and no `gh` is involved. An **issue-id** is fetched (`gh issue view <id>`) and its title printed back before planning: an id resolved against the wrong list is the most expensive silent error in this command. Anything else is taken as the description you typed.
 - Identify: what changes, what is new, what must not break
 
 ### 3. Explore the codebase
@@ -61,6 +61,11 @@ Read the `## Commands` table in `.claude/CLAUDE.md` for the gate commands. Save 
 ## Goal
 
 One sentence: what this plan achieves.
+
+## Source
+
+{`owner/repo#42` · path to the spec file · `conversation` — where this plan came from.
+Do not restate its contents; the sections below are what this plan adds.}
 
 ## Patterns to follow
 

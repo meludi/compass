@@ -92,9 +92,11 @@ Loads context, explores the codebase, and writes a file-level implementation pla
 | **Uses** | the built-in `Explore` subagent |
 | **Writes** | `.work/plans/<feature>.plan.md` |
 
-The spec is whatever you have. A markdown file, an issue id fetched via `gh`, or a sentence typed on the spot — compass does not produce specs and does not care where yours comes from.
+The spec is whatever you have. Usually a markdown file — a path is read as given, with no tracker and no `gh` involved. An issue id works too, as does a sentence typed on the spot: compass does not produce specs and does not care where yours comes from.
 
-The plan lists files to create and update, tasks in dependency order, and a `Behavior` line per logic-bearing task. That line is what makes `/compass:implement` write a test for it.
+An **issue id** is the one input that gets resolved rather than read, so it is confirmed: the command fetches the issue and **prints the title back before planning**. A bare `#2` otherwise resolves against whatever numbered list is in view — a todo file, a checklist, another repository — and you find out once a plan for the wrong work exists. Pass `owner/repo#2` when the number alone is ambiguous.
+
+The plan lists files to create and update, tasks in dependency order, and a `Behavior` line per logic-bearing task. That line is what makes `/compass:implement` write a test for it. A `## Source` line records where the plan came from — the issue reference, the spec path, or `conversation` — and it points rather than repeats: the plan is not a summary of your issue, it is the file-level design the issue does not contain.
 
 **If a complete plan already exists** for this feature, it reports status and recommends `/compass:implement` instead of re-planning. Ask explicitly for a revision to override.
 
