@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.14.0 — 2026-08-10
+
+### Fixed
+- **Claude can no longer invoke the shipping commands on its own.** Custom commands are skills now, and a skill is model-invocable unless it says otherwise — so `/compass:commit`, `/compass:ship` and `/compass:plan-to-pr` were reachable by an agent that decided the code looked ready, `plan-to-pr` being the one command that commits and pushes without asking. Every command with a side effect — `setup`, `worktree`, `plan-feature`, `implement`, `plan-to-pr`, `commit`, `ship`, `fix-ci-review` — now carries `disable-model-invocation: true`. `/compass:validate` and `/compass:help` stay open: reading and routing are what you *want* an agent to reach for. Nothing in the chain breaks, because `plan-to-pr` delegates by reading `commands/*.md` rather than by invoking the commands.
+
 ## v0.13.0 — 2026-08-10
 
 ### Added

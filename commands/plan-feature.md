@@ -1,6 +1,7 @@
 ---
 description: Load context, then create an implementation plan for a feature — plan only, no code written
 argument-hint: <spec file | issue-id | feature description>
+disable-model-invocation: true
 ---
 
 # /compass:plan-feature — Create Implementation Plan

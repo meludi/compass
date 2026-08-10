@@ -1,6 +1,7 @@
 ---
 description: Create a worktree + feature branch, or remove one (guarded) with `rm`
 argument-hint: <feature-name> [rm]
+disable-model-invocation: true
 ---
 
 # /compass:worktree — Create Worktree and Open Session

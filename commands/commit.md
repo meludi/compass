@@ -1,6 +1,7 @@
 ---
 description: Stage and commit changes with a Conventional Commit message. Pass --push to also push immediately after.
 argument-hint: "[--push]"
+disable-model-invocation: true
 ---
 
 # /compass:commit — Stage and Commit

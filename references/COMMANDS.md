@@ -23,6 +23,13 @@ points at `commands/` for every rule it obeys.
 | Ship | [`/compass:ship`](#compassship) | — | opus |
 | Fix | [`/compass:fix-ci-review`](#compassfix-ci-review) | `[PR-number]` | opus |
 
+**You start these, not the agent.** Every command that writes a file, commits,
+pushes or opens a PR carries `disable-model-invocation: true`, so Claude cannot
+reach for it on its own — a session that decides your code "looks ready" cannot
+turn that into a commit. `/compass:validate` and `/compass:help` stay open,
+because reading and routing have no side effects worth gating. Blocked calls are
+refused outright, so expect the agent to *suggest* the command instead.
+
 ---
 
 ## Help

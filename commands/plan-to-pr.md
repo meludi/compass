@@ -1,6 +1,7 @@
 ---
 description: Run a confirmed plan to an open PR without stopping — implement, validate, review, commit, push
 argument-hint: <path to .work/plans/*.plan.md>
+disable-model-invocation: true
 ---
 
 # /compass:plan-to-pr — a confirmed plan, run to an open PR

@@ -1,5 +1,6 @@
 ---
 description: Set up compass for a new project
+disable-model-invocation: true
 ---
 
 # /compass:setup — Project Setup

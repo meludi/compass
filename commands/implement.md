@@ -1,6 +1,7 @@
 ---
 description: Execute an implementation plan step by step, with validation after each task and a full check at the end
 argument-hint: <path to .work/plans/*.plan.md>
+disable-model-invocation: true
 ---
 
 # /compass:implement — Execute Implementation Plan

@@ -1,5 +1,6 @@
 ---
 description: Commit, push, and open a PR, then hand off to review
+disable-model-invocation: true
 ---
 
 # /compass:ship — Commit, PR, and Review

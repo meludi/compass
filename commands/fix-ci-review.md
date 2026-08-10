@@ -1,6 +1,7 @@
 ---
 description: Fetch the review comments on the PR and apply the fixes locally, then validate
 argument-hint: [PR-number]
+disable-model-invocation: true
 ---
 
 # /compass:fix-ci-review — Apply PR Review Findings
