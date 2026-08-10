@@ -5,7 +5,10 @@ when to reach for it. The flow they form is in `WORKFLOW.md`.
 
 **This file answers *whether* to run a command, never *how* it runs.** The files
 in `commands/` are the instruction set the agent executes and the only place a
-rule lives; restating one here would give it a second copy to drift from.
+rule lives; restating one here would give it a second copy to drift from. One
+exception: `plan-to-pr` chains three other commands and runs them unattended, so
+its **sequence** is laid out below. It names the order and the abort points, and
+points at `commands/` for every rule it obeys.
 
 | | Command | Argument | Model |
 |---|---|---|---|
@@ -129,6 +132,46 @@ Runs `implement` → `/code-review` → `ship` as one unattended pass, from a co
 The plan is the only human gate, which is why `plan-feature` stays outside the chain. Everything downstream is guarded automatically: a failed validation aborts before the commit, and it never merges.
 
 It is the **one** compass command that commits without asking. That exception is the reason to pick it deliberately rather than by default.
+
+**What a run does, step by step.** Four phases, and nothing between them asks you anything.
+
+**0 — Pre-flight.** Four checks before a single file is touched. Any failure: the failed check is named, the run stops, nothing has changed.
+
+1. The path in `$ARGUMENTS` resolves to a readable file under `.work/plans/`.
+2. The current branch is **not** the base branch.
+3. `git status --porcelain` is empty, or lists only paths from the plan's *Files to change* table. Anything else stops the run rather than sweeping it into the commit.
+4. `gh` is installed. Checked here rather than at PR time, because a run that implements its way to a missing CLI has wasted the whole pass.
+
+A main checkout instead of a worktree is reported once and does not stop anything.
+
+**1 — Implement.** `commands/implement.md`, steps 1–5:
+
+1. Load context — `.claude/CLAUDE.md`, git state, any existing report for the feature.
+2. Load the plan — goal, tasks, *Files to change*, and the `## Commands` table with its **Test policy** line.
+3. Execute the tasks in order. Each one passes its own gate (new test plus type check, or type check alone) before the next starts; a failure is fixed immediately. Finished tasks are ticked `[x]` in the plan, and anything the plan did not foresee is appended to its `## Loop log`.
+4. Run the full suite — lint, type check, tests, browser smoke test.
+5. Write `.work/reports/{feature}-report.md`.
+
+Two deltas against the interactive command, both because nobody is watching: step 6's commit checkpoint is skipped — Phase 3 owns the commit — and a tripped 3-fix boundary **aborts** instead of handing the decision back.
+
+**2 — Review.** `/code-review` on the branch. Critical and Important findings get applied; nits do not, since an unattended run is the wrong place to spend edits on taste. Then `/compass:validate` runs again, because those fixes are unproven code. Finally the report gains `## Review findings applied` and `## Validation after review` — without them Phase 3 would build the PR body from a report describing the code as it stood *before* the review fixes.
+
+**3 — Commit, push, PR.** `commands/ship.md`, steps 1–4: read the report including the two sections Phase 2 just appended, commit, `git push -u origin <branch>`, `gh pr create` against the resolved base branch. `ship.md`'s step 0b staleness check is skipped — Phase 2 just validated. The confirmation gate in `commit.md` is waived here and only here; `git status` and `git diff` are still shown, as a record rather than a gate. Only the paths in the plan's *Files to change* table are staged, never `git add -A`.
+
+**Stop.** The PR URL and the hand-off block from `ship.md` step 5, then nothing — no merge, no auto-merge, no follow-up question.
+
+Where it can abort, and what it leaves behind:
+
+| Abort point | Trigger | State afterwards |
+|---|---|---|
+| Pre-flight | plan unreadable, base branch, unrelated changes, no `gh` | untouched |
+| Task gate | 3-fix boundary tripped on one task | code written, tasks ticked up to that point, no commit |
+| Phase 1 step 4 | any check in the full suite fails | code written, no commit |
+| Phase 2 | re-validation after the review fixes fails | code written, no commit |
+
+No abort reaches a PR, and none of them merges anything.
+
+The rules behind each step live in `commands/plan-to-pr.md`, `commands/implement.md` and `commands/ship.md` — this section only puts them in order.
 
 ### /compass:validate
 
