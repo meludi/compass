@@ -21,7 +21,15 @@ Nine workflow commands, no more — plus `/compass:help`, which tells you which 
 
 ## Install
 
-Run in a Claude Code session (or prefix each with `claude` in your terminal):
+<details>
+<summary><strong>Claude Code</strong></summary>
+
+```bash
+claude plugin marketplace add meludi/compass
+claude plugin install compass@compass
+```
+
+Or, from inside a session:
 
 ```
 /plugin marketplace add meludi/compass
@@ -30,10 +38,13 @@ Run in a Claude Code session (or prefix each with `claude` in your terminal):
 
 Restart Claude Code afterwards (or `/reload-plugins`).
 
-- **Project-only install** (terminal): add `--scope local` (private, gitignored) or `--scope project` (shared via git) to `claude plugin install compass@compass`.
-- **Update:** `/plugin update compass`. Nothing to re-run in your projects — the `## Commands` table is yours, and a plugin update never touches it.
+compass ships its own marketplace, so the catalog is added once per machine — after that, updates arrive via `/plugin update compass`. The plugin installs centrally; nothing is copied into your repo.
 
-The plugin installs centrally — nothing is copied into your repo. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
+**Project-only install** (terminal): add `--scope local` (private, gitignored) or `--scope project` (shared via git) to `claude plugin install compass@compass`.
+
+</details>
+
+Updating never touches your projects — the `## Commands` table in `.claude/CLAUDE.md` is yours, and a plugin update leaves it alone. (To hack on compass itself: `claude --plugin-dir .` from a clone.)
 
 ---
 
