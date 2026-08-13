@@ -4,6 +4,9 @@ A Claude Code **plugin** that brings a structured PIV loop (Plan → Implement �
 
 Nine workflow commands, no more — plus `/compass:help`, which tells you which one you want. Specs, tickets and code review are left to tools that are maintained for you — [`references/WORKFLOW.md`](references/WORKFLOW.md) names which.
 
+> [!NOTE]
+> **Pre-1.0.** Command names, the `## Commands` table format and the plan template can still change between minor versions. Updates arrive automatically via `/plugin update` — read [CHANGELOG.md](CHANGELOG.md) before updating. Updating never rewrites your `.claude/CLAUDE.md`; only `/compass:setup` writes it, and only when it does not exist yet.
+
 ---
 
 ## Requirements
